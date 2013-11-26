@@ -1,0 +1,429 @@
+create or replace package P_BASE is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_BASE
+--  Type definitions and data values used throughout the PSR system.
+--
+--  Change History:
+--  11-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'BAS';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Subtype definitions
+-- ========================================
+--
+-- Non schema-based types
+--
+  subtype tsText is varchar2;
+  subtype tmsText is tsText not null;
+  subtype tsNormalText is varchar2(1000);
+  subtype tsFlag is varchar2(1);
+  subtype tmsFlag is tsFlag not null;
+  subtype tnNumber is number;
+  subtype tnInteger is integer;
+  subtype tdDate is date;
+  subtype tmdDate is tdDate not null;
+  subtype tnYear is number(4);
+  subtype tmnYear is tnYear not null;
+  subtype tsCountryCode is varchar2(3);
+  subtype tmsCountryCode is tsCountryCode not null;
+--
+-- T_AGE_PROFILES
+--
+  subtype tsAGP_CODE is T_AGE_PROFILES.CODE%type;
+  subtype tmsAGP_CODE is tsAGP_CODE not null;
+  subtype tnAGP_DISPLAY_SEQ is T_AGE_PROFILES.DISPLAY_SEQ%type;
+  subtype tsAGP_ACTIVE_FLAG is T_AGE_PROFILES.ACTIVE_FLAG%type;
+  subtype tmsAGP_ACTIVE_FLAG is tsAGP_ACTIVE_FLAG not null;
+  subtype tnAGP_VERSION_NBR is T_AGE_PROFILES.VERSION_NBR%type;
+--
+-- T_AGE_RANGES
+--
+  subtype tnAGR_ID is T_AGE_RANGES.ID%type;
+  subtype tmnAGR_ID is tnAGR_ID not null;
+  subtype tnAGR_AGE_FROM is T_AGE_RANGES.AGE_FROM%type;
+  subtype tmnAGR_AGE_FROM is tnAGR_AGE_FROM not null;
+  subtype tnAGR_AGE_TO is T_AGE_RANGES.AGE_TO%type;
+  subtype tmnAGR_AGE_TO is tnAGR_AGE_TO not null;
+  subtype tnAGR_VERSION_NBR is T_AGE_RANGES.VERSION_NBR%type;
+--
+-- T_CODE_TYPES
+--
+  subtype tsCDET_CODE is T_CODE_TYPES.CODE%type;
+  subtype tmsCDET_CODE is tsCDET_CODE not null;
+  subtype tnCDET_DISPLAY_SEQ is T_CODE_TYPES.DISPLAY_SEQ%type;
+  subtype tsCDET_ACTIVE_FLAG is T_CODE_TYPES.ACTIVE_FLAG%type;
+  subtype tmsCDET_ACTIVE_FLAG is tsCDET_ACTIVE_FLAG not null;
+  subtype tnCDET_VERSION_NBR is T_CODE_TYPES.VERSION_NBR%type;
+--
+-- T_CODES
+--
+  subtype tsCDE_CODE is T_CODES.CODE%type;
+  subtype tmsCDE_CODE is tsCDE_CODE not null;
+  subtype tnCDE_DISPLAY_SEQ is T_CODES.DISPLAY_SEQ%type;
+  subtype tsCDE_ACTIVE_FLAG is T_CODES.ACTIVE_FLAG%type;
+  subtype tmsCDE_ACTIVE_FLAG is tsCDE_ACTIVE_FLAG not null;
+  subtype tnCDE_VERSION_NBR is T_CODES.VERSION_NBR%type;
+--
+-- T_COMPONENTS
+--
+  subtype tsCOMP_CODE is T_COMPONENTS.CODE%type;
+  subtype tmsCOMP_CODE is tsCOMP_CODE not null;
+  subtype tnCOMP_DISPLAY_SEQ is T_COMPONENTS.DISPLAY_SEQ%type;
+  subtype tsCOMP_ACTIVE_FLAG is T_COMPONENTS.ACTIVE_FLAG%type;
+  subtype tmsCOMP_ACTIVE_FLAG is tsCOMP_ACTIVE_FLAG not null;
+  subtype tnCOMP_VERSION_NBR is T_COMPONENTS.VERSION_NBR%type;
+--
+-- T_DATA_ITEMS
+--
+  subtype tnITM_ID is T_DATA_ITEMS.ID%type;
+  subtype tmnITM_ID is tnITM_ID not null;
+--
+-- T_DIMENSION_TYPES
+--
+  subtype tsDIMT_CODE is T_DIMENSION_TYPES.CODE%type;
+  subtype tmsDIMT_CODE is tsDIMT_CODE not null;
+  subtype tnDIMT_DISPLAY_SEQ is T_DIMENSION_TYPES.DISPLAY_SEQ%type;
+  subtype tsDIMT_ACTIVE_FLAG is T_DIMENSION_TYPES.ACTIVE_FLAG%type;
+  subtype tmsDIMT_ACTIVE_FLAG is tsDIMT_ACTIVE_FLAG not null;
+  subtype tnDIMT_VERSION_NBR is T_DIMENSION_TYPES.VERSION_NBR%type;
+--
+-- T_DIMENSION_VALUES
+--
+  subtype tnDIM_ID is T_DIMENSION_VALUES.ID%type;
+  subtype tmnDIM_ID is tnDIM_ID not null;
+  subtype tsDIM_CODE is T_DIMENSION_VALUES.CODE%type;
+  subtype tmsDIM_CODE is tsDIM_CODE not null;
+  subtype tnDIM_DISPLAY_SEQ is T_DIMENSION_VALUES.DISPLAY_SEQ%type;
+  subtype tsDIM_ACTIVE_FLAG is T_DIMENSION_VALUES.ACTIVE_FLAG%type;
+  subtype tmsDIM_ACTIVE_FLAG is tsDIM_ACTIVE_FLAG not null;
+  subtype tnDIM_VERSION_NBR is T_DIMENSION_VALUES.VERSION_NBR%type;
+--
+-- T_DISPLACEMENT_STATUSES
+--
+  subtype tnDST_ID is T_DISPLACEMENT_STATUSES.ID%type;
+  subtype tmnDST_ID is tnDST_ID not null;
+  subtype tsDST_CODE is T_DISPLACEMENT_STATUSES.CODE%type;
+  subtype tmsDST_CODE is tsDST_CODE not null;
+  subtype tnDST_DISPLAY_SEQ is T_DISPLACEMENT_STATUSES.DISPLAY_SEQ%type;
+  subtype tsDST_ACTIVE_FLAG is T_DISPLACEMENT_STATUSES.ACTIVE_FLAG%type;
+  subtype tmsDST_ACTIVE_FLAG is tsDST_ACTIVE_FLAG not null;
+  subtype tnDST_VERSION_NBR is T_DISPLACEMENT_STATUSES.VERSION_NBR%type;
+--
+-- T_LANGUAGES
+--
+  subtype tsLANG_CODE is T_LANGUAGES.CODE%type;
+  subtype tmsLANG_CODE is tsLANG_CODE not null;
+  subtype tnLANG_DISPLAY_SEQ is T_LANGUAGES.DISPLAY_SEQ%type;
+  subtype tsLANG_ACTIVE_FLAG is T_LANGUAGES.ACTIVE_FLAG%type;
+  subtype tmsLANG_ACTIVE_FLAG is tsLANG_ACTIVE_FLAG not null;
+  subtype tnLANG_VERSION_NBR is T_LANGUAGES.VERSION_NBR%type;
+--
+-- T_LOCATIONS
+--
+  subtype tnLOC_ID is T_LOCATIONS.ID%type;
+  subtype tmnLOC_ID is tnLOC_ID not null;
+  subtype tsLOC_ACTIVE_FLAG is T_LOCATIONS.ACTIVE_FLAG%type;
+  subtype tmsLOC_ACTIVE_FLAG is tsLOC_ACTIVE_FLAG not null;
+  subtype tnLOC_VERSION_NBR is T_LOCATIONS.VERSION_NBR%type;
+--
+-- T_LOCATION_ATTRIBUTES
+--
+  subtype tsLOCA_CHAR_VALUE is T_LOCATION_ATTRIBUTES.CHAR_VALUE%type;
+  subtype tnLOCA_NUM_VALUE is T_LOCATION_ATTRIBUTES.NUM_VALUE%type;
+  subtype tdLOCA_DATE_VALUE is T_LOCATION_ATTRIBUTES.DATE_VALUE%type;
+  subtype tnLOCA_VERSION_NBR is T_LOCATION_ATTRIBUTES.VERSION_NBR%type;
+--
+-- T_LOCATION_ATTRIBUTE_TYPES
+--
+  subtype tmsLOCAT_CODE is T_LOCATION_ATTRIBUTE_TYPES.CODE%type not null;
+  subtype tsLOCAT_DATA_TYPE is T_LOCATION_ATTRIBUTE_TYPES.DATA_TYPE%type;
+  subtype tmsLOCAT_DATA_TYPE is tsLOCAT_DATA_TYPE not null;
+  subtype tnLOCAT_DISPLAY_SEQ is T_LOCATION_ATTRIBUTE_TYPES.DISPLAY_SEQ%type;
+  subtype tsLOCAT_ACTIVE_FLAG is T_LOCATION_ATTRIBUTE_TYPES.ACTIVE_FLAG%type;
+  subtype tmsLOCAT_ACTIVE_FLAG is tsLOCAT_ACTIVE_FLAG not null;
+  subtype tnLOCAT_VERSION_NBR is T_LOCATION_ATTRIBUTE_TYPES.VERSION_NBR%type;
+--
+-- T_LOCATION_RELATIONSHIPS
+--
+  subtype tnLOCR_VERSION_NBR is T_LOCATION_RELATIONSHIPS.VERSION_NBR%type;
+--
+-- T_LOCATION_RELATIONSHIP_TYPES
+--
+  subtype tsLOCRT_CODE is T_LOCATION_RELATIONSHIP_TYPES.CODE%type;
+  subtype tmsLOCRT_CODE is tsLOCRT_CODE not null;
+  subtype tnLOCRT_DISPLAY_SEQ is T_LOCATION_RELATIONSHIP_TYPES.DISPLAY_SEQ%type;
+  subtype tsLOCRT_ACTIVE_FLAG is T_LOCATION_RELATIONSHIP_TYPES.ACTIVE_FLAG%type;
+  subtype tmsLOCRT_ACTIVE_FLAG is tsLOCRT_ACTIVE_FLAG not null;
+  subtype tnLOCRT_VERSION_NBR is T_LOCATION_RELATIONSHIP_TYPES.VERSION_NBR%type;
+--
+-- T_LOCATION_TYPES
+--
+  subtype tsLOCT_CODE is T_LOCATION_TYPES.CODE%type;
+  subtype tmsLOCT_CODE is tsLOCT_CODE not null;
+  subtype tnLOCT_DISPLAY_SEQ is T_LOCATION_TYPES.DISPLAY_SEQ%type;
+  subtype tsLOCT_ACTIVE_FLAG is T_LOCATION_TYPES.ACTIVE_FLAG%type;
+  subtype tmsLOCT_ACTIVE_FLAG is tsLOCT_ACTIVE_FLAG not null;
+  subtype tnLOCT_VERSION_NBR is T_LOCATION_TYPES.VERSION_NBR%type;
+--
+-- T_LOCATION_TYPE_RELATIONSHIPS
+--
+  subtype tnLOCTR_VERSION_NBR is T_LOCATION_TYPE_RELATIONSHIPS.VERSION_NBR%type;
+--
+-- T_LOCATION_TYPE_VARIANTS
+--
+  subtype tnLOCTV_ID is T_LOCATION_TYPE_VARIANTS.ID%type;
+  subtype tmnLOCTV_ID is tnLOCTV_ID not null;
+  subtype tnLOCTV_DISPLAY_SEQ is T_LOCATION_TYPE_VARIANTS.DISPLAY_SEQ%type;
+  subtype tsLOCTV_ACTIVE_FLAG is T_LOCATION_TYPE_VARIANTS.ACTIVE_FLAG%type;
+  subtype tmsLOCTV_ACTIVE_FLAG is tsLOCTV_ACTIVE_FLAG not null;
+  subtype tnLOCTV_VERSION_NBR is T_LOCATION_TYPE_VARIANTS.VERSION_NBR%type;
+--
+-- T_MESSAGES
+--
+  subtype tnMSG_SEQ_NBR is T_MESSAGES.SEQ_NBR%type;
+  subtype tsMSG_SEVERITY is T_MESSAGES.SEVERITY%type;
+  subtype tnMSG_VERSION_NBR is T_MESSAGES.VERSION_NBR%type;
+--
+-- T_PERMISSIONS
+--
+  subtype tnPRM_ID is T_PERMISSIONS.ID%type;
+  subtype tmnPRM_ID is tnPRM_ID not null;
+  subtype tsPRM_WRITE_FLAG is T_PERMISSIONS.WRITE_FLAG%type;
+  subtype tmsPRM_WRITE_FLAG is tsPRM_WRITE_FLAG not null;
+  subtype tsPRM_ANNOTATE_FLAG is T_PERMISSIONS.ANNOTATE_FLAG%type;
+  subtype tmsPRM_ANNOTATE_FLAG is tsPRM_ANNOTATE_FLAG not null;
+  subtype tnPRM_DISPLAY_SEQ is T_PERMISSIONS.DISPLAY_SEQ%type;
+  subtype tsPRM_ACTIVE_FLAG is T_PERMISSIONS.ACTIVE_FLAG%type;
+  subtype tmsPRM_ACTIVE_FLAG is tsPRM_ACTIVE_FLAG not null;
+  subtype tnPRM_VERSION_NBR is T_PERMISSIONS.VERSION_NBR%type;
+--
+-- T_POPULATION_PLANNING_GROUPS
+--
+  subtype tnPPG_ID is T_POPULATION_PLANNING_GROUPS.ID%type;
+  subtype tmnPPG_ID is tnPPG_ID not null;
+  subtype tsPPG_CODE is T_POPULATION_PLANNING_GROUPS.PPG_CODE%type;
+  subtype tmsPPG_CODE is tsPPG_CODE not null;
+  subtype tnPPG_VERSION_NBR is T_POPULATION_PLANNING_GROUPS.VERSION_NBR%type;
+--
+-- T_ROLES
+--
+  subtype tnROL_ID is T_ROLES.ID%type;
+  subtype tmnROL_ID is tnROL_ID not null;
+  subtype tsROL_COUNTRY_FLAG is T_ROLES.COUNTRY_FLAG%type;
+  subtype tmsROL_COUNTRY_FLAG is tsROL_COUNTRY_FLAG not null;
+  subtype tnROL_DISPLAY_SEQ is T_ROLES.DISPLAY_SEQ%type;
+  subtype tsROL_ACTIVE_FLAG is T_ROLES.ACTIVE_FLAG%type;
+  subtype tmsROL_ACTIVE_FLAG is tsROL_ACTIVE_FLAG not null;
+  subtype tnROL_VERSION_NBR is T_ROLES.VERSION_NBR%type;
+--
+-- T_SEXES
+--
+  subtype tsSEX_CODE is T_SEXES.CODE%type;
+--
+-- T_STATISTICS
+--
+  subtype tnSTC_ID is T_STATISTICS.ID%type;
+  subtype tmnSTC_ID is tnSTC_ID not null;
+  subtype tnSTC_VALUE is T_STATISTICS.VALUE%type;
+  subtype tmnSTC_VALUE is tnSTC_VALUE not null;
+  subtype tnSTC_VERSION_NBR is T_STATISTICS.VERSION_NBR%type;
+--
+-- T_STATISTIC_GROUPS
+--
+  subtype tnSTG_ID is T_STATISTIC_GROUPS.ID%type;
+  subtype tmnSTG_ID is tnSTG_ID not null;
+  subtype tnSTG_SEQ_NBR is T_STATISTIC_GROUPS.SEQ_NBR%type;
+  subtype tnSTG_VERSION_NBR is T_STATISTIC_GROUPS.VERSION_NBR%type;
+--
+-- T_STATISTIC_TYPES
+--
+  subtype tsSTCT_CODE is T_STATISTIC_TYPES.CODE%type;
+  subtype tmsSTCT_CODE is tsSTCT_CODE not null;
+  subtype tnSTCT_DISPLAY_SEQ is T_STATISTIC_TYPES.DISPLAY_SEQ%type;
+  subtype tsSTCT_ACTIVE_FLAG is T_STATISTIC_TYPES.ACTIVE_FLAG%type;
+  subtype tmsSTCT_ACTIVE_FLAG is tsSTCT_ACTIVE_FLAG not null;
+  subtype tnSTCT_VERSION_NBR is T_STATISTIC_TYPES.VERSION_NBR%type;
+--
+-- T_STATISTIC_TYPES_IN_GROUPS
+--
+  subtype tnSTTIG_VERSION_NBR is T_STATISTIC_TYPES_IN_GROUPS.VERSION_NBR%type;
+--
+-- T_STATISTIC_TYPE_GROUPS
+--
+  subtype tsSTTG_CODE is T_STATISTIC_TYPE_GROUPS.CODE%type;
+  subtype tmsSTTG_CODE is tsSTTG_CODE not null;
+  subtype tnSTTG_DISPLAY_SEQ is T_STATISTIC_TYPE_GROUPS.DISPLAY_SEQ%type;
+  subtype tsSTTG_ACTIVE_FLAG is T_STATISTIC_TYPE_GROUPS.ACTIVE_FLAG%type;
+  subtype tmsSTTG_ACTIVE_FLAG is tsSTTG_ACTIVE_FLAG not null;
+  subtype tnSTTG_VERSION_NBR is T_STATISTIC_TYPE_GROUPS.VERSION_NBR%type;
+--
+-- T_STC_GROUP_ATTRIBUTES
+--
+  subtype tsSTGA_CHAR_VALUE is T_STC_GROUP_ATTRIBUTES.CHAR_VALUE%type;
+  subtype tnSTGA_NUM_VALUE is T_STC_GROUP_ATTRIBUTES.NUM_VALUE%type;
+  subtype tdSTGA_DATE_VALUE is T_STC_GROUP_ATTRIBUTES.DATE_VALUE%type;
+  subtype tnSTGA_VERSION_NBR is T_STC_GROUP_ATTRIBUTES.VERSION_NBR%type;
+--
+-- T_STC_GROUP_ATTRIBUTE_TYPES
+--
+  subtype tmsSTGAT_CODE is T_STC_GROUP_ATTRIBUTE_TYPES.CODE%type not null;
+  subtype tsSTGAT_DATA_TYPE is T_STC_GROUP_ATTRIBUTE_TYPES.DATA_TYPE%type;
+  subtype tmsSTGAT_DATA_TYPE is tsSTGAT_DATA_TYPE not null;
+  subtype tnSTGAT_DISPLAY_SEQ is T_STC_GROUP_ATTRIBUTE_TYPES.DISPLAY_SEQ%type;
+  subtype tsSTGAT_ACTIVE_FLAG is T_STC_GROUP_ATTRIBUTE_TYPES.ACTIVE_FLAG%type;
+  subtype tmsSTGAT_ACTIVE_FLAG is tsSTGAT_ACTIVE_FLAG not null;
+  subtype tnSTGAT_VERSION_NBR is T_STC_GROUP_ATTRIBUTE_TYPES.VERSION_NBR%type;
+--
+-- T_SYSTEM_PARAMETERS
+--
+  subtype tmsSYP_CODE is T_SYSTEM_PARAMETERS.CODE%type not null;
+  subtype tsSYP_DATA_TYPE is T_SYSTEM_PARAMETERS.DATA_TYPE%type;
+  subtype tmsSYP_DATA_TYPE is tsSYP_DATA_TYPE not null;
+  subtype tsSYP_CHAR_VALUE is T_SYSTEM_PARAMETERS.CHAR_VALUE%type;
+  subtype tnSYP_NUM_VALUE is T_SYSTEM_PARAMETERS.NUM_VALUE%type;
+  subtype tdSYP_DATE_VALUE is T_SYSTEM_PARAMETERS.DATE_VALUE%type;
+  subtype tnSYP_VERSION_NBR is T_SYSTEM_PARAMETERS.VERSION_NBR%type;
+--
+-- T_SYSTEM_USERS
+--
+  subtype tmsUSR_USERID is T_SYSTEM_USERS.USERID%type not null;
+  subtype tsUSR_LOCKED_FLAG is T_SYSTEM_USERS.LOCKED_FLAG%type;
+  subtype tmsUSR_LOCKED_FLAG is tsUSR_LOCKED_FLAG not null;
+  subtype tsUSR_TEMPLATE_FLAG is T_SYSTEM_USERS.TEMPLATE_FLAG%type;
+  subtype tmsUSR_TEMPLATE_FLAG is tsUSR_TEMPLATE_FLAG not null;
+  subtype tnUSR_VERSION_NBR is T_SYSTEM_USERS.VERSION_NBR%type;
+--
+-- T_TABLE_ALIASES
+--
+  subtype tsTAB_ALIAS is T_TABLE_ALIASES.ALIAS%type;
+  subtype tmsTAB_ALIAS is tsTAB_ALIAS not null;
+--
+-- T_TESTS
+--
+  subtype tsTST_CODE is T_TESTS.CODE%type;
+  subtype tsTST_DESCRIPTION is T_TESTS.DESCRIPTION%type;
+--
+-- T_TEST_CASES
+--
+  subtype tsTCS_PACKAGE_NAME is T_TEST_CASES.PACKAGE_NAME%type;
+  subtype tsTCS_PROGRAM_UNIT_NAME is T_TEST_CASES.PROGRAM_UNIT_NAME%type;
+  subtype tnTCS_EXCEPTION_NBR is T_TEST_CASES.EXCEPTION_NBR%type;
+  subtype tsTCS_VARIABLE_NAME is T_TEST_CASES.VARIABLE_NAME%type;
+  subtype tsTCS_CHAR_VALUE is T_TEST_CASES.CHAR_VALUE%type;
+  subtype tnTCS_NUM_VALUE is T_TEST_CASES.NUM_VALUE%type;
+  subtype tdTCS_DATE_VALUE is T_TEST_CASES.DATE_VALUE%type;
+--
+-- T_TEST_CASE_ARGUMENTS
+--
+  subtype tsTCA_PARAMETER_NAME is T_TEST_CASE_ARGUMENTS.PARAMETER_NAME%type;
+  subtype tsTCA_VARIABLE_NAME is T_TEST_CASE_ARGUMENTS.VARIABLE_NAME%type;
+  subtype tsTCA_CHAR_VALUE_IN is T_TEST_CASE_ARGUMENTS.CHAR_VALUE_IN%type;
+  subtype tsTCA_CHAR_VALUE_OUT is T_TEST_CASE_ARGUMENTS.CHAR_VALUE_OUT%type;
+  subtype tnTCA_NUM_VALUE_IN is T_TEST_CASE_ARGUMENTS.NUM_VALUE_IN%type;
+  subtype tnTCA_NUM_VALUE_OUT is T_TEST_CASE_ARGUMENTS.NUM_VALUE_OUT%type;
+  subtype tdTCA_DATE_VALUE_IN is T_TEST_CASE_ARGUMENTS.DATE_VALUE_IN%type;
+  subtype tdTCA_DATE_VALUE_OUT is T_TEST_CASE_ARGUMENTS.DATE_VALUE_OUT%type;
+--
+-- T_TEST_STEPS
+--
+  subtype tsSTP_SEQ_NBR is T_TEST_STEPS.SEQ_NBR%type;
+  subtype tsSTP_DESCRIPTION is T_TEST_STEPS.DESCRIPTION%type;
+--
+-- T_TEXT_ITEMS
+--
+  subtype tnTXT_SEQ_NBR is T_TEXT_ITEMS.SEQ_NBR%type;
+--
+-- T_TEXT_TYPES
+--
+  subtype tsTXTT_CODE is T_TEXT_TYPES.CODE%type;
+  subtype tmsTXTT_CODE is tsTXTT_CODE not null;
+  subtype tnTXTT_DISPLAY_SEQ is T_TEXT_TYPES.DISPLAY_SEQ%type;
+  subtype tsTXTT_ACTIVE_FLAG is T_TEXT_TYPES.ACTIVE_FLAG%type;
+  subtype tmsTXTT_ACTIVE_FLAG is tsTXTT_ACTIVE_FLAG not null;
+  subtype tnTXTT_VERSION_NBR is T_TEXT_TYPES.VERSION_NBR%type;
+--
+-- T_TEXT_TYPE_HEADERS
+--
+  subtype tnTXT_SEQ_NBR_MAX is T_TEXT_TYPE_HEADERS.TXT_SEQ_NBR_MAX%type;
+--
+-- T_TEXT_TYPE_PROPERTIES
+--
+  subtype tsTTP_MANDATORY_FLAG is T_TEXT_TYPE_PROPERTIES.MANDATORY_FLAG%type;
+  subtype tmsTTP_MANDATORY_FLAG is tsTTP_MANDATORY_FLAG not null;
+  subtype tsTTP_MULTI_INSTANCE_FLAG is T_TEXT_TYPE_PROPERTIES.MULTI_INSTANCE_FLAG%type;
+  subtype tmsTTP_MULTI_INSTANCE_FLAG is tsTTP_MULTI_INSTANCE_FLAG not null;
+  subtype tsTTP_LONG_TEXT_FLAG is T_TEXT_TYPE_PROPERTIES.LONG_TEXT_FLAG%type;
+  subtype tmsTTP_LONG_TEXT_FLAG is tsTTP_LONG_TEXT_FLAG not null;
+  subtype tnTTP_VERSION_NBR is T_TEXT_TYPE_PROPERTIES.VERSION_NBR%type;
+--
+-- T_USER_ATTRIBUTES
+--
+  subtype tsUAT_CHAR_VALUE is T_USER_ATTRIBUTES.CHAR_VALUE%type;
+  subtype tnUAT_NUM_VALUE is T_USER_ATTRIBUTES.NUM_VALUE%type;
+  subtype tdUAT_DATE_VALUE is T_USER_ATTRIBUTES.DATE_VALUE%type;
+  subtype tnUAT_VERSION_NBR is T_USER_ATTRIBUTES.VERSION_NBR%type;
+--
+-- T_USER_ATTRIBUTE_TYPES
+--
+  subtype tmsUATT_CODE is T_USER_ATTRIBUTE_TYPES.CODE%type not null;
+  subtype tsUATT_DATA_TYPE is T_USER_ATTRIBUTE_TYPES.DATA_TYPE%type;
+  subtype tmsUATT_DATA_TYPE is tsUATT_DATA_TYPE not null;
+  subtype tnUATT_DISPLAY_SEQ is T_USER_ATTRIBUTE_TYPES.DISPLAY_SEQ%type;
+  subtype tsUATT_ACTIVE_FLAG is T_USER_ATTRIBUTE_TYPES.ACTIVE_FLAG%type;
+  subtype tmsUATT_ACTIVE_FLAG is tsUATT_ACTIVE_FLAG not null;
+  subtype tnUATT_VERSION_NBR is T_USER_ATTRIBUTE_TYPES.VERSION_NBR%type;
+--
+-- T_USER_LANGUAGE_PREFERENCES
+--
+  subtype tnULP_PREF_SEQ is T_USER_LANGUAGE_PREFERENCES.PREF_SEQ%type;
+  subtype tnULP_VERSION_NBR is T_USER_LANGUAGE_PREFERENCES.VERSION_NBR%type;
+--
+-- ========================================
+-- Public variables
+-- ========================================
+--
+  gdMIN_DATE tdDate;  -- Minimum date value (earlier than any possible practical date).
+  gdMAX_DATE tdDate;  -- Maximum date value (later than any possible practical date).
+  gdFALSE_DATE tdDate;  -- Impossible date value (used for parameter default values).
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- MIN_DATE
+-- ----------------------------------------
+--
+-- Return the minimum date value.
+--
+  function MIN_DATE
+    return tdDate;
+--
+-- ----------------------------------------
+-- MAX_DATE
+-- ----------------------------------------
+--
+-- Return the maximum date value.
+--
+  function MAX_DATE
+    return tdDate;
+--
+-- ----------------------------------------
+-- FALSE_DATE
+-- ----------------------------------------
+--
+-- Return the impossible date value.
+--
+  function FALSE_DATE
+    return tdDate;
+--
+end P_BASE;
+/
+
+show error

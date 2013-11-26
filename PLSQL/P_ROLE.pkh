@@ -1,0 +1,493 @@
+create or replace package P_ROLE is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_ROLE
+--  Procedures for maintenance of roles and permissions.
+--
+--  Change History:
+--  11-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'ROL';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_ROLE
+-- ----------------------------------------
+--
+-- Create a new role.
+--
+-- Parameters:
+--  pnID - New role identifier (returned).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of role (mandatory).
+--  psCOUNTRY_FLAG - Flag (Y/N) indicating whether this role is specific to designated countries
+--    (optional: defaults to N).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of roles (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the role is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_ROLE
+   (pnID out P_BASE.tnROL_ID,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    psCOUNTRY_FLAG in P_BASE.tmsROL_COUNTRY_FLAG := 'N',
+    pnDISPLAY_SEQ in P_BASE.tnROL_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsROL_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_ROLE
+-- ----------------------------------------
+--
+-- Update an existing role. Note that the country flag cannot be updated.
+--
+-- Parameters:
+--  pnID - Role identifier (mandatory).
+--  pnVERSION_NBR - Update version number of role record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of role (optional: if not specified, the description is not
+--    changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of roles (optional: if not
+--    specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the role is currently available for use (optional:
+--    if not specified, the existing value is not changed).
+--
+  procedure UPDATE_ROLE
+   (pnID in P_BASE.tmnROL_ID,
+    pnVERSION_NBR in out P_BASE.tnROL_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnROL_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsROL_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_ROLE
+-- ----------------------------------------
+--
+-- Create a new role or update an existing one.
+--
+-- Parameters:
+--  pnID - Role identifier (optional: if null, a new one is generated and returned).
+--  pnVERSION_NBR - Update version number of role record (mandatory: new version number is returned;
+--    for a new role, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing role
+--    but must be specified if psDescription is specified).
+--  psDescription - Textual description of role (optional when updating an existing role: if not
+--    specified, the description is not changed).
+--  psCOUNTRY_FLAG - Flag (Y/N) indicating whether this role is specific to designated countries
+--    (only allowed, and optional, when creating a new role: defaults to N).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of roles (optional: if not
+--    specified, an existing display sequence is not changed and a new one is set to null; if null
+--    is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the role is currently available for use (optional:
+--    if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_ROLE
+   (pnID in out P_BASE.tnROL_ID,
+    pnVERSION_NBR in out P_BASE.tnROL_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psCOUNTRY_FLAG in P_BASE.tsROL_COUNTRY_FLAG := null,
+    pnDISPLAY_SEQ in P_BASE.tnROL_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsROL_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_ROLE
+-- ----------------------------------------
+--
+-- Delete a role record.
+--
+-- Parameters:
+--  pnID - Role identifier (mandatory).
+--  pnVERSION_NBR - Update version number of role record (mandatory).
+--
+  procedure DELETE_ROLE
+   (pnID in P_BASE.tmnROL_ID,
+    pnVERSION_NBR in P_BASE.tnROL_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_ROL_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a role, or update an existing description.
+--
+-- Parameters:
+--  pnID - Identifier of role for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of role record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of role (mandatory).
+--
+  procedure SET_ROL_DESCRIPTION
+   (pnID in P_BASE.tmnROL_ID,
+    pnVERSION_NBR in out P_BASE.tnROL_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_ROL_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a role. Note that it is not possible to remove the
+--  last language variant of the description.
+--
+-- Parameters:
+--  pnID - Identifier of role from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of role record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_ROL_DESCRIPTION
+   (pnID in P_BASE.tmnROL_ID,
+    pnVERSION_NBR in out P_BASE.tnROL_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_ROL_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a role, or update an existing text item.
+--
+-- Parameters:
+--  pnID - Identifier of role for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of role record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with role (mandatory).
+--
+  procedure SET_ROL_TEXT
+   (pnID in P_BASE.tmnROL_ID,
+    pnVERSION_NBR in out P_BASE.tnROL_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_ROL_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a role. The following cases arise:
+-- 1. All text of the given type is deleted for the given role (neither psSEQ_NBR nor psLANG_CODE is
+--    specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given role, text type and text item sequence number
+--    (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last text
+--    item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  pnID - Identifier of role from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of role record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_ROL_TEXT
+   (pnID in P_BASE.tmnROL_ID,
+    pnVERSION_NBR in out P_BASE.tnROL_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_ROLE_COUNTRY
+-- ----------------------------------------
+--
+-- Associate a country with a country-oriented role.
+--
+-- Parameters:
+--  pnROL_ID - Role dentifier (mandatory).
+--  pnLOC_ID - Location identifier of country (mandatory).
+--
+  procedure INSERT_ROLE_COUNTRY
+   (pnROL_ID in P_BASE.tmnROL_ID,
+    pnLOC_ID in P_BASE.tmnLOC_ID);
+--
+-- ----------------------------------------
+-- DELETE_ROLE_COUNTRY
+-- ----------------------------------------
+--
+-- Remove a country's association with a country-oriented role.
+--
+-- Parameters:
+--  pnROL_ID - Role dentifier (mandatory).
+--  pnLOC_ID - Location identifier of country (mandatory).
+--
+  procedure DELETE_ROLE_COUNTRY
+   (pnROL_ID in P_BASE.tmnROL_ID,
+    pnLOC_ID in P_BASE.tmnLOC_ID);
+--
+-- ----------------------------------------
+-- INSERT_PERMISSION
+-- ----------------------------------------
+--
+-- Create a new permission.
+--
+-- Parameters:
+--  pnID - New permission identifier (returned).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of permission (mandatory).
+--  psWRITE_FLAG - Flag (Y/N) indicating whether this permission conveys write authority on
+--    associated resources (optional: defaults to Y).
+--  psANNOTATE_FLAG - Flag (Y/N) indicating whether this permission conveys the authority to
+--    annotate associated resources (optional: defaults to Y).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of permissions (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the permission is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_PERMISSION
+   (pnID out P_BASE.tnPRM_ID,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    psWRITE_FLAG in P_BASE.tmsPRM_WRITE_FLAG := 'Y',
+    psANNOTATE_FLAG in P_BASE.tmsPRM_ANNOTATE_FLAG := 'Y',
+    pnDISPLAY_SEQ in P_BASE.tnPRM_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsPRM_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_PERMISSION
+-- ----------------------------------------
+--
+-- Update an existing permission.
+--
+-- Parameters:
+--  pnID - Permission identifier (mandatory).
+--  pnVERSION_NBR - Update version number of permission record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of permission (optional: if not specified, the description
+--    is not changed).
+--  psWRITE_FLAG - Flag (Y/N) indicating whether this permission conveys write authority on
+--    associated resources (optional: if not specified, the existing value is not changed).
+--  psANNOTATE_FLAG - Flag (Y/N) indicating whether this permission conveys the authority to
+--    annotate associated resources (optional: if not specified, the existing value is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of permissions (optional: if not
+--    specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the permission is currently available for use
+--    (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_PERMISSION
+   (pnID in P_BASE.tmnPRM_ID,
+    pnVERSION_NBR in out P_BASE.tnPRM_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psWRITE_FLAG in P_BASE.tsPRM_WRITE_FLAG := null,
+    psANNOTATE_FLAG in P_BASE.tsPRM_ANNOTATE_FLAG := null,
+    pnDISPLAY_SEQ in P_BASE.tnPRM_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsPRM_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_PERMISSION
+-- ----------------------------------------
+--
+-- Create a new permission or update an existing one.
+--
+-- Parameters:
+--  pnID - Permission identifier (optional: if null, a new one is generated and returned).
+--  pnVERSION_NBR - Update version number of permission record (mandatory: new version number
+--    is returned; for a new permission, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing
+--    permission but must be specified if psDescription is specified).
+--  psDescription - Textual description of permission (optional when updating an existing
+--    permission: if not specified, the description is not changed).
+--  psWRITE_FLAG - Flag (Y/N) indicating whether this permission conveys write authority on
+--    associated resources (optional: if not specified, the existing value is not changed; a new
+--    value defaults to Y).
+--  psANNOTATE_FLAG - Flag (Y/N) indicating whether this permission conveys the authority to
+--    annotate associated resources (optional: if not specified, the existing value is not changed;
+--    a new value defaults to Y).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of permissions (optional: if
+--    not specified, an existing display sequence is not changed and a new one is set to null; if
+--    null is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the permission is currently available for use
+--    (optional: if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_PERMISSION
+   (pnID in out P_BASE.tnPRM_ID,
+    pnVERSION_NBR in out P_BASE.tnPRM_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psWRITE_FLAG in P_BASE.tsPRM_WRITE_FLAG := null,
+    psANNOTATE_FLAG in P_BASE.tsPRM_ANNOTATE_FLAG := null,
+    pnDISPLAY_SEQ in P_BASE.tnPRM_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsPRM_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_PERMISSION
+-- ----------------------------------------
+--
+-- Delete a permission record.
+--
+-- Parameters:
+--  pnID - Permission identifier (mandatory).
+--  pnVERSION_NBR - Update version number of permission record (mandatory).
+--
+  procedure DELETE_PERMISSION
+   (pnID in P_BASE.tmnPRM_ID,
+    pnVERSION_NBR in P_BASE.tnPRM_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_PRM_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a permission, or update an existing description.
+--
+-- Parameters:
+--  pnID - Identifier of permission for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of permission record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of permission (mandatory).
+--
+  procedure SET_PRM_DESCRIPTION
+   (pnID in P_BASE.tmnPRM_ID,
+    pnVERSION_NBR in out P_BASE.tnPRM_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_PRM_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a permission. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  pnID - Identifier of permission from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of permission record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_PRM_DESCRIPTION
+   (pnID in P_BASE.tmnPRM_ID,
+    pnVERSION_NBR in out P_BASE.tnPRM_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_PRM_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a permission, or update an existing text item.
+--
+-- Parameters:
+--  pnID - Identifier of permission for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of permission record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with permission (mandatory).
+--
+  procedure SET_PRM_TEXT
+   (pnID in P_BASE.tmnPRM_ID,
+    pnVERSION_NBR in out P_BASE.tnPRM_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_PRM_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a permission. The following cases arise:
+-- 1. All text of the given type is deleted for the given permission (neither psSEQ_NBR nor psLANG_CODE is
+--    specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given permission, text type and text item sequence number
+--    (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last text
+--    item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  pnID - Identifier of permission from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of permission record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_PRM_TEXT
+   (pnID in P_BASE.tmnPRM_ID,
+    pnVERSION_NBR in out P_BASE.tnPRM_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_PERMISSION_IN_ROLE
+-- ----------------------------------------
+--
+-- Associate a permission with a role.
+--
+-- Parameters:
+--  pnPRM_ID - Permission identifier (mandatory).
+--  pnROL_ID - Role identifier (mandatory).
+--
+  procedure INSERT_PERMISSION_IN_ROLE
+   (pnPRM_ID in P_BASE.tmnPRM_ID,
+    pnROL_ID in P_BASE.tmnROL_ID);
+--
+-- ----------------------------------------
+-- DELETE_PERMISSION_IN_ROLE
+-- ----------------------------------------
+--
+-- Remove a permission's association with a role.
+--
+-- Parameters:
+--  pnPRM_ID - Permission identifier (mandatory).
+--  pnROL_ID - Role identifier (mandatory).
+--
+  procedure DELETE_PERMISSION_IN_ROLE
+   (pnPRM_ID in P_BASE.tmnPRM_ID,
+    pnROL_ID in P_BASE.tmnROL_ID);
+--
+-- ----------------------------------------
+-- INSERT_DATA_ITEM_PERMISSION
+-- ----------------------------------------
+--
+-- Associate a data item with a permission.
+--
+-- Parameters:
+--  pnITM_ID - Data item identifier (mandatory).
+--  pnPRM_ID - Permission identifier (mandatory).
+--
+  procedure INSERT_DATA_ITEM_PERMISSION
+   (pnITM_ID in P_BASE.tmnITM_ID,
+    pnPRM_ID in P_BASE.tmnPRM_ID);
+--
+-- ----------------------------------------
+-- DELETE_DATA_ITEM_PERMISSION
+-- ----------------------------------------
+--
+-- Remove a data item's association with a permission.
+--
+-- Parameters:
+--  pnITM_ID - Data item identifier (mandatory).
+--  pnPRM_ID - Permission identifier (mandatory).
+--
+  procedure DELETE_DATA_ITEM_PERMISSION
+   (pnITM_ID in P_BASE.tmnITM_ID,
+    pnPRM_ID in P_BASE.tmnPRM_ID);
+--
+end P_ROLE;
+/
+
+show errors

@@ -1,0 +1,10 @@
+execute dbms_mview.refresh('S_COUNTRY_PPGS');
+execute dbms_mview.refresh('S_ASR_REFUGEES');
+execute dbms_mview.refresh('S_ASR_DEMOGRAPHICS_CLEANED');
+execute dbms_mview.refresh('S_ASR_DEMOGRAPHICS');
+execute dbms_mview.refresh('S_ASR_RSD');
+execute dbms_mview.refresh('S_ASR_IDPS_CLEANED');
+execute dbms_mview.refresh('S_ASR_IDPS');
+execute dbms_mview.refresh('S_ASR_RETURNS');
+execute dbms_mview.refresh('S_ASR_STATELESS');
+execute dbms_mview.refresh('S_ASR_OOC');

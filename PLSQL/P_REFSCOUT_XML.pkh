@@ -1,0 +1,59 @@
+create or replace package P_REFSCOUT_XML is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_REFSCOUT_XML
+--  Procedures for generating XML files suitable for use in the RefScout application.
+--
+--  Change History:
+--  16-Nov-2012 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sModule varchar2(30) := $$PLSQL_UNIT;
+  sVersion varchar2(10) := 'D0.1';
+  sComponent varchar2(30) := 'RSX';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- CHARTBYASYLUM
+-- ----------------------------------------
+--
+  function CHARTBYASYLUM
+    return XMLType;
+--
+-- ----------------------------------------
+-- CHARTBYORIGIN
+-- ----------------------------------------
+--
+  function CHARTBYORIGIN
+    return XMLType;
+--
+-- ----------------------------------------
+-- STATSBYASYLUM
+-- ----------------------------------------
+--
+  function STATSBYASYLUM
+    return XMLType;
+--
+-- ----------------------------------------
+-- STATSBYFLOW
+-- ----------------------------------------
+--
+--  function STATSBYFLOW
+--    return XMLType;
+--
+-- ----------------------------------------
+-- STATSBYORIGIN
+-- ----------------------------------------
+--
+  function STATSBYORIGIN
+    return XMLType;
+--
+end P_REFSCOUT_XML;
+/
+
+show errors

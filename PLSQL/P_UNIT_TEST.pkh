@@ -1,0 +1,41 @@
+create or replace package P_UNIT_TEST is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_UNIT_TEST
+--  Procedures for running unit tests of (packaged) procedures and functions.
+--  Testing is currently limited to non-overloaded procedures and functions with scalar parameters
+--    of type character, number or date only.
+--
+--  Change History:
+--  16-Nov-2012 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sModule varchar2(30) := $$PLSQL_UNIT;
+  sVersion varchar2(10) := 'D0.1';
+  sComponent varchar2(30) := 'TST';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- RUN_TEST
+-- ----------------------------------------
+--
+  procedure RUN_TEST
+   (psCODE in P_BASE.tsTST_CODE);
+--
+-- ----------------------------------------
+-- RUN_TEST_CASE
+-- ----------------------------------------
+--
+  procedure RUN_TEST_CASE
+   (psTST_CODE in P_BASE.tsTST_CODE,
+    pnSEQ_NBR in P_BASE.tsSTP_SEQ_NBR);
+--
+end P_UNIT_TEST;
+/
+
+show errors

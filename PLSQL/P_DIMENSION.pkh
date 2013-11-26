@@ -1,0 +1,423 @@
+create or replace package P_DIMENSION is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_DIMENSION
+--  Procedures for maintenance of dimension types and dimension values.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'DIM';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_DIMENSION_TYPE
+-- ----------------------------------------
+--
+-- Create a new dimension type.
+--
+-- Parameters:
+--  psCODE - Dimension type code (mandatory).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of dimension type (mandatory).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of dimension types (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the dimension type is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_DIMENSION_TYPE
+   (psCODE in P_BASE.tmsDIMT_CODE,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    pnDISPLAY_SEQ in P_BASE.tnDIMT_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsDIMT_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_DIMENSION_TYPE
+-- ----------------------------------------
+--
+-- Update an existing dimension type.
+--
+-- Parameters:
+--  psCODE - Dimension type code (mandatory).
+--  pnVERSION_NBR - Update version number of dimension type record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of dimension type (optional: if not specified, the
+--    description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of dimension types (optional: if not
+--    specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the dimension type is currently available for use
+--    (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_DIMENSION_TYPE
+   (psCODE in P_BASE.tmsDIMT_CODE,
+    pnVERSION_NBR in out P_BASE.tnDIMT_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnDIMT_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsDIMT_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_DIMENSION_TYPE
+-- ----------------------------------------
+--
+-- Create a new dimension type or update an existing one.
+--
+-- Parameters:
+--  psCODE - Dimension type code (mandatory).
+--  pnVERSION_NBR - Update version number of dimension type record (mandatory: new version number is
+--    returned; for a new dimension type, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing
+--    dimension type but must be specified if psDescription is specified).
+--  psDescription - Textual description of dimension type (optional when updating an existing
+--    dimension type; if not specified, the description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of dimension types (optional: if not
+--    specified, an existing display sequence is not changed and a new one is set to null; if null
+--    is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the dimension type is currently available for use
+--    (optional: if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_DIMENSION_TYPE
+   (psCODE in P_BASE.tmsDIMT_CODE,
+    pnVERSION_NBR in out P_BASE.tnDIMT_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnDIMT_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsDIMT_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_DIMENSION_TYPE
+-- ----------------------------------------
+--
+-- Delete a dimension type record.
+--
+-- Parameters:
+--  psCODE - Code of dimension type to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of dimension type record (mandatory).
+--
+  procedure DELETE_DIMENSION_TYPE
+   (psCODE in P_BASE.tmsDIMT_CODE,
+    pnVERSION_NBR in P_BASE.tnDIMT_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_DIMT_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a dimension type, or update an existing description.
+--
+-- Parameters:
+--  psCODE - Code of dimension type for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of dimension type record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of dimension type (mandatory).
+--
+  procedure SET_DIMT_DESCRIPTION
+   (psCODE in P_BASE.tmsDIMT_CODE,
+    pnVERSION_NBR in out P_BASE.tnDIMT_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_DIMT_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a dimension type. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  psCODE - Code of dimension type from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of dimension type record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_DIMT_DESCRIPTION
+   (psCODE in P_BASE.tmsDIMT_CODE,
+    pnVERSION_NBR in out P_BASE.tnDIMT_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_DIMT_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a dimension type, or update an existing text item.
+--
+-- Parameters:
+--  psCODE - Code of dimension type for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of dimension type record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with dimension type (mandatory).
+--
+  procedure SET_DIMT_TEXT
+   (psCODE in P_BASE.tmsDIMT_CODE,
+    pnVERSION_NBR in out P_BASE.tnDIMT_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_DIMT_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a dimension type. The following cases arise:
+-- 1. All text of the given type is deleted for the given dimension type (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given dimension type, text type and text item
+--    sequence number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is
+--    the last text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCODE - Code of dimension type from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of dimension type record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_DIMT_TEXT
+   (psCODE in P_BASE.tmsDIMT_CODE,
+    pnVERSION_NBR in out P_BASE.tnDIMT_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_DIMENSION_VALUE
+-- ----------------------------------------
+--
+-- Create a new dimension value.
+--
+-- Parameters:
+--  pnID - New dimension value identifier (returned).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of dimension value (mandatory).
+--  psDIMT_CODE - Dimension type code (mandatory).
+--  psCODE - Dimension value code (mandatory).
+--  pdSTART_DATE - Effective start date of details of this dimension value (optional, the absence of
+--    a start date, or a null value, indicates that the effectivity starts indefinitely far in the
+--    past).
+--  pdEND_DATE - Effective end date of details of this dimansion value (optional, the absence of an
+--    end date, or a null value, indicates that the effectivity extends indefinitely into the
+--    future).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of dimension values (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the dimension value is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_DIMENSION_VALUE
+   (pnID out P_BASE.tnDIM_ID,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    psDIMT_CODE in P_BASE.tmsDIMT_CODE,
+    psCODE in P_BASE.tmsDIM_CODE,
+    pdSTART_DATE in P_BASE.tdDate := null,
+    pdEND_DATE in P_BASE.tdDate := null,
+    pnDISPLAY_SEQ in P_BASE.tnDIM_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsDIM_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_DIMENSION_VALUE
+-- ----------------------------------------
+--
+-- Update an existing dimension value.
+--
+-- Parameters:
+--  pnID - Dimension value identifier (mandatory).
+--  pnVERSION_NBR - Update version number of dimension value record (mandatory: new version number
+--    is returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of dimension value (optional: if not specified, the
+--    description is not changed).
+--  psCODE - Dimension value code (optional: if not specified, the code is not changed).
+--  pdSTART_DATE - Effective start date of details of this dimension value (optional: if not
+--    specified, the existing start date is left unchanged; a null value indicates that the
+--    effectivity starts indefinitely far in the past).
+--  pdEND_DATE - Effective end date of details of this dimension value (optional: if not specified,
+--    the existing end date is left unchanged; a null value indicates that the effectivity extends
+--    indefinitely into the future).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of dimension values (optional: if
+--    not specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the dimension value is currently available for use
+--    (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_DIMENSION_VALUE
+   (pnID in P_BASE.tmnDIM_ID,
+    pnVERSION_NBR in out P_BASE.tnDIM_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psCODE in P_BASE.tsDIM_CODE := null,
+    pdSTART_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pnDISPLAY_SEQ in P_BASE.tnDIM_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsDIM_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_DIMENSION_VALUE
+-- ----------------------------------------
+--
+-- Create a new dimension value or update an existing one.
+--
+-- Parameters:
+--  pnID - Dimension value identifier (optional: if null, a new one is generated and returned).
+--  pnVERSION_NBR - Update version number of dimension value record (mandatory: new version number
+--    is returned; for a new dimension value, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing
+--    dimension value but must be specified if psDescription is specified).
+--  psDescription - Textual description of dimension value (optional when updating an existing
+--    dimension value: if not specified, the description is not changed).
+--  psDIMT_CODE - Dimension type code (mandatory when creating an new dimension value; ignored when
+--    updating an existing dimension value, since the dimension type may not be changed).
+--  psCODE - Dimension value code (optional when updating an existing dimension value: if not
+--    specified, the code is not changed).
+--  pdSTART_DATE - Effective start date of this dimension value (optional: for a new dimension
+--    value, the absence of a start date, or a null value, indicates that the effectivity starts
+--    indefinitely far in the past; when updating an existing dimension value, the absence of a
+--    start date leaves the existing date unchanged, and a null value indicates that the effectivity
+--    starts indefinitely far in the past).
+--  pdEND_DATE - Effective end date of details of this dimension value (optional: for a new
+--    dimension value, the absence of an end date, or a null value, indicates that the effectivity
+--    extends indefinitely into the future; when updating an existing dimension value, the absence
+--    of an end date leaves the existing date unchanged, and a null value indicates that the
+--    effectivity extends indefinitely into the future).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of dimension values (optional: if
+--    not specified, an existing display sequence is not changed and a new one is set to null; if
+--    null is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the dimension value is currently available for use
+--    (optional: if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_DIMENSION_VALUE
+   (pnID in out P_BASE.tnDIM_ID,
+    pnVERSION_NBR in out P_BASE.tnDIM_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psDIMT_CODE in P_BASE.tsDIMT_CODE := null,
+    psCODE in P_BASE.tsDIM_CODE := null,
+    pdSTART_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pnDISPLAY_SEQ in P_BASE.tnDIM_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsDIM_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_DIMENSION_VALUE
+-- ----------------------------------------
+--
+-- Delete a dimension value record.
+--
+-- Parameters:
+--  pnID - Dimension value identifier (mandatory).
+--  pnVERSION_NBR - Update version number of dimension value record (mandatory).
+--
+  procedure DELETE_DIMENSION_VALUE
+   (pnID in P_BASE.tmnDIM_ID,
+    pnVERSION_NBR in P_BASE.tnDIM_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_DIM_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a dimension value, or update an existing description.
+--
+-- Parameters:
+--  pnID - Identifier of dimension value for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of dimension value record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of dimension value (mandatory).
+--
+  procedure SET_DIM_DESCRIPTION
+   (pnID in P_BASE.tmnDIM_ID,
+    pnVERSION_NBR in out P_BASE.tnDIM_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_DIM_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a dimension value. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  pnID - Identifier of dimension value from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of dimension value record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_DIM_DESCRIPTION
+   (pnID in P_BASE.tmnDIM_ID,
+    pnVERSION_NBR in out P_BASE.tnDIM_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_DIM_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a dimension value, or update an existing text item.
+--
+-- Parameters:
+--  pnID - Identifier of dimension value for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of dimension value record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with dimension value (mandatory).
+--
+  procedure SET_DIM_TEXT
+   (pnID in P_BASE.tmnDIM_ID,
+    pnVERSION_NBR in out P_BASE.tnDIM_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_DIM_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a dimension value. The following cases arise:
+-- 1. All text of the given type is deleted for the given dimension value (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given dimension value, text type and text item
+--    sequence number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is
+--    the last text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  pnID - Identifier of dimension value from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of dimension value record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_DIM_TEXT
+   (pnID in P_BASE.tmnDIM_ID,
+    pnVERSION_NBR in out P_BASE.tnDIM_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+end P_DIMENSION;
+/
+
+show errors

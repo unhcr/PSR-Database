@@ -1,0 +1,402 @@
+create or replace package P_MESSAGE is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_MESSAGE
+--  Procedures for maintenance of system messages and their associated components.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'MSG';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_COMPONENT
+-- ----------------------------------------
+--
+-- Create a new component record.
+--
+-- Parameters:
+--  psCODE - Code of component (mandatory).
+--  psLANG_CODE - Language code for the textual description (mandatory).
+--  psDescription - Textual description of component (mandatory).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of components (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the component is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_COMPONENT
+   (psCODE in P_BASE.tmsCOMP_CODE,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    pnDISPLAY_SEQ in P_BASE.tnCOMP_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tsCOMP_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_COMPONENT
+-- ----------------------------------------
+--
+-- Update an existing component record.
+--
+-- Parameters:
+--  psCODE - Code of component (mandatory).
+--  pnVERSION_NBR - Update version number of component (mandatory: new version number is returned).
+--  psLANG_CODE - Language code for the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of component (optional, if not specified, the description
+--    is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of components (optional: if not
+--    specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the component is currently available for use
+--    (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_COMPONENT
+   (psCODE in P_BASE.tmsCOMP_CODE,
+    pnVERSION_NBR in out P_BASE.tnCOMP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnCOMP_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsCOMP_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_COMPONENT
+-- ----------------------------------------
+--
+-- Create a new component record or update an existing one.
+--
+-- Parameters:
+--  psCODE - Code of component (mandatory).
+--  pnVERSION_NBR - Update version number of component (mandatory: new version number is returned;
+--    for a new component, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code for the textual description (optional when updating an existing
+--    component but must be specified if psDescription is specified).
+--  psDescription - Textual description of component (optional when updating an existing component;
+--    if not specified, the description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of components (optional: if not
+--    specified, an existing display sequence is not changed and a new one is set to null; if null
+--    is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the component is currently available for use
+--    (optional: if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_COMPONENT
+   (psCODE in P_BASE.tmsCOMP_CODE,
+    pnVERSION_NBR in out P_BASE.tnCOMP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnCOMP_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsCOMP_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_COMPONENT
+-- ----------------------------------------
+--
+-- Delete a component record.
+--
+-- Parameters:
+--  psCODE - Code of component to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of component (mandatory)
+--
+  procedure DELETE_COMPONENT
+   (psCODE in P_BASE.tmsCOMP_CODE,
+    pnVERSION_NBR in P_BASE.tnCOMP_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_COMP_DESCRIPTION
+-- ----------------------------------------
+--
+-- Create or update a description in a given language for a component record.
+--
+-- Parameters:
+--  psCODE - Code of component (mandatory).
+--  pnVERSION_NBR - Update version number of component (mandatory: new version number is returned).
+--  psLANG_CODE - Language code of the description (mandatory).
+--  psDescription - Textual description of component (mandatory).
+--
+  procedure SET_COMP_DESCRIPTION
+   (psCODE in P_BASE.tmsCOMP_CODE,
+    pnVERSION_NBR in out P_BASE.tnCOMP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_COMP_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a component record. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  psCODE - Code of component from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of component (mandatory: new version number is returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_COMP_DESCRIPTION
+   (psCODE in P_BASE.tmsCOMP_CODE,
+    pnVERSION_NBR in out P_BASE.tnCOMP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_COMP_TEXT
+-- ----------------------------------------
+--
+-- Create or update a general text item in a given language for a component record.
+--
+-- Parameters:
+--  psCODE - Code of component (mandatory).
+--  pnVERSION_NBR - Update version number of component (mandatory: new version number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item (mandatory).
+--  psText - Text associated with component (mandatory).
+--
+  procedure SET_COMP_TEXT
+   (psCODE in P_BASE.tmsCOMP_CODE,
+    pnVERSION_NBR in out P_BASE.tnCOMP_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_COMP_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a component record. The following cases arise:
+-- 1. All text of the given type is deleted for the given component (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given component, text type and text item sequence
+--    number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last
+--    text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCODE - Code of component from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of component (mandatory: new version number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_COMP_TEXT
+   (psCODE in P_BASE.tmsCOMP_CODE,
+    pnVERSION_NBR in out P_BASE.tnCOMP_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_MESSAGE
+-- ----------------------------------------
+--
+-- Create a new message record.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message (mandatory).
+--  pnSEQ_NBR - Sequence number of message (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the message (mandatory).
+--  psMessage - Message text (mandatory).
+--  psSEVERITY - Severity of event associated with message: S - System, E - Error, W - Warning or
+--    I - Information (optional: defaults to E).
+--
+  procedure INSERT_MESSAGE
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in out P_BASE.tnMSG_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psMessage in P_BASE.tmsText,
+    psSEVERITY in P_BASE.tsMSG_SEVERITY := 'E');
+--
+-- ----------------------------------------
+-- UPDATE_MESSAGE
+-- ----------------------------------------
+--
+-- Update an existing message record.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message (mandatory).
+--  pnSEQ_NBR - Sequence number of message (mandatory).
+--  pnVERSION_NBR - Update version number of message (mandatory: new version number is returned).
+--  psLANG_CODE - Language code of the message (optional, but must be specified if psMessage is
+--    specified).
+--  psMessage - Message text (optional, if not specified, the message text is not changed).
+--  psSEVERITY - Severity of event associated with message: S - System, E - Error, W - Warning or
+--    I - Information (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_MESSAGE
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in P_BASE.tnMSG_SEQ_NBR,
+    pnVERSION_NBR in out P_BASE.tnMSG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psMessage in P_BASE.tsText := null,
+    psSEVERITY in P_BASE.tsMSG_SEVERITY := null);
+--
+-- ----------------------------------------
+-- SET_MESSAGE
+-- ----------------------------------------
+--
+-- Create a new message record or update an existing one.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message (mandatory).
+--  pnSEQ_NBR - Sequence number of message (optional: if null, a new one is generated and returned).
+--  pnVERSION_NBR - Update version number of message (mandatory: new version number is returned;
+--    for a new message, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the message (optional when updating an existing message but must
+--    be specified if psMessage is specified).
+--  psMessage - Message text (optional when updating an existing message; if not specified, the
+--    message is not changed).
+--  psSEVERITY - Severity of event associated with message: S - System, E - Error, W - Warning or
+--    I - Information (optional: if not specified, the existing value is not changed; a new value
+--    defaults to E).
+--
+  procedure SET_MESSAGE
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in out P_BASE.tnMSG_SEQ_NBR,
+    pnVERSION_NBR in out P_BASE.tnMSG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psMessage in P_BASE.tsText := null,
+    psSEVERITY in P_BASE.tsMSG_SEVERITY := null);
+--
+-- ----------------------------------------
+-- DELETE_MESSAGE
+-- ----------------------------------------
+--
+-- Delete a message record.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message to be deleted (mandatory).
+--  pnSEQ_NBR - Sequence number of message to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of message (mandatory).
+--
+  procedure DELETE_MESSAGE
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in P_BASE.tnMSG_SEQ_NBR,
+    pnVERSION_NBR in P_BASE.tnMSG_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_MSG_MESSAGE
+-- ----------------------------------------
+--
+-- Create or update a language variant of a message.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message (mandatory).
+--  pnSEQ_NBR - Sequence number of message (mandatory).
+--  pnVERSION_NBR - Update version number of message (mandatory: new version number is returned).
+--  psLANG_CODE - Language code of the message variant (mandatory).
+--  psMessage - Message text (mandatory).
+--
+  procedure SET_MSG_MESSAGE
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in P_BASE.tnMSG_SEQ_NBR,
+    pnVERSION_NBR in out P_BASE.tnMSG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psMessage in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_MSG_MESSAGE
+-- ----------------------------------------
+--
+-- Remove a variant in a given language from a message. Note that it is not possible to remove the
+--  last language variant of the message.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message from which variant is to be removed (mandatory).
+--  pnSEQ_NBR - Sequence number of message from which variant is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of message (mandatory: new version number is returned).
+--  psLANG_CODE - Language code of the variant to be removed (mandatory).
+--
+  procedure REMOVE_MSG_MESSAGE
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in P_BASE.tnMSG_SEQ_NBR,
+    pnVERSION_NBR in out P_BASE.tnMSG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_MSG_TEXT
+-- ----------------------------------------
+--
+-- Create or update a general text item in a given language for a message record.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message (mandatory).
+--  pnSEQ_NBR - Sequence number of message (mandatory).
+--  pnVERSION_NBR - Update version number of message (mandatory: new version number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnTXI_SEQ_NBR - Text item sequence number (optional: if null, a new one is generated and
+--    returned).
+--  psLANG_CODE - Language code of the text item (mandatory).
+--  psText - Text associated with message (mandatory).
+--
+  procedure SET_MSG_TEXT
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in P_BASE.tnMSG_SEQ_NBR,
+    pnVERSION_NBR in out P_BASE.tnMSG_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnTXI_SEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_MSG_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a message record. The following cases arise:
+-- 1. All text of the given type is deleted for the given message (neither psSEQ_NBR nor psLANG_CODE
+--    is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given message, text type and text item sequence
+--    number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last
+--    text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). The
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message from which text item is to be removed (mandatory).
+--  pnSEQ_NBR - Sequence number of message from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of message (mandatory: new version number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnTXI_SEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_MSG_TEXT
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in P_BASE.tnMSG_SEQ_NBR,
+    pnVERSION_NBR in out P_BASE.tnMSG_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnTXI_SEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- DISPLAY_MESSAGE
+-- ----------------------------------------
+--
+-- Display a message.
+--
+-- Parameters:
+--  psCOMP_CODE - Component code of message to be displayed (mandatory).
+--  pnSEQ_NBR - Sequence number of message to be displayed (mandatory).
+--  psLANG_CODE - Language code of message to be displayed (optional).
+--  psEnglishMessage - Message text (optional: if specified, it is checked against the English
+--    message text for the message with the given component code and sequence number).
+--  psSEVERITY - Severity of event associated with message: E - Error, W - Warning or
+--    I - Information (optional: if not specified the severity stored in the T_MESSAGES table is
+--    used).
+--
+  procedure DISPLAY_MESSAGE
+   (psCOMP_CODE in P_BASE.tmsCOMP_CODE,
+    pnSEQ_NBR in P_BASE.tnMSG_SEQ_NBR,
+    psEnglishMessage in P_BASE.tsText := null,
+    psSEVERITY in P_BASE.tsMSG_SEVERITY := null);
+--
+end P_MESSAGE;
+/
+
+show errors

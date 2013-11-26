@@ -1,0 +1,241 @@
+create or replace package P_DISPLACEMENT_STATUS is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_DISPLACEMENT_STATUS
+--  Procedures for maintenance of displacement statuses.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'DST';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_DISPLACEMENT_STATUS
+-- ----------------------------------------
+--
+-- Create a new displacement status.
+--
+-- Parameters:
+--  pnID - New displacement status identifier (returned).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of displacement status (mandatory).
+--  psCODE - Displacement status code (mandatory).
+--  pdSTART_DATE - Effective start date of details of this displacement status (optional, the
+--    absence of a start date, or a null value, indicates that the effectivity starts indefinitely
+--    far in the past).
+--  pdEND_DATE - Effective end date of details of this displacement status (optional, the absence of
+--    an end date, or a null value, indicates that the effectivity extends indefinitely into the
+--    future).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of displacement statuses (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the displacement status is currently available for
+--    use (optional: defaults to Y).
+--
+  procedure INSERT_DISPLACEMENT_STATUS
+   (pnID out P_BASE.tnDST_ID,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    psCODE in P_BASE.tmsDST_CODE,
+    pdSTART_DATE in P_BASE.tdDate := null,
+    pdEND_DATE in P_BASE.tdDate := null,
+    pnDISPLAY_SEQ in P_BASE.tnDST_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsDST_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_DISPLACEMENT_STATUS
+-- ----------------------------------------
+--
+-- Update an existing displacement status.
+--
+-- Parameters:
+--  pnID - Displacement status identifier (mandatory).
+--  pnVERSION_NBR - Update version number of displacement status record (mandatory: new version
+--    number is returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of displacement status (optional: if not specified, the
+--    description is not changed).
+--  pdSTART_DATE - Effective start date of details of this displacement status (optional: if not
+--    specified, the existing start date is left unchanged; a null value indicates that the
+--    effectivity starts indefinitely far in the past).
+--  pdEND_DATE - Effective end date of details of this displacement status (optional: if not
+--    specified, the existing end date is left unchanged; a null value indicates that the
+--    effectivity extends indefinitely into the future).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of displacement statuses (optional:
+--    if not specified, the existing display sequence is not changed; if null is specified, the
+--    display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the displacement status is currently available for
+--    use (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_DISPLACEMENT_STATUS
+   (pnID in P_BASE.tmnDST_ID,
+    pnVERSION_NBR in out P_BASE.tnDST_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pdSTART_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pnDISPLAY_SEQ in P_BASE.tnDST_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsDST_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_DISPLACEMENT_STATUS
+-- ----------------------------------------
+--
+-- Create a new displacement status or update an existing one.
+--
+-- Parameters:
+--  pnID - Displacement status identifier (optional: if null, a new one is generated and returned).
+--  pnVERSION_NBR - Update version number of displacement status record (mandatory: new version
+--    number is returned; for a new displacement status, null must be specified and 1 will be
+--    returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing
+--    displacement status but must be specified if psDescription is specified).
+--  psDescription - Textual description of displacement status (optional when updating an existing
+--    displacement status; if not specified, the description is not changed).
+--  psCODE - Displacement status code (mandatory when creating an new displacement status; ignored
+--    when updating an existing displacement status, since the code my not be changed).
+--  pdSTART_DATE - Effective start date of this displacement status (optional: for a new
+--    displacement status, the absence of a start date, or a null value, indicates that the
+--    effectivity starts indefinitely far in the past; when updating an existing displacement
+--    status, the absence of a start date leaves the existing date unchanged, and a null value
+--    indicates that the effectivity starts indefinitely far in the past).
+--  pdEND_DATE - Effective end date of details of this displacement status (optional: for a new
+--    displacement status, the absence of an end date, or a null value, indicates that the
+--    effectivity extends indefinitely into the future; when updating an existing displacement
+--    status, the absence of an end date leaves the existing date unchanged, and a null value
+--    indicates that the effectivity extends indefinitely into the future).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of displacement statuses (optional:
+--    if not specified, an existing display sequence is not changed and a new one is set to null; if
+--    null is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the displacement status is currently available for
+--    use (optional: if not specified, the existing value is not changed; a new value defaults
+--    to Y).
+--
+  procedure SET_DISPLACEMENT_STATUS
+   (pnID in out P_BASE.tmnDST_ID,
+    pnVERSION_NBR in out P_BASE.tnDST_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psCODE in P_BASE.tsDST_CODE,
+    pdSTART_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pnDISPLAY_SEQ in P_BASE.tnDST_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsDST_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_DISPLACEMENT_STATUS
+-- ----------------------------------------
+--
+-- Delete a displacement status record.
+--
+-- Parameters:
+--  pnID - Identifier of displacement status to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of displacement status record (mandatory).
+--
+  procedure DELETE_DISPLACEMENT_STATUS
+   (pnID in P_BASE.tmnDST_ID,
+    pnVERSION_NBR in P_BASE.tnDST_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_DST_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a displacement status, or update an existing
+--  description.
+--
+-- Parameters:
+--  pnID - Identifier of displacement status for which description is to be added or updated
+--   (mandatory).
+--  pnVERSION_NBR - Update version number of displacement status record (mandatory: new version
+--    number is returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of displacement status (mandatory).
+--
+  procedure SET_DST_DESCRIPTION
+   (pnID in P_BASE.tmnDST_ID,
+    pnVERSION_NBR in out P_BASE.tnDST_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_DST_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a displacement status. Note that it is not possible
+--  to remove the last language variant of the description.
+--
+-- Parameters:
+--  pnID - Identifier of displacement status from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of displacement status record (mandatory: new version
+--    number is returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_DST_DESCRIPTION
+   (pnID in P_BASE.tmnDST_ID,
+    pnVERSION_NBR in out P_BASE.tnDST_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_DST_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a displacement status, or update an existing text
+--  item.
+--
+-- Parameters:
+--  pnID - Identifier of displacement status for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of displacement status record (mandatory: new version
+--    number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with displacement status (mandatory).
+--
+  procedure SET_DST_TEXT
+   (pnID in P_BASE.tmnDST_ID,
+    pnVERSION_NBR in out P_BASE.tnDST_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_DST_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a displacement status. The following cases arise:
+-- 1. All text of the given type is deleted for the given displacement status (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given displacement status, text type and text item
+--    sequence number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is
+--    the last text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  pnID - Identifier of displacement status from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of displacement status record (mandatory: new version
+--    number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_DST_TEXT
+   (pnID in P_BASE.tmnDST_ID,
+    pnVERSION_NBR in out P_BASE.tnDST_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+end P_DISPLACEMENT_STATUS;
+/
+
+show errors

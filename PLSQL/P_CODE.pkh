@@ -1,0 +1,401 @@
+create or replace package P_CODE is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_CODE
+--  Procedures for maintenance of generic codes and code types.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'CDE';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_CODE_TYPE
+-- ----------------------------------------
+--
+-- Create a new code type.
+--
+-- Parameters:
+--  psCODE - Code type code (mandatory).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of code type (mandatory).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of code types (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the code type is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_CODE_TYPE
+   (psCODE in P_BASE.tmsCDET_CODE,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    pnDISPLAY_SEQ in P_BASE.tnCDET_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsCDET_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_CODE_TYPE
+-- ----------------------------------------
+--
+-- Update an existing dimension type.
+--
+-- Parameters:
+--  psCODE - Code type code (mandatory).
+--  pnVERSION_NBR - Update version number of code type record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of code type (optional: if not specified, the description is
+--    not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of code types (optional: if not
+--    specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the code type is currently available for use
+--    (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_CODE_TYPE
+   (psCODE in P_BASE.tmsCDET_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDET_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnCDET_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsCDET_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_CODE_TYPE
+-- ----------------------------------------
+--
+-- Create a new code type or update an existing one.
+--
+-- Parameters:
+--  psCODE - Code type code (mandatory).
+--  pnVERSION_NBR - Update version number of code type record (mandatory: new version number is
+--    returned; for a new code type, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing code
+--    type but must be specified if psDescription is specified).
+--  psDescription - Textual description of code type (optional when updating an existing code type;
+--    if not specified, the description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of code types (optional: if not
+--    specified, an existing display sequence is not changed and a new one is set to null; if null
+--    is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the code type is currently available for use
+--    (optional: if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_CODE_TYPE
+   (psCODE in P_BASE.tmsCDET_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDET_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnCDET_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsCDET_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_CODE_TYPE
+-- ----------------------------------------
+--
+-- Delete a code type record.
+--
+-- Parameters:
+--  psCODE - Code of code type to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of code type record (mandatory).
+--
+  procedure DELETE_CODE_TYPE
+   (psCODE in P_BASE.tmsCDET_CODE,
+    pnVERSION_NBR in P_BASE.tnCDET_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_CDET_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a code type, or update an existing description.
+--
+-- Parameters:
+--  psCODE - Code of code type for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of code type record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of code type (mandatory).
+--
+  procedure SET_CDET_DESCRIPTION
+   (psCODE in P_BASE.tmsCDET_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDET_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_CDET_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a code type. Note that it is not possible to remove
+--  the last language variant of the description.
+--
+-- Parameters:
+--  psCODE - Code of code type from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of code type record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_CDET_DESCRIPTION
+   (psCODE in P_BASE.tmsCDET_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDET_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_CDET_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a code type, or update an existing text item.
+--
+-- Parameters:
+--  psCODE - Code of code type for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of code type record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with code type (mandatory).
+--
+  procedure SET_CDET_TEXT
+   (psCODE in P_BASE.tmsCDET_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDET_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_CDET_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a code type. The following cases arise:
+-- 1. All text of the given type is deleted for the given code type (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given code type, text type and text item sequence
+--    number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last
+--    text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCODE - Code of code type from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of code type record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_CDET_TEXT
+   (psCODE in P_BASE.tmsCDET_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDET_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_CODE
+-- ----------------------------------------
+--
+-- Create a new generic code.
+--
+-- Parameters:
+--  psCDET_CODE - Code type code (mandatory).
+--  psCODE - Generic code (mandatory).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of generic code (mandatory).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of generic codes (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the generic code is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_CODE
+   (psCDET_CODE in P_BASE.tmsCDET_CODE,
+    psCODE in P_BASE.tmsCDE_CODE,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    pnDISPLAY_SEQ in P_BASE.tnCDE_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsCDE_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_CODE
+-- ----------------------------------------
+--
+-- Update an existing generic code.
+--
+-- Parameters:
+--  psCDET_CODE - Code type code (mandatory).
+--  psCODE - Generic code (mandatory).
+--  pnVERSION_NBR - Update version number of generic code record (mandatory: new version number
+--    is returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of generic code (optional: if not specified, the
+--    description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of generic codes (optional: if not
+--    specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the generic code is currently available for use
+--    (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_CODE
+   (psCDET_CODE in P_BASE.tmsCDET_CODE,
+    psCODE in P_BASE.tmsCDE_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDE_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnCDE_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsCDE_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_CODE
+-- ----------------------------------------
+--
+-- Create a new generic code or update an existing one.
+--
+-- Parameters:
+--  psCDET_CODE - Code type code (mandatory).
+--  psCODE - Generic code (mandatory).
+--  pnVERSION_NBR - Update version number of generic code record (mandatory: new version number is
+--    returned; for a new generic code, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing
+--    generic code but must be specified if psDescription is specified).
+--  psDescription - Textual description of generic code (optional when updating an existing
+--    generic code: if not specified, the description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of generic codes (optional: if not
+--    specified, an existing display sequence is not changed and a new one is set to null; if null
+--    is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the generic code is currently available for use
+--    (optional: if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_CODE
+   (psCDET_CODE in P_BASE.tmsCDET_CODE,
+    psCODE in P_BASE.tmsCDE_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDE_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnCDE_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsCDE_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_CODE
+-- ----------------------------------------
+--
+-- Delete a generic code record.
+--
+-- Parameters:
+--  psCDET_CODE - Code type code (mandatory).
+--  psCODE - Generic code (mandatory).
+--  pnVERSION_NBR - Update version number of generic code record (mandatory).
+--
+  procedure DELETE_CODE
+   (psCDET_CODE in P_BASE.tmsCDET_CODE,
+    psCODE in P_BASE.tmsCDE_CODE,
+    pnVERSION_NBR in P_BASE.tnCDE_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_CDE_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a generic code, or update an existing description.
+--
+-- Parameters:
+--  psCDET_CODE - Code type code of generic code for which description is to be added or updated
+--    (mandatory).
+--  psCODE - Generic code for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of generic code record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of generic code (mandatory).
+--
+  procedure SET_CDE_DESCRIPTION
+   (psCDET_CODE in P_BASE.tmsCDET_CODE,
+    psCODE in P_BASE.tmsCDE_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDE_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_CDE_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a generic code. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  psCDET_CODE - Code type code of generic code for which description is to be removed (mandatory).
+--  psCODE - Generic code for which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of generic code record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_CDE_DESCRIPTION
+   (psCDET_CODE in P_BASE.tmsCDET_CODE,
+    psCODE in P_BASE.tmsCDE_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDE_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_CDE_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a generic code, or update an existing text item.
+--
+-- Parameters:
+--  psCDET_CODE - Code type code of generic code for which description is to be added or updated
+--    (mandatory).
+--  psCODE - Generic code for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of generic code record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with generic code (mandatory).
+--
+  procedure SET_CDE_TEXT
+   (psCDET_CODE in P_BASE.tmsCDET_CODE,
+    psCODE in P_BASE.tmsCDE_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDE_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_CDE_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a generic code. The following cases arise:
+-- 1. All text of the given type is deleted for the given generic code (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given generic code, text type and text item sequence
+--    number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last
+--    text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCDET_CODE - Code type code of generic code for which description is to be removed (mandatory).
+--  psCODE - Generic code for which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of generic code record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_CDE_TEXT
+   (psCDET_CODE in P_BASE.tmsCDET_CODE,
+    psCODE in P_BASE.tmsCDE_CODE,
+    pnVERSION_NBR in out P_BASE.tnCDE_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+end P_CODE;
+/
+
+show errors

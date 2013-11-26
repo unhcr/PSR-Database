@@ -1,0 +1,579 @@
+create or replace package P_STATISTIC_GROUP is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_STATISTIC_GROUP
+--  Procedures for maintenance of statistic groups and their associated attributes and attribute
+--   types.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'STG';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_STATISTIC_GROUP
+-- ----------------------------------------
+--
+-- Create a new statistic group record.
+--
+-- Parameters:
+--  pnID - New statistic group identifier (returned).
+--  pdSTART_DATE - Statistic group start date (mandatory).
+--  pdEND_DATE - Statistic group end date (mandatory).
+--  psSTTG_CODE - Statistic type group code (optional).
+--  pnDST_ID - Displacement status identifier (optional).
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum (optional).
+--  pnLOC_ID_ASYLUM - Identifier of asylum location (optional).
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of (country of) origin (optional).
+--  pnLOC_ID_ORIGIN - Identifier of location of origin (optional).
+--  pnDIM_ID1 - Dimension value identifier 1 (optional).
+--  pnDIM_ID2 - Dimension value identifier 2 (optional).
+--  pnDIM_ID3 - Dimension value identifier 3 (optional).
+--  pnDIM_ID4 - Dimension value identifier 4 (optional).
+--  pnDIM_ID5 - Dimension value identifier 5 (optional).
+--  psSEX_CODE - Sex code (optional).
+--  pnAGR_ID - Age range identifier (optional).
+--  psLANG_CODE - Language code of the population subgroup name (optional, if specified,
+--    psSUBGROUP_NAME must also be specified).
+--  psSUBGROUP_NAME - Population subgroup name (optional, if specified, psLANG_CODE must also be
+--    specified).
+--  pnPPG_ID - PPG identifier (optional).
+--
+  procedure INSERT_STATISTIC_GROUP
+   (pnID out P_BASE.tnSTG_ID,
+    pdSTART_DATE in P_BASE.tmdDate,
+    pdEND_DATE in P_BASE.tmdDate,
+    psSTTG_CODE in P_BASE.tsSTTG_CODE := null,
+    pnDST_ID in P_BASE.tnDST_ID := null,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := null,
+    pnDIM_ID1 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID2 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID3 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID4 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID5 in P_BASE.tnDIM_ID := null,
+    psSEX_CODE in P_BASE.tsSEX_CODE := null,
+    pnAGR_ID in P_BASE.tnAGR_ID := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psSUBGROUP_NAME in P_BASE.tsText := null,
+    pnPPG_ID in P_BASE.tnPPG_ID := null);
+--
+-- ----------------------------------------
+-- UPDATE_STATISTIC_GROUP
+-- ----------------------------------------
+--
+-- Update an existing statistic group record.
+--
+-- Parameters:
+--  pnID - Statistic group identifier (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group record (mandatory: new version number
+--    is returned).
+--  psLANG_CODE - Language code of the population subgroup name (optional, must be specified when
+--    psSUBGROUP_NAME is specified).
+--  psSUBGROUP_NAME - Population subgroup name (optional, may only be specified if the statistic
+--    group has been created with population subgroups).
+--  pnPPG_ID - PPG identifier (optional, if null the linkage to a PPG is removed, if absent, the PPG
+--    linkage is left unchanged).
+--
+  procedure UPDATE_STATISTIC_GROUP
+   (pnID in P_BASE.tmnSTG_ID,
+    pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psSUBGROUP_NAME in P_BASE.tsText := null,
+    pnPPG_ID in P_BASE.tnPPG_ID := -1);
+--
+-- ----------------------------------------
+-- SET_STATISTIC_GROUP
+-- ----------------------------------------
+--
+-- Create a new statistic group record or update an existing one.
+--
+-- Parameters:
+--  pnID - Statistic group identifier (optional: if null, a new one is generated and returned).
+--  pnVERSION_NBR - Update version number of statistic group record (mandatory: new version
+--    number is returned; for a new statistic group, null must be specified and 1 will be
+--    returned).
+--  pdSTART_DATE - Statistic group start date (mandatory for a new statistic group; may not be
+--    specified for an existing statistic group).
+--  pdEND_DATE - Statistic group end date (mandatory for a new statistic group; may not be
+--    specified for an existing statistic group).
+--  psSTTG_CODE - Statistic type group code (optional, may only be specified for a new statistic
+--    group).
+--  pnDST_ID - Displacement status identifier (optional, may only be specified for a new statistic
+--    group).
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum (optional, may only be
+--    specified for a new statistic group).
+--  pnLOC_ID_ASYLUM - Identifier of asylum location (optional, may only specified for a new
+--    statistic group).
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of (country of) origin (optional, may only be
+--    specified for a new statistic group).
+--  pnLOC_ID_ORIGIN - Identifier of location of origin (optional, may only be specified for a new
+--    statistic group).
+--  pnDIM_ID1 - Dimension value identifier 1 (optional, may only be specified for a new statistic
+--    group).
+--  pnDIM_ID2 - Dimension value identifier 2 (optional, may only be specified for a new statistic
+--    group).
+--  pnDIM_ID3 - Dimension value identifier 3 (optional, may only be specified for a new statistic
+--    group).
+--  pnDIM_ID4 - Dimension value identifier 4 (optional, may only be specified for a new statistic
+--    group).
+--  pnDIM_ID5 - Dimension value identifier 5 (optional, may only be specified for a new statistic
+--    group).
+--  psSEX_CODE - Sex code (optional, may only be specified for a new statistic group).
+--  pnAGR_ID - Age range identifier (optional, may only be specified for a new statistic group).
+--  psLANG_CODE - Language code of the population subgroup name (optional, must be specified when
+--    psSUBGROUP_NAME is specified).
+--  psSUBGROUP_NAME - Population subgroup name (optional, when updating an existing statistic group,
+--    may only be specified if the statistic group has been created with population subgroups).
+--  pnPPG_ID - PPG identifier (optional, when updating an existing statistic group, a null value
+--    causes the linkage to a PPG to be removed, and the PPG linkage is left unchanged if the
+--    parameter is omitted).
+--
+  procedure SET_STATISTIC_GROUP
+   (pnID in out P_BASE.tnSTG_ID,
+    pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
+    pdSTART_DATE in P_BASE.tdDate := null,
+    pdEND_DATE in P_BASE.tdDate := null,
+    psSTTG_CODE in P_BASE.tsSTTG_CODE := null,
+    pnDST_ID in P_BASE.tnDST_ID := null,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := null,
+    pnDIM_ID1 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID2 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID3 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID4 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID5 in P_BASE.tnDIM_ID := null,
+    psSEX_CODE in P_BASE.tsSEX_CODE := null,
+    pnAGR_ID in P_BASE.tnAGR_ID := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psSUBGROUP_NAME in P_BASE.tsText := null,
+    pnPPG_ID in P_BASE.tnPPG_ID := -1);
+--
+-- ----------------------------------------
+-- DELETE_STATISTIC_GROUP
+-- ----------------------------------------
+--
+-- Delete a statistic group record.
+--
+-- Parameters:
+--  pnID - Statistic group identifier (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group record (mandatory).
+--
+  procedure DELETE_STATISTIC_GROUP
+   (pnID in P_BASE.tmnSTG_ID,
+    pnVERSION_NBR in P_BASE.tnSTG_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_STG_TEXT
+-- ----------------------------------------
+--
+-- Create or update a general text item in a given language for a statistic group record.
+--
+-- Parameters:
+--  pnID - Statistic group identifier (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item (mandatory).
+--  psText - Text associated with statistic group (mandatory).
+--
+  procedure SET_STG_TEXT
+   (pnID in P_BASE.tmnSTG_ID,
+    pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE,
+    psText in P_BASE.tsText);
+--
+-- ----------------------------------------
+-- REMOVE_STG_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a statistic group record. The following cases arise:
+-- 1. All text of the given type is deleted for the given statistic group (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given statistic group, text type and text item
+--    sequence number (pnSEQ_NBR is specified but psLANG_CODE is not). The action fails if this is
+--    the last text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  pnID - Statistic group identifier (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_STG_TEXT
+   (pnID in P_BASE.tmnSTG_ID,
+    pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_STG_ATTRIBUTE_TYPE
+-- ----------------------------------------
+--
+-- Create a new statistic group attribute type record.
+--
+-- Parameters:
+--  psCODE - Code of statistic group attribute type (mandatory).
+--  psDATA_TYPE - Data type of statistic group attribute type (mandatory).
+--  psLANG_CODE - Language code for the textual description (mandatory).
+--  psDescription - Textual description of statistic group attribute type (mandatory).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of statistic group attribute types
+--    (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the statistic group attribute type is currently
+--    available for use (optional: defaults to Y).
+--
+  procedure INSERT_STG_ATTRIBUTE_TYPE
+   (psCODE in P_BASE.tmsSTGAT_CODE,
+    psDATA_TYPE in P_BASE.tmsSTGAT_DATA_TYPE,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    pnDISPLAY_SEQ in P_BASE.tnSTGAT_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tsSTGAT_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_STG_ATTRIBUTE_TYPE
+-- ----------------------------------------
+--
+-- Update an existing statistic group attribute type record.
+--
+-- Parameters:
+--  psCODE - Code of statistic group attribute type (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute type (mandatory: new
+--    version number is returned).
+--  psDATA_TYPE - Data type of statistic group attribute type (optional, if not specified or null
+--    the data type is not changed). The data type cannot be changed if statistic group
+--    attributes of this type already exist.
+--  psLANG_CODE - Language code for the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of statistic group attribute type (optional, if not
+--    specified, the description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of statistic group attribute
+--    types (optional: if not specified, an existing display sequence is not changed; if null is
+--    specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the statistic group attribute type is currently
+--    available for use (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_STG_ATTRIBUTE_TYPE
+   (psCODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGAT_VERSION_NBR,
+    psDATA_TYPE in P_BASE.tsSTGAT_DATA_TYPE := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnSTGAT_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsSTGAT_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_STG_ATTRIBUTE_TYPE
+-- ----------------------------------------
+--
+-- Create a new statistic group attribute type record or update an existing one.
+--
+-- Parameters:
+--  psCODE - Code of statistic group attribute type (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute type (mandatory: new
+--    version number is returned; for a new attribute statistic group type, null must be
+--    specified and 1 will be returned).
+--  psDATA_TYPE - Data type of statistic group attribute type (optional when updating an existing
+--    statistic group attribute type; if not specified or null the data type is not changed). The
+--    data type cannot be changed if statistic group attributes of this type already exist.
+--  psLANG_CODE - Language code for the textual description (optional when updating an existing
+--    statistic group attribute type but must be specified if psDescription is specified).
+--  psDescription - Textual description of statistic group attribute type (optional when updating
+--    an existing statistic group attribute type; if not specified, the description is not
+--    changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of statistic group attribute
+--    types (optional: if not specified, an existing display sequence is not changed and a new one
+--    is set to null; if null is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the statistic group attribute type is currently
+--    available for use (optional: if not specified, the existing value is not changed; a new value
+--    defaults to Y).
+--
+  procedure SET_STG_ATTRIBUTE_TYPE
+   (psCODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGAT_VERSION_NBR,
+    psDATA_TYPE in P_BASE.tsSTGAT_DATA_TYPE := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnSTGAT_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsSTGAT_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_STG_ATTRIBUTE_TYPE
+-- ----------------------------------------
+--
+-- Delete a statistic group attribute type record.
+--
+-- Parameters:
+--  psCODE - Code of statistic group attribute type to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute type (mandatory).
+--
+  procedure DELETE_STG_ATTRIBUTE_TYPE
+   (psCODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in P_BASE.tnSTGAT_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_STGAT_DESCRIPTION
+-- ----------------------------------------
+--
+-- Create or update a description in a given language for a statistic group attribute type record.
+--
+-- Parameters:
+--  psCODE - Code of statistic group attribute type (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute type (mandatory: new version
+--    number is returned).
+--  psLANG_CODE - Language code of the description (mandatory).
+--  psDescription - Textual description of statistic group attribute type (mandatory).
+--
+  procedure SET_STGAT_DESCRIPTION
+   (psCODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGAT_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_STGAT_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a statistic group attribute type record. Note that
+--  it is not possible to remove the last language variant of the description.
+--
+-- Parameters:
+--  psCODE - Code of statistic group attribute type from which description is to be removed
+--    (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute type (mandatory: new version
+--    number is returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_STGAT_DESCRIPTION
+   (psCODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGAT_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_STGAT_TEXT
+-- ----------------------------------------
+--
+-- Create or update a general text item in a given language for a statistic group attribute type
+--  record.
+--
+-- Parameters:
+--  psCODE - Code of statistic group attribute type (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute type (mandatory: new
+--    version number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item (mandatory).
+--  psText - Text associated with statistic group attribute type (mandatory).
+--
+  procedure SET_STGAT_TEXT
+   (psCODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGAT_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_STGAT_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a statistic group attribute type record. The following cases
+--  arise:
+-- 1. All text of the given type is deleted for the given statistic group attribute type (neither
+--    psSEQ_NBR nor psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given statistic group attribute type, text type and
+--    text item sequence number (pnSEQ_NBR is specified but psLANG_CODE is not). The action fails if
+--    this is the last text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCODE - Code of statistic group attribute type from which text item is to be removed
+--   (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute type (mandatory: new version
+--    number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_STGAT_TEXT
+   (psCODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGAT_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_STG_ATTRIBUTE
+-- ----------------------------------------
+--
+-- Create an attribute for a statistic group.
+--
+-- Parameters:
+--  pnSTG_ID - Statistic group identifier (mandatory).
+--  psSTGAT_CODE - Statistic group attribute type code (mandatory).
+--  psCHAR_VALUE - Value for attribute of data type character (optional).
+--  pnNUM_VALUE - Value for attribute of data type numeric (optional).
+--  pdDATE_VALUE - Value for attribute of data type date (optional).
+-- One and only one of the parameters psCHAR_VALUE, pnNUM_VALUE and pdDATE_VALUE must be specified
+--  depending on the value of T_POP_GROUP_ATTRIBUTE_TYPES.DATA_TYPE for the specified statistic
+--  group attribute type.
+--
+  procedure INSERT_STG_ATTRIBUTE
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
+    psSTGAT_CODE in P_BASE.tmsSTGAT_CODE,
+    psCHAR_VALUE in P_BASE.tsSTGA_CHAR_VALUE := null,
+    pnNUM_VALUE in P_BASE.tnSTGA_NUM_VALUE := null,
+    pdDATE_VALUE in P_BASE.tdSTGA_DATE_VALUE := null);
+--
+-- ----------------------------------------
+-- UPDATE_STG_ATTRIBUTE
+-- ----------------------------------------
+--
+-- Update an existing statistic group attribute.
+--
+-- Parameters:
+--  pnSTG_ID - Statistic group identifier (mandatory).
+--  psSTGAT_CODE - Statistic group attribute type code (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute (mandatory: new version
+--    number is returned).
+--  psCHAR_VALUE - Value for attribute of data type character (optional).
+--  pnNUM_VALUE - Value for attribute of data type numeric (optional).
+--  pdDATE_VALUE - Value for attribute of data type date (optional).
+-- One and only one of the parameters psCHAR_VALUE, pnNUM_VALUE and pdDATE_VALUE must be specified
+--  depending on the value of T_POP_GROUP_ATTRIBUTE_TYPES.DATA_TYPE for the specified statistic
+--  group attribute type.
+--
+  procedure UPDATE_STG_ATTRIBUTE
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
+    psSTGAT_CODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR,
+    psCHAR_VALUE in P_BASE.tsSTGA_CHAR_VALUE := null,
+    pnNUM_VALUE in P_BASE.tnSTGA_NUM_VALUE := null,
+    pdDATE_VALUE in P_BASE.tdSTGA_DATE_VALUE := null);
+--
+-- ----------------------------------------
+-- SET_STG_ATTRIBUTE
+-- ----------------------------------------
+--
+-- Create an attribute for a statistic group or update an existing statistic group attribute.
+--
+-- Parameters:
+--  pnSTG_ID - Statistic group identifier (mandatory).
+--  psSTGAT_CODE - Statistic group attribute type code (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute (mandatory: new version
+--    number is returned; for a new attribute, null must be specified and 1 will be returned).
+--  psCHAR_VALUE - Value for attribute of data type character (optional).
+--  pnNUM_VALUE - Value for attribute of data type numeric (optional).
+--  pdDATE_VALUE - Value for attribute of data type date (optional).
+-- One and only one of the parameters psCHAR_VALUE, pnNUM_VALUE and pdDATE_VALUE must be specified
+--  depending on the value of T_POP_GROUP_ATTRIBUTE_TYPES.DATA_TYPE for the specified statistic
+--  group attribute type.
+--
+  procedure SET_STG_ATTRIBUTE
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
+    psSTGAT_CODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR,
+    psCHAR_VALUE in P_BASE.tsSTGA_CHAR_VALUE := null,
+    pnNUM_VALUE in P_BASE.tnSTGA_NUM_VALUE := null,
+    pdDATE_VALUE in P_BASE.tdSTGA_DATE_VALUE := null);
+--
+-- ----------------------------------------
+-- DELETE_STG_ATTRIBUTE
+-- ----------------------------------------
+--
+-- Remove an attribute for a statistic group.
+--
+-- Parameters:
+--  pnSTG_ID - Statistic group identifier (mandatory).
+--  psSTGAT_CODE - Statistic group attribute type code (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute (mandatory).
+--
+  procedure DELETE_STG_ATTRIBUTE
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
+    psSTGAT_CODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in P_BASE.tnSTGA_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_STGA_TEXT
+-- ----------------------------------------
+--
+-- Create or update a general text item in a given language for a statistic group attribute
+--  record.
+--
+-- Parameters:
+--  pnSTG_ID - Statistic group identifier (mandatory).
+--  psSTGAT_CODE - Statistic group attribute type code (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute (mandatory: new version
+--    number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item (mandatory).
+--  psText - Text associated with statistic group attribute (mandatory).
+--
+  procedure SET_STGA_TEXT
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
+    psSTGAT_CODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_STGA_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a statistic group attribute record. The following cases arise:
+-- 1. All text of the given type is deleted for the given statistic group attribute (neither
+--    psSEQ_NBR nor psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given statistic group attribute, text type and text
+--    item sequence number (pnSEQ_NBR is specified but psLANG_CODE is not). The action fails if this
+--    is the last text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  pnSTG_ID - Statistic group identifier (mandatory).
+--  psSTGAT_CODE - Statistic group attribute type code (mandatory).
+--  pnVERSION_NBR - Update version number of statistic group attribute (mandatory: new version
+--    number is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_STGA_TEXT
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
+    psSTGAT_CODE in P_BASE.tmsSTGAT_CODE,
+    pnVERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+end P_STATISTIC_GROUP;
+/
+
+show errors

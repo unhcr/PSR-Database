@@ -1,0 +1,217 @@
+create or replace package P_SYSTEM_PARAMETER is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_SYSTEM_PARAMETER
+--  Procedures for maintenance of system parameters.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'SYP';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_SYSTEM_PARAMETER
+-- ----------------------------------------
+--
+-- Create a new system parameter.
+--
+-- Parameters:
+--  psCODE - System parameter code (mandatory).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of system parameter (mandatory).
+--  psDATA_TYPE - Data type of system parameter (mandatory).
+--  psCHAR_VALUE - Value for system parameter of data type character (optional).
+--  pnNUM_VALUE - Value for system parameter of data type character (optional).
+--  pdDATE_VALUE - Value for system parameter of data type character (optional).
+-- One and only one of the parameters psCHAR_VALUE, pnNUM_VALUE and pdDATE_VALUE must be specified
+--  depending on the value of psDATA_TYPE.
+--
+  procedure INSERT_SYSTEM_PARAMETER
+   (psCODE in P_BASE.tmsSYP_CODE,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    psDATA_TYPE in P_BASE.tmsSYP_DATA_TYPE,
+    psCHAR_VALUE in P_BASE.tsSYP_CHAR_VALUE := null,
+    pnNUM_VALUE in P_BASE.tnSYP_NUM_VALUE := null,
+    pdDATE_VALUE in P_BASE.tdSYP_DATE_VALUE := null);
+--
+-- ----------------------------------------
+-- UPDATE_SYSTEM_PARAMETER
+-- ----------------------------------------
+--
+-- Update an existing system parameter.
+--
+-- Parameters:
+--  psCODE - System parameter code (mandatory).
+--  pnVERSION_NBR - Update version number of system parameter record (mandatory: new version number
+--    is returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of system parameter (optional: if not specified, the
+--    description is not changed).
+--  psDATA_TYPE - Data type of system parameter (optional: if not specified, none of psCHAR_VALUE,
+--    pnNUM_VALUE or pdDATE_VALUE may be specified either).
+--  psCHAR_VALUE - Value for system parameter of data type character (optional).
+--  pnNUM_VALUE - Value for system parameter of data type character (optional).
+--  pdDATE_VALUE - Value for system parameter of data type character (optional).
+-- One and only one of the parameters psCHAR_VALUE, pnNUM_VALUE and pdDATE_VALUE must be specified
+--  depending on the value of psDATA_TYPE.
+--
+  procedure UPDATE_SYSTEM_PARAMETER
+   (psCODE in P_BASE.tmsSYP_CODE,
+    pnVERSION_NBR in out P_BASE.tnSYP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psDATA_TYPE in P_BASE.tsSYP_DATA_TYPE := null,
+    psCHAR_VALUE in P_BASE.tsSYP_CHAR_VALUE := null,
+    pnNUM_VALUE in P_BASE.tnSYP_NUM_VALUE := null,
+    pdDATE_VALUE in P_BASE.tdSYP_DATE_VALUE := null);
+--
+-- ----------------------------------------
+-- SET_SYSTEM_PARAMETER
+-- ----------------------------------------
+--
+-- Create a new system parameter or update an existing one.
+--
+-- Parameters:
+--  psCODE - System parameter code (mandatory).
+--  pnVERSION_NBR - Update version number of system parameter record (mandatory: new version number
+--    is returned; for a new system parameter, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing
+--    language but must be specified if psDescription is specified).
+--  psDescription - Textual description of language (optional when updating an existing language;
+--    if not specified, the description is not changed).
+--  psDATA_TYPE - Data type of system parameter (optional: if not specified, none of psCHAR_VALUE,
+--    pnNUM_VALUE or pdDATE_VALUE may be specified either).
+--  psCHAR_VALUE - Value for system parameter of data type character (optional).
+--  pnNUM_VALUE - Value for system parameter of data type character (optional).
+--  pdDATE_VALUE - Value for system parameter of data type character (optional).
+-- One and only one of the parameters psCHAR_VALUE, pnNUM_VALUE and pdDATE_VALUE must be specified
+--  depending on the value of psDATA_TYPE.
+--
+  procedure SET_SYSTEM_PARAMETER
+   (psCODE in P_BASE.tmsSYP_CODE,
+    pnVERSION_NBR in out P_BASE.tnSYP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psDATA_TYPE in P_BASE.tsSYP_DATA_TYPE := null,
+    psCHAR_VALUE in P_BASE.tsSYP_CHAR_VALUE := null,
+    pnNUM_VALUE in P_BASE.tnSYP_NUM_VALUE := null,
+    pdDATE_VALUE in P_BASE.tdSYP_DATE_VALUE := null);
+--
+-- ----------------------------------------
+-- DELETE_SYSTEM_PARAMETER
+-- ----------------------------------------
+--
+-- Delete a system parameter.
+--
+-- Parameters:
+--  psCODE - Code of system parameter to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of system parameter record (mandatory).
+--
+  procedure DELETE_SYSTEM_PARAMETER
+   (psCODE in P_BASE.tmsSYP_CODE,
+    pnVERSION_NBR in P_BASE.tnSYP_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_SYP_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a system parameter, or update an existing description.
+--
+-- Parameters:
+--  psCODE - Code of system parameter for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of system parameter (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of system parameter (mandatory).
+--
+  procedure SET_SYP_DESCRIPTION
+   (psCODE in P_BASE.tmsSYP_CODE,
+    pnVERSION_NBR in out P_BASE.tnSYP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_SYP_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a system parameter. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  psCODE - Code of system parameter from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of system parameter (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_SYP_DESCRIPTION
+   (psCODE in P_BASE.tmsSYP_CODE,
+    pnVERSION_NBR in out P_BASE.tnSYP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_SYP_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a system parameter, or update an existing text
+--  item.
+--
+-- Parameters:
+--  psCODE - Code of system parameter for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of system parameter record (mandatory: new version number
+--    is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with system parameter (mandatory).
+--
+  procedure SET_SYP_TEXT
+   (psCODE in P_BASE.tmsSYP_CODE,
+    pnVERSION_NBR in out P_BASE.tnSYP_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_SYP_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a system parameter. The following cases arise:
+-- 1. All text of the given type is deleted for the given system parameter (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given system parameter, text type and text item
+--    sequence number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is
+--    the last text item of this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item of this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCODE - Code of system parameter from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of system parameter record (mandatory: new version number
+--    is returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_SYP_TEXT
+   (psCODE in P_BASE.tmsSYP_CODE,
+    pnVERSION_NBR in out P_BASE.tnSYP_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+end P_SYSTEM_PARAMETER;
+/
+
+show errors

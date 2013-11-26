@@ -1,0 +1,253 @@
+create or replace package P_STATISTIC is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_STATISTIC
+--  Procedures for maintenance of statistics.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'STC';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_STATISTIC
+-- ----------------------------------------
+--
+-- Create a new statistic.
+--
+-- Parameters:
+--  pnID - New statistic identifier (returned).
+--  psSTCT_CODE - Statistic type code (mandatory).
+--  pdSTART_DATE - Statistic start date (mandatory).
+--  pdEND_DATE - Statistic end date (mandatory).
+--  psDST_ID - Displacement status identifier (optional).
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum (optional).
+--  pnLOC_ID_ASYLUM - Identifier of asylum location (optional).
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of (country of) origin (optional).
+--  pnLOC_ID_ORIGIN - Identifier of location of origin (optional).
+--  pnDIM_ID1 - Dimension value identifier 1 (optional).
+--  pnDIM_ID2 - Dimension value identifier 2 (optional).
+--  pnDIM_ID3 - Dimension value identifier 3 (optional).
+--  pnDIM_ID4 - Dimension value identifier 4 (optional).
+--  pnDIM_ID5 - Dimension value identifier 5 (optional).
+--  psSEX_CODE - Sex code (optional).
+--  pnAGR_ID - Age range identifier (optional).
+--  pnSTG_ID_PRIMARY - Identifier of primary statistic group (optional).
+--  pnPPG_ID - PPG identifier (optional).
+--  pnVALUE - The value of the statistic (mandatory).
+--
+  procedure INSERT_STATISTIC
+   (pnID out P_BASE.tnSTC_ID,
+    psSTCT_CODE in P_BASE.tmsSTCT_CODE,
+    pdSTART_DATE in P_BASE.tmdDate,
+    pdEND_DATE in P_BASE.tmdDate,
+    pnDST_ID in P_BASE.tnDST_ID := null,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := null,
+    pnDIM_ID1 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID2 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID3 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID4 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID5 in P_BASE.tnDIM_ID := null,
+    psSEX_CODE in P_BASE.tsSEX_CODE := null,
+    pnAGR_ID in P_BASE.tnAGR_ID := null,
+    pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID := null,
+    pnPPG_ID in P_BASE.tnPPG_ID := null,
+    pnVALUE in P_BASE.tmnSTC_VALUE);
+--
+-- ----------------------------------------
+-- UPDATE_STATISTIC
+-- ----------------------------------------
+--
+-- Update an existing statistic.
+--
+-- Parameters:
+--  pnID - Statistic identifier (mandatory).
+--  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
+--    returned).
+--  pnVALUE - The value of the statistic (mandatory).
+--
+  procedure UPDATE_STATISTIC
+   (pnID in P_BASE.tmnSTC_ID,
+    pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
+    pnVALUE in P_BASE.tnSTC_VALUE);
+--
+-- ----------------------------------------
+-- SET_STATISTIC
+-- ----------------------------------------
+--
+-- Create a new statistic or update an existing one.
+--
+-- Parameters:
+--  pnID - Statistic identifier (optional: if null, a new one is generated and returned).
+--  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
+--    returned; for a new statistic, null must be specified and 1 will be returned).
+--  psSTCT_CODE - Statistic type code (mandatory when creating a new statistic; ignored when
+--    updating an existing statistic, since the statistic type may not be changed).
+--  pdSTART_DATE - Statistic start date (mandatory when creating a new statistic; ignored when
+--    updating an existing statistic, since the statistic date range may not be changed).
+--  pdEND_DATE - Statistic end date (mandatory when creating a new statistic; ignored when updating
+--    an existing statistic, since the statistic date range may not be changed).
+--  psDST_ID - Displacement status identifier (optional when creating a new statistic; ignored when
+--    updating an existing statistic, since the displacement status may not be changed).
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum (optional when creating a new
+--    statistic; ignored when updating an existing statistic, since the country of asylum may not be
+--    changed).
+--  pnLOC_ID_ASYLUM - Identifier of asylum location (optional when creating a new statistic; ignored
+--    when updating an existing statistic, since the asylum location may not be changed).
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of (country of) origin (optional when creating a
+--    new statistic; ignored when updating an existing statistic, since the origin country may not
+--    be changed).
+--  pnLOC_ID_ORIGIN - Identifier of location of origin (optional when creating a new statistic;
+--    ignored when updating an existing statistic, since the origin location may not be changed).
+--  pnDIM_ID1 - Dimension value identifier 1 (optional when creating a new statistic; ignored when
+--    updating an existing statistic, since dimensions may not be changed).
+--  pnDIM_ID2 - Dimension value identifier 2 (optional when creating a new statistic; ignored when
+--    updating an existing statistic, since dimensions may not be changed).
+--  pnDIM_ID3 - Dimension value identifier 3 (optional when creating a new statistic; ignored when
+--    updating an existing statistic, since dimensions may not be changed).
+--  pnDIM_ID4 - Dimension value identifier 4 (optional when creating a new statistic; ignored when
+--    updating an existing statistic, since dimensions may not be changed).
+--  pnDIM_ID5 - Dimension value identifier 5 (optional when creating a new statistic; ignored when
+--    updating an existing statistic, since dimensions may not be changed).
+--  psSEX_CODE - Sex code (optional when creating a new statistic; ignored when updating an existing
+--    statistic, since the sex may not be changed).
+--  pnAGR_ID - Age range identifier (optional when creating a new statistic; ignored when updating
+--    an existing statistic, since the age range may not be changed).
+--  pnSTG_ID_PRIMARY - Identifier of primary statistic group (optional when creating a new
+--    statistic; ignored when updating an existing statistic, since the primary statistic group may
+--    not be changed).
+--  pnPPG_ID - PPG identifier (optional when creating a new statistic; ignored when updating an
+--    existing statistic, since the PPG may not be changed).
+--  pnVALUE - The value of the statistic (mandatory).
+--
+  procedure SET_STATISTIC
+   (pnID in out P_BASE.tnSTC_ID,
+    pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
+    psSTCT_CODE in P_BASE.tsSTCT_CODE := null,
+    pdSTART_DATE in P_BASE.tdDate := null,
+    pdEND_DATE in P_BASE.tdDate := null,
+    pnDST_ID in P_BASE.tnDST_ID := null,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := null,
+    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := null,
+    pnDIM_ID1 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID2 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID3 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID4 in P_BASE.tnDIM_ID := null,
+    pnDIM_ID5 in P_BASE.tnDIM_ID := null,
+    psSEX_CODE in P_BASE.tsSEX_CODE := null,
+    pnAGR_ID in P_BASE.tnAGR_ID := null,
+    pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID := null,
+    pnPPG_ID in P_BASE.tnPPG_ID := null,
+    pnVALUE in P_BASE.tmnSTC_VALUE);
+--
+-- ----------------------------------------
+-- DELETE_STATISTIC
+-- ----------------------------------------
+--
+-- Delete a statistic record.
+--
+-- Parameters:
+--  pnID - Identifier of statistic to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of statistic record (mandatory).
+--
+  procedure DELETE_STATISTIC
+   (pnID in P_BASE.tmnSTC_ID,
+    pnVERSION_NBR in P_BASE.tnSTC_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_STC_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a statistic, or update an existing text item.
+--
+-- Parameters:
+--  pnID - Identifier of statistic for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with statistic (mandatory).
+--
+  procedure SET_STC_TEXT
+   (pnID in P_BASE.tmnSTC_ID,
+    pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_STC_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a statistic. The following cases arise:
+-- 1. All text of the given type is deleted for the given statistic (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given statistic, text type and text item
+--    sequence number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is
+--    the last text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  pnID - Identifier of statistic from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_STC_TEXT
+   (pnID in P_BASE.tmnSTC_ID,
+    pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_STATISTIC_IN_GROUP
+-- ----------------------------------------
+--
+-- Add a statistic to a statistic group.
+--
+-- Parameters:
+--  pnSTC_ID - Identifier of statistic to be added to statistic group (mandatory).
+--  pnSTG_ID - Identifier of statistic group (mandatory).
+--
+  procedure INSERT_STATISTIC_IN_GROUP
+   (pnSTC_ID in P_BASE.tmnSTC_ID,
+    pnSTG_ID in P_BASE.tmnSTG_ID);
+--
+-- ----------------------------------------
+-- DELETE_STATISTIC_IN_GROUP
+-- ----------------------------------------
+--
+-- Remove a statistic from a statistic group.
+--
+-- Parameters:
+--  pnSTC_ID - Identifier of statistic to be removed from statistic group (mandatory).
+--  pnSTG_ID - Identifier of statistic group (mandatory).
+--
+  procedure DELETE_STATISTIC_IN_GROUP
+   (pnSTC_ID in P_BASE.tmnSTC_ID,
+    pnSTG_ID in P_BASE.tmnSTG_ID);
+--
+end P_STATISTIC;
+/
+
+show errors

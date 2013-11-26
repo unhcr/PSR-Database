@@ -1,0 +1,97 @@
+create or replace package P_UTILITY is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_UTILITY
+--  Procedures of general use in other packages (tracing and logging).
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sVersion varchar2(10) := 'D0.1';
+--
+--
+-- Set module name.
+--
+  procedure START_MODULE
+   (psModuleName in varchar2,
+    psContext in varchar2 := null);
+--
+-- Restore calling module name.
+--
+  procedure END_MODULE;
+--
+-- Output trace information.
+--
+  procedure TRACE_POINT
+   (psTracePoint in varchar2);
+--
+  procedure TRACE_POINT
+   (psTracePoint in varchar2,
+    psContext in varchar2);
+--
+-- Set tracing context.
+--
+  procedure TRACE_CONTEXT
+   (psContext in varchar2);
+--
+-- Raise tracing exception.
+--
+  procedure TRACE_EXCEPTION;
+--
+-- Enable or disable display of call stack in exceptions.
+--
+  procedure ENABLE_CALL_STACK;
+--
+  procedure DISABLE_CALL_STACK;
+--
+-- Enable or disable display of backtrace information in exceptions.
+--
+  procedure ENABLE_BACKTRACE;
+--
+  procedure DISABLE_BACKTRACE;
+--
+-- Enable or disable continuous tracing (with optional filtering and destination parameters).
+--
+  procedure ENABLE_TRACE
+   (psMatchString in varchar2 := null,
+    pbLogFile in boolean := null);
+--
+  procedure DISABLE_TRACE;
+--
+-- Test if the log file is open.
+--
+  function LOG_OPEN
+    return boolean;
+--
+-- Open a log file, optionally appending to an existing file.
+--
+  procedure OPEN_LOG
+   (psFileName in varchar2,
+    pbAppend boolean := false);
+--
+-- Close the log file.
+--
+  procedure CLOSE_LOG;
+--
+-- Write a line to the log file.
+--
+  procedure LOG
+   (psMessage in varchar2);
+--
+-- Record the start of a timed operation in the log file.
+--
+  procedure START_OPERATION
+   (psOperation in varchar2);
+--
+-- Record the end of the active timed operation in the log file with optional additional message.
+--
+  procedure END_OPERATION
+   (psMessage in varchar2 := null);
+--
+end P_UTILITY;
+/
+
+show errors

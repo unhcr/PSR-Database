@@ -1,0 +1,391 @@
+create or replace package P_AGE_PROFILE is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_AGE_PROFILE
+--  Procedures for maintenance of age profiles and age ranges.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'AGP';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_AGE_PROFILE
+-- ----------------------------------------
+--
+-- Create a new age profile.
+--
+-- Parameters:
+--  psCODE - Age profile code (mandatory).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of age profile (mandatory).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of age profiles (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the age profile is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_AGE_PROFILE
+   (psCODE in P_BASE.tmsAGP_CODE,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    pnDISPLAY_SEQ in P_BASE.tnAGP_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsAGP_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_AGE_PROFILE
+-- ----------------------------------------
+--
+-- Update an existing age profile.
+--
+-- Parameters:
+--  psCODE - Age profile code (mandatory).
+--  pnVERSION_NBR - Update version number of age profile record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of age profile (optional: if not specified, the description
+--    is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of age profiles (optional: if not
+--    specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the age profile is currently available for use
+--    (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_AGE_PROFILE
+   (psCODE in P_BASE.tmsAGP_CODE,
+    pnVERSION_NBR in out P_BASE.tnAGP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnAGP_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsAGP_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_AGE_PROFILE
+-- ----------------------------------------
+--
+-- Create a new age profile or update an existing one.
+--
+-- Parameters:
+--  psCODE - Age profile code (mandatory).
+--  pnVERSION_NBR - Update version number of age profile record (mandatory: new version number is
+--    returned; for a new age profile, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing age
+--    profile but must be specified if psDescription is specified).
+--  psDescription - Textual description of age profile (optional when updating an existing age
+--    profile; if not specified, the description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of age profiles (optional: if not
+--    specified, an existing display sequence is not changed and a new one is set to null; if null
+--    is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the age profile is currently available for use
+--    (optional: if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_AGE_PROFILE
+   (psCODE in P_BASE.tmsAGP_CODE,
+    pnVERSION_NBR in out P_BASE.tnAGP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnAGP_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsAGP_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_AGE_PROFILE
+-- ----------------------------------------
+--
+-- Delete an age profile record.
+--
+-- Parameters:
+--  psCODE - Code of age profile to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of age profile record (mandatory).
+--
+  procedure DELETE_AGE_PROFILE
+   (psCODE in P_BASE.tmsAGP_CODE,
+    pnVERSION_NBR in P_BASE.tnAGP_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_AGP_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to an age profile, or update an existing description.
+--
+-- Parameters:
+--  psCODE - Code of age profile for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of age profile record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of age profile (mandatory).
+--
+  procedure SET_AGP_DESCRIPTION
+   (psCODE in P_BASE.tmsAGP_CODE,
+    pnVERSION_NBR in out P_BASE.tnAGP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_AGP_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from an age profile. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  psCODE - Code of age profile from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of age profile record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_AGP_DESCRIPTION
+   (psCODE in P_BASE.tmsAGP_CODE,
+    pnVERSION_NBR in out P_BASE.tnAGP_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_AGP_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to an age profile, or update an existing text item.
+--
+-- Parameters:
+--  psCODE - Code of age profile for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of age profile record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with age profile (mandatory).
+--
+  procedure SET_AGP_TEXT
+   (psCODE in P_BASE.tmsAGP_CODE,
+    pnVERSION_NBR in out P_BASE.tnAGP_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_AGP_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from an age profile. The following cases arise:
+-- 1. All text of the given type is deleted for the given age profile (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given age profile, text type and text item sequence
+--    number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last
+--    text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCODE - Code of age profile from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of age profile record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_AGP_TEXT
+   (psCODE in P_BASE.tmsAGP_CODE,
+    pnVERSION_NBR in out P_BASE.tnAGP_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+-- ----------------------------------------
+-- INSERT_AGE_RANGE
+-- ----------------------------------------
+--
+-- Create a new age range.
+--
+-- Parameters:
+--  pnID - New age range identifier (returned).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of age range (mandatory).
+--  psAGP_CODE - Age profile code (mandatory).
+--  pnAGE_FROM - Lower age range limit (mandatory)
+--  pnAGE_TO - Upper age range limit (mandatory)
+--
+  procedure INSERT_AGE_RANGE
+   (pnID out P_BASE.tnAGR_ID,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    psAGP_CODE in P_BASE.tmsAGP_CODE,
+    pnAGE_FROM in P_BASE.tmnAGR_AGE_FROM,
+    pnAGE_TO in P_BASE.tmnAGR_AGE_TO);
+--
+-- ----------------------------------------
+-- UPDATE_AGE_RANGE
+-- ----------------------------------------
+--
+-- Update an existing age range.
+--
+-- Parameters:
+--  pnID - Age range identifier (mandatory).
+--  pnVERSION_NBR - Update version number of age range record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of age range (optional: if not specified, the description
+--    is not changed).
+--  pnAGE_FROM - Lower age range limit (optional: if not specified, the existing lower age range
+--    limit is not changed)
+--  pnAGE_TO - Upper age range limit (optional: if not specified, the existing upper age range limit
+--    is not changed)
+--
+-- Note that changing the age range limits of an age range already in use is not allowed.
+--
+  procedure UPDATE_AGE_RANGE
+   (pnID in P_BASE.tmnAGR_ID,
+    pnVERSION_NBR in out P_BASE.tnAGR_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnAGE_FROM in P_BASE.tnAGR_AGE_FROM := null,
+    pnAGE_TO in P_BASE.tnAGR_AGE_TO := null);
+--
+-- ----------------------------------------
+-- SET_AGE_RANGE
+-- ----------------------------------------
+--
+-- Create a new age range or update an existing one.
+--
+-- Parameters:
+--  pnID - Age range identifier (optional: if null, a new one is generated and returned).
+--  pnVERSION_NBR - Update version number of age range record (mandatory: new version number is
+--    returned; for a new age range, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (mandatory when creating a new age range;
+--    optional when updating an existing age range, but must be specified if psDescription is
+--    specified).
+--  psDescription - Textual description of age range (mandatory when creating a new age range;
+--    optional when updating an existing age range: if not specified, the description is not
+--    changed).
+--  psAGP_CODE - Age profile code (mandatory when creating a new age range; ignored when updating
+--    an existing age range, since the age profile may not be changed).
+--  pnAGE_FROM - Lower age range limit (mandatory when creating a new age range; if not specified
+--    when updating an existing age range, the existing lower age range limit is not changed).
+--  pnAGE_TO - Upper age range limit (mandatory when creating a new age range; if not specified when
+--    updating an existing age range, the existing upper age range limit is not changed).
+--
+-- Note that changing the age range limits of an age range already in use is not allowed.
+--
+  procedure SET_AGE_RANGE
+   (pnID in out P_BASE.tnAGR_ID,
+    pnVERSION_NBR in out P_BASE.tnAGR_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    psAGP_CODE in P_BASE.tsAGP_CODE := null,
+    pnAGE_FROM in P_BASE.tnAGR_AGE_FROM := null,
+    pnAGE_TO in P_BASE.tnAGR_AGE_TO := null);
+--
+-- ----------------------------------------
+-- DELETE_AGE_RANGE
+-- ----------------------------------------
+--
+-- Delete an age range record.
+--
+-- Parameters:
+--  pnID - Age range identifier (mandatory).
+--  pnVERSION_NBR - Update version number of age range record (mandatory).
+--
+  procedure DELETE_AGE_RANGE
+   (pnID in P_BASE.tmnAGR_ID,
+    pnVERSION_NBR in P_BASE.tnAGR_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_AGR_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to an age range, or update an existing description.
+--
+-- Parameters:
+--  pnID - Age range identifier (mandatory).
+--  pnVERSION_NBR - Update version number of age range record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of age range (mandatory).
+--
+  procedure SET_AGR_DESCRIPTION
+   (pnID in P_BASE.tmnAGR_ID,
+    pnVERSION_NBR in out P_BASE.tnAGR_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_AGR_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from an age range. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  pnID - Age range identifier (mandatory).
+--  pnVERSION_NBR - Update version number of age range record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_AGR_DESCRIPTION
+   (pnID in P_BASE.tmnAGR_ID,
+    pnVERSION_NBR in out P_BASE.tnAGR_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_AGR_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to an age range, or update an existing text item.
+--
+-- Parameters:
+--  pnID - Age range identifier (mandatory).
+--  pnVERSION_NBR - Update version number of age range record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with age range (mandatory).
+--
+  procedure SET_AGR_TEXT
+   (pnID in P_BASE.tmnAGR_ID,
+    pnVERSION_NBR in out P_BASE.tnAGR_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_AGR_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from an age range. The following cases arise:
+-- 1. All text of the given type is deleted for the given age range (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given age range, text type and text item sequence
+--    number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last
+--    text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  pnID - Age range identifier (mandatory).
+--  pnVERSION_NBR - Update version number of age range record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_AGR_TEXT
+   (pnID in P_BASE.tmnAGR_ID,
+    pnVERSION_NBR in out P_BASE.tnAGR_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+end P_AGE_PROFILE;
+/
+
+show errors

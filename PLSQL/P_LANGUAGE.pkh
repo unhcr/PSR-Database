@@ -1,0 +1,210 @@
+create or replace package P_LANGUAGE is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_LANGUAGE
+--  Procedures for maintenance of text languages.
+--
+--  Change History:
+--  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'LNG';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_LANGUAGE
+-- ----------------------------------------
+--
+-- Create a new language record.
+--
+-- Parameters:
+--  psCODE - ISO 639-1 (preferred), 639-2 or 639-3 language code (lower case), optionally followed
+--    by a hyphen and an ISO 3166-1 Alpha-2 country code (upper case) acting as a regional
+--    designator (mandatory).
+--  psLANG_CODE - Language code of the textual description (mandatory).
+--  psDescription - Textual description of language (mandatory).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of languages (optional).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the language is currently available for use
+--    (optional: defaults to Y).
+--
+  procedure INSERT_LANGUAGE
+   (psCODE in P_BASE.tmsLANG_CODE,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText,
+    pnDISPLAY_SEQ in P_BASE.tnLANG_DISPLAY_SEQ := null,
+    psACTIVE_FLAG in P_BASE.tmsLANG_ACTIVE_FLAG := 'Y');
+--
+-- ----------------------------------------
+-- UPDATE_LANGUAGE
+-- ----------------------------------------
+--
+-- Update an existing language record.
+--
+-- Parameters:
+--  psCODE - ISO 639-1 (preferred), 639-2 or 639-3 language code (lower case), optionally followed
+--    by a hyphen and an ISO 3166-1 Alpha-2 country code (upper case) acting as a regional
+--    designator (mandatory).
+--  pnVERSION_NBR - Update version number of language record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the textual description (optional, but must be specified if
+--    psDescription is specified).
+--  psDescription - Textual description of language (optional: if not specified, the description is
+--    not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of languages (optional: if not
+--    specified, the existing display sequence is not changed; if null is specified, the display
+--    sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the language is currently available for use
+--    (optional: if not specified, the existing value is not changed).
+--
+  procedure UPDATE_LANGUAGE
+   (psCODE in P_BASE.tmsLANG_CODE,
+    pnVERSION_NBR in out P_BASE.tnLANG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnLANG_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsLANG_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- SET_LANGUAGE
+-- ----------------------------------------
+--
+-- Create a new language record or update an existing one.
+--
+-- Parameters:
+--  psCODE - ISO 639-1 (preferred), 639-2 or 639-3 language code (lower case), optionally followed
+--    by a hyphen and an ISO 3166-1 Alpha-2 country code (upper case) acting as a regional
+--    designator (mandatory).
+--  pnVERSION_NBR - Update version number of language record (mandatory: new version number is
+--    returned; for a new language, null must be specified and 1 will be returned).
+--  psLANG_CODE - Language code of the textual description (optional when updating an existing
+--    language but must be specified if psDescription is specified).
+--  psDescription - Textual description of language (optional when updating an existing language;
+--    if not specified, the description is not changed).
+--  pnDISPLAY_SEQ - Sequence number to control display ordering of languages (optional: if not
+--    specified, an existing display sequence is not changed and a new one is set to null; if null
+--    is specified, the display sequence is set to null).
+--  psACTIVE_FLAG - Flag (Y/N) indicating whether the language is currently available for use
+--    (optional: if not specified, the existing value is not changed; a new value defaults to Y).
+--
+  procedure SET_LANGUAGE
+   (psCODE in P_BASE.tmsLANG_CODE,
+    pnVERSION_NBR in out P_BASE.tnLANG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null,
+    psDescription in P_BASE.tsText := null,
+    pnDISPLAY_SEQ in P_BASE.tnLANG_DISPLAY_SEQ := -1e6,
+    psACTIVE_FLAG in P_BASE.tsLANG_ACTIVE_FLAG := null);
+--
+-- ----------------------------------------
+-- DELETE_LANGUAGE
+-- ----------------------------------------
+--
+-- Delete a language record.
+--
+-- Parameters:
+--  psCODE - Code of language to be deleted (mandatory).
+--  pnVERSION_NBR - Update version number of language record (mandatory).
+--
+  procedure DELETE_LANGUAGE
+   (psCODE in P_BASE.tmsLANG_CODE,
+    pnVERSION_NBR in P_BASE.tnLANG_VERSION_NBR);
+--
+-- ----------------------------------------
+-- SET_LANG_DESCRIPTION
+-- ----------------------------------------
+--
+-- Add a description in a given language to a language record, or update an existing description.
+--
+-- Parameters:
+--  psCODE - Code of language for which description is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of language record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be added or updated (mandatory).
+--  psDescription - Textual description of language (mandatory).
+--
+  procedure SET_LANG_DESCRIPTION
+   (psCODE in P_BASE.tmsLANG_CODE,
+    pnVERSION_NBR in out P_BASE.tnLANG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psDescription in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_LANG_DESCRIPTION
+-- ----------------------------------------
+--
+-- Remove a description in a given language from a language record. Note that it is not possible to
+--  remove the last language variant of the description.
+--
+-- Parameters:
+--  psCODE - Code of language from which description is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of language record (mandatory: new version number is
+--    returned).
+--  psLANG_CODE - Language code of the description to be removed (mandatory).
+--
+  procedure REMOVE_LANG_DESCRIPTION
+   (psCODE in P_BASE.tmsLANG_CODE,
+    pnVERSION_NBR in out P_BASE.tnLANG_VERSION_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE);
+--
+-- ----------------------------------------
+-- SET_LANG_TEXT
+-- ----------------------------------------
+--
+-- Add a general text item in a given language to a language record, or update an existing text
+--  item.
+--
+-- Parameters:
+--  psCODE - Code of language for which text item is to be added or updated (mandatory).
+--  pnVERSION_NBR - Update version number of language record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional: if null, a new one is generated and returned).
+--  psLANG_CODE - Language code of the text item to be added (mandatory).
+--  psText - Text associated with language (mandatory).
+--
+  procedure SET_LANG_TEXT
+   (psCODE in P_BASE.tmsLANG_CODE,
+    pnVERSION_NBR in out P_BASE.tnLANG_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
+    psLANG_CODE in P_BASE.tmsLANG_CODE,
+    psText in P_BASE.tmsText);
+--
+-- ----------------------------------------
+-- REMOVE_LANG_TEXT
+-- ----------------------------------------
+--
+-- Remove a general text item from a language record. The following cases arise:
+-- 1. All text of the given type is deleted for the given language (neither psSEQ_NBR nor
+--    psLANG_CODE is specified). This action fails if the text type is mandatory.
+-- 2. All language variants are deleted for the given language, text type and text item sequence
+--    number (pnSEQ_NBR is specified but psLANG_CODE is not). This action fails if this is the last
+--    text item for this text type and the text type is mandatory.
+-- 3. A single language variant is deleted (both pnSEQ_NBR and psLANG_CODE are specified). This
+--    action fails if this is the last language variant of the last text item for this text type and
+--    the text type is mandatory.
+--
+-- Parameters:
+--  psCODE - Code of language from which text item is to be removed (mandatory).
+--  pnVERSION_NBR - Update version number of language record (mandatory: new version number is
+--    returned).
+--  psTXTT_CODE - Type of text item (mandatory).
+--  pnSEQ_NBR - Text item sequence number (optional if psLANG_CODE is not specified).
+--  psLANG_CODE - Language code of the text item to be removed (optional).
+--
+  procedure REMOVE_LANG_TEXT
+   (psCODE in P_BASE.tmsLANG_CODE,
+    pnVERSION_NBR in out P_BASE.tnLANG_VERSION_NBR,
+    psTXTT_CODE in P_BASE.tmsTXTT_CODE,
+    pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
+    psLANG_CODE in P_BASE.tsLANG_CODE := null);
+--
+end P_LANGUAGE;
+/
+
+show errors

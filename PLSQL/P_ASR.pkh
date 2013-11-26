@@ -1,0 +1,85 @@
+create or replace package P_ASR is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_ASR
+--  Procedures for maintenance of statistics.
+--
+--  Change History:
+--  3-Oct-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'ASR';
+  sVersion varchar2(10) := 'D0.1';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_ASR_RETURNEES
+-- ----------------------------------------
+--
+-- Create a new row in ASR returnees table.
+--
+-- Parameters:
+--
+  procedure INSERT_ASR_RETURNEES
+   (pnASR_YEAR in P_BASE.tmnYear,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnDST_ID in P_BASE.tmnDST_ID,
+    psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
+    psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
+    pnREFRTN_VALUE in P_BASE.tnSTC_VALUE,
+    pnREFRTN_AH_VALUE in P_BASE.tnSTC_VALUE);
+--
+-- ----------------------------------------
+-- UPDATE_ASR_RETURNEES
+-- ----------------------------------------
+--
+-- Update an existing row in ASR returnees table.
+--
+-- Parameters:
+--
+  procedure UPDATE_ASR_RETURNEES
+   (pnASR_YEAR in P_BASE.tmnYear,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnDST_ID in P_BASE.tmnDST_ID,
+    psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
+    psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
+    pnREFRTN_VALUE in P_BASE.tnSTC_VALUE,
+    pnREFRTN_AH_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tnSTG_VERSION_NBR,  --  ** Not required
+    pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
+    pnREFRTN_STC_ID in P_BASE.tnSTC_ID,
+    pnREFRTN_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnREFRTN_AH_STC_ID in P_BASE.tnSTC_ID,
+    pnREFRTN_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR);
+--
+-- ----------------------------------------
+-- DELETE_ASR_RETURNEES
+-- ----------------------------------------
+--
+-- Delete a row in ASR returnees table.
+--
+-- Parameters:
+--
+  procedure DELETE_ASR_RETURNEES
+   (pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tnSTG_VERSION_NBR,
+    pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
+    pnREFRTN_STC_ID in P_BASE.tnSTC_ID,
+    pnREFRTN_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnREFRTN_AH_STC_ID in P_BASE.tnSTC_ID,
+    pnREFRTN_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR);
+--
+end P_ASR;
+/
+
+show errors

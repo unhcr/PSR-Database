@@ -1042,92 +1042,38 @@ create or replace package body P_SYSTEM_USER is
   end REMOVE_USER_LANG_PREFERENCE;
 --
 -- ----------------------------------------
--- INSERT_USER_ROLE
+-- USER_LOGIN
 -- ----------------------------------------
 --
-  procedure INSERT_USER_ROLE
-   (psUSERID in P_BASE.tmsUSR_USERID,
-    pnROL_ID in P_BASE.tmnROL_ID,
-    pnLOC_ID in P_BASE.tnLOC_ID := null)
+  procedure USER_LOGIN
+   (psUSERID in P_BASE.tmsUSR_USERID)
   is
-    sCOUNTRY_FLAG P_BASE.tsROL_COUNTRY_FLAG;
   begin
-    P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_USER_ROLE',
-      psUSERID || '~' || to_char(pnROL_ID) || '~' || to_char(pnLOC_ID));
+    P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.USER_LOGIN', psUSERID);
   --
-  -- Determine if given role is country-oriented.
-  --
-    select COUNTRY_FLAG into sCOUNTRY_FLAG from T_ROLES where ID = pnROL_ID;
-  --
-    if sCOUNTRY_FLAG = 'Y'
-    then
-      if pnLOC_ID is null
-      then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 10, 'Country must be specified for country-oriented role');
-      else
-        insert into T_USERS_IN_ROLE_COUNTRIES (USERID, ROL_ID, LOC_ID)
-        values (psUSERID, pnROL_ID, pnLOC_ID);
-      end if;
-    else
-      if pnLOC_ID is not null
-      then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 11, 'Country must not be specified for non-country-oriented role');
-      else
-        insert into T_USERS_IN_ROLES (USERID, ROL_ID) values (psUSERID, pnROL_ID);
-      end if;
-    end if;
+    P_CONTEXT.SET_USERID(psUSERID);
   --
     P_UTILITY.END_MODULE;
   exception
     when others
     then P_UTILITY.TRACE_EXCEPTION;
-  end INSERT_USER_ROLE;
---
--- ----------------------------------------
--- DELETE_USER_ROLE
--- ----------------------------------------
---
-  procedure DELETE_USER_ROLE
-   (psUSERID in P_BASE.tmsUSR_USERID,
-    pnROL_ID in P_BASE.tmnROL_ID,
-    pnLOC_ID in P_BASE.tnLOC_ID := null)
-  is
-    sCOUNTRY_FLAG P_BASE.tsROL_COUNTRY_FLAG;
-  begin
-    P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_USER_ROLE',
-      psUSERID || '~' || to_char(pnROL_ID) || '~' || to_char(pnLOC_ID));
-  --
-  -- Determine if given role is country-oriented.
-  --
-    select COUNTRY_FLAG into sCOUNTRY_FLAG from T_ROLES where ID = pnROL_ID;
-  --
-    if sCOUNTRY_FLAG = 'Y'
-    then
-      delete from T_USERS_IN_ROLE_COUNTRIES
-      where USERID = psUSERID
-      and ROL_ID = pnROL_ID
-      and LOC_ID = pnLOC_ID;
-    else
-      delete from T_USERS_IN_ROLES where USERID = psUSERID and ROL_ID = pnROL_ID;
-    end if;
-  --
-    P_UTILITY.END_MODULE;
-  exception
-    when others
-    then P_UTILITY.TRACE_EXCEPTION;
-  end DELETE_USER_ROLE;
+  end USER_LOGIN;
 --
 -- =====================================
 -- Initialisation
 -- =====================================
 --
 begin
-  if sComponent != 'USR'
-  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
+  if sModule != $$PLSQL_UNIT
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
   end if;
 --
   if sVersion != 'D0.1'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
+  end if;
+--
+  if sComponent != 'USR'
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 3, 'Component code mismatch');
   end if;
 --
 end P_SYSTEM_USER;

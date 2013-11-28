@@ -7,12 +7,13 @@ create or replace package P_LOCATION is
 --   attribute types, relationships and relationship types.
 --
 --  Change History:
---  07-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  07-Jan-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
-  sComponent varchar2(30) := 'LOC';
+  sModule varchar2(30) := $$PLSQL_UNIT;
   sVersion varchar2(10) := 'D0.1';
+  sComponent varchar2(30) := 'LOC';
 --
 -- ========================================
 -- Program unit definitions
@@ -216,8 +217,6 @@ create or replace package P_LOCATION is
 --    past).
 --  pdEND_DATE - Effective end date of details of this location (optional, the absence of an end
 --    date, or a null value, indicates that the effectivity extends indefinitely into the future).
---  psACTIVE_FLAG - Flag (Y/N) indicating whether the location is currently available for use
---    (optional: defaults to Y).
 --
   procedure INSERT_LOCATION
    (pnID out P_BASE.tnLOC_ID,
@@ -226,42 +225,7 @@ create or replace package P_LOCATION is
     psLOCT_CODE in P_BASE.tmsLOCT_CODE,
     psCountryCode in P_BASE.tsCountryCode := null,
     pdSTART_DATE in P_BASE.tdDate := null,
-    pdEND_DATE in P_BASE.tdDate := null,
-    psACTIVE_FLAG in P_BASE.tmsLOC_ACTIVE_FLAG := 'Y');
---
--- ----------------------------------------
--- INSERT_LOCATION_WITH_ID
--- ----------------------------------------
---
--- Create a new location record supplying the location id to be assigned.
---
--- This is a special procedure to be used only on initial load of the database when preserving
---  already assigned location ids.
---
--- Parameters:
---  pnID - Location identifier to be assigned (mandatory).
---  psLANG_CODE - Language code of the location name (mandatory).
---  psName - Location name text (mandatory).
---  psLOCT_CODE - Location type code (mandatory).
---  psCountryCode - ISO 3166-1 alpha-3 country code (not allowed when the location type is not
---    country; mandatory for a new location of type country).
---  pdSTART_DATE - Effective start date of details of this location (optional, the absence of a
---    start date, or a null value, indicates that the effectivity starts indefinitely far in the
---    past).
---  pdEND_DATE - Effective end date of details of this location (optional, the absence of an end
---    date, or a null value, indicates that the effectivity extends indefinitely into the future).
---  psACTIVE_FLAG - Flag (Y/N) indicating whether the location is currently available for use
---    (optional: defaults to Y).
---
-  procedure INSERT_LOCATION_WITH_ID
-   (pnID in P_BASE.tnLOC_ID,
-    psLANG_CODE in P_BASE.tmsLANG_CODE,
-    psName in P_BASE.tmsText,
-    psLOCT_CODE in P_BASE.tmsLOCT_CODE,
-    psCountryCode in P_BASE.tsCountryCode := null,
-    pdSTART_DATE in P_BASE.tdDate := null,
-    pdEND_DATE in P_BASE.tdDate := null,
-    psACTIVE_FLAG in P_BASE.tmsLOC_ACTIVE_FLAG := 'Y');
+    pdEND_DATE in P_BASE.tdDate := null);
 --
 -- ----------------------------------------
 -- UPDATE_LOCATION
@@ -287,8 +251,6 @@ create or replace package P_LOCATION is
 --  pdEND_DATE - Effective end date of details of this location (optional: if not specified, the
 --    existing end date is left unchanged; a null value indicates that the effectivity extends
 --    indefinitely into the future).
---  psACTIVE_FLAG - Flag (Y/N) indicating whether the location is currently available for use
---    (optional: if not specified, the existing value is left unchanged).
 --
   procedure UPDATE_LOCATION
    (pnID in P_BASE.tmnLOC_ID,
@@ -298,8 +260,7 @@ create or replace package P_LOCATION is
     pnLOCTV_ID in P_BASE.tnLOCTV_ID := -1,
     psCountryCode in P_BASE.tsCountryCode := null,
     pdSTART_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
-    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
-    psACTIVE_FLAG in P_BASE.tsLOC_ACTIVE_FLAG := null);
+    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE);
 --
 -- ----------------------------------------
 -- SET_LOCATION
@@ -335,9 +296,6 @@ create or replace package P_LOCATION is
 --    into the future; when updating an existing location, the absence of an end date leaves the
 --    existing date unchanged, and a null value indicates that the effectivity extends indefinitely
 --    into the future).
---  psACTIVE_FLAG - Flag (Y/N) indicating whether the location is currently available for use
---    (optional: defaults to Y when creating a new location; if not specified when updating an
---     existing location, the existing value is left unchanged).
 --
   procedure SET_LOCATION
    (pnID in out P_BASE.tnLOC_ID,
@@ -348,8 +306,7 @@ create or replace package P_LOCATION is
     pnLOCTV_ID in P_BASE.tnLOCTV_ID := -1,
     psCountryCode in P_BASE.tsCountryCode := null,
     pdSTART_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
-    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
-    psACTIVE_FLAG in P_BASE.tsLOC_ACTIVE_FLAG := null);
+    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE);
 --
 -- ----------------------------------------
 -- DELETE_LOCATION
@@ -1480,6 +1437,39 @@ create or replace package P_LOCATION is
     psTXTT_CODE in P_BASE.tmsTXTT_CODE,
     pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
     psLANG_CODE in P_BASE.tsLANG_CODE := null);
+/*
+--
+-- ----------------------------------------
+-- SET_COUNTRY
+-- ----------------------------------------
+--
+-- Create a new location record or update an existing one.
+--
+-- Parameters:
+--  psCODE - Location identifier (mandatory).
+--  psLANG_CODE - Language code of the location name (optional when updating an existing location
+--    but must be specified if psName is specified).
+--  psName - Location name text (optional when updating an existing location; if not specified, the
+--    name is not changed).
+--  psLOCT_CODE - Location type code (mandatory when creating an new location; not allowed when
+--    updating an existing location).
+--  psCOUNTRY_CODE - Country code (optional: only allowed and required when the location type is
+--    country; if allowed but not specified, the existing value is not changed).
+--  pdSTART_DATE - Effective start date of details of this location (optional when updating an
+--    existing location; if not specified, the name is not changed).
+--  pdEND_DATE - Effective end date of details of this location (optional when updating an existing
+--    location; if not specified, the name is not changed).
+--
+--
+  procedure SET_COUNTRY
+   (psCODE in T_LOCATIONS.CODE%type,
+    psLANG_CODE in T_LANGUAGES.CODE%type := null,
+    psName in P_BASE.tsText := null,
+    psLOCT_CODE in P_BASE.tsLOCT_CODE := null,
+    psCOUNTRY_CODE in P_BASE.tsLOC_COUNTRY_CODE := null,
+    pdSTART_DATE in T_LOCATIONS.START_DATE%type := null,
+    pdEND_DATE in T_LOCATIONS.END_DATE%type := null);
+*/
 --
 end P_LOCATION;
 /

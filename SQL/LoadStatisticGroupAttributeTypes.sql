@@ -7,7 +7,7 @@ declare
 begin
   for rSTGAT in
    (select CODE, DESCRIPTION_EN, DATA_TYPE, DISPLAY_SEQ, DESCRIPTION_FR, NOTES
-    from S_STC_GROUP_ATTRIBUTE_TYPES)
+    from STAGE.S_STC_GROUP_ATTRIBUTE_TYPES)
   loop
     nCount := nCount + 1;
   --

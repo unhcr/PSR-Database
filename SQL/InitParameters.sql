@@ -8,7 +8,7 @@ begin
   P_SYSTEM_PARAMETER.INSERT_SYSTEM_PARAMETER('LOCATION ID CHECK INCREMENT', 'en', 'Increment used in calculating check digits for location identifier', 'N', pnNUM_VALUE => 99);
   P_SYSTEM_PARAMETER.INSERT_SYSTEM_PARAMETER('LOCATION ID CHECK MODULUS', 'en', 'Modulus used in calculating check digits for location identifier', 'N', pnNUM_VALUE => 89);
   P_SYSTEM_PARAMETER.INSERT_SYSTEM_PARAMETER('COUNTRY LOCAT CODE', 'en', 'Location type code for standard country code', 'C', psCHAR_VALUE => 'ISO3166A3');
-  --P_SYSTEM_PARAMETER.INSERT_SYSTEM_PARAMETER('REDACTION LIMIT', 'en', 'Threshold below which small values are redacted from public reports', 'N', pnNUM_VALUE => 5);
+  P_SYSTEM_PARAMETER.INSERT_SYSTEM_PARAMETER('REDACTION LIMIT', 'en', 'Threshold below which small values are redacted from public reports', 'N', pnNUM_VALUE => 5);
   P_SYSTEM_PARAMETER.INSERT_SYSTEM_PARAMETER('DISPLAY CALL STACK', 'en', 'Display the call stack in exception messages? (Y/N)', 'C', psCHAR_VALUE => 'Y');
   P_SYSTEM_PARAMETER.INSERT_SYSTEM_PARAMETER('DISPLAY BACKTRACE', 'en', 'Display backtrace information in exception messages? (Y/N)', 'C', psCHAR_VALUE => 'Y');
   --P_SYSTEM_PARAMETER.INSERT_SYSTEM_PARAMETER('TRACING', 'en', 'Display continuous trace information? (Y/N)', 'C', psCHAR_VALUE => 'Y');

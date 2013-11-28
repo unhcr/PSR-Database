@@ -34,7 +34,7 @@ create or replace package body P_STATISTIC_GROUP is
     nTXT_SEQ_NBR P_BASE.tnTXT_SEQ_NBR := null;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_STATISTIC_GROUP',
+     (sVersion || '-' || sModule || '.INSERT_STATISTIC_GROUP',
       to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD')  || '~' ||
         to_char(pnDST_ID) || '~' || psSTTG_CODE || '~' ||
         to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' || to_char(pnLOC_ID_ASYLUM) || '~' ||
@@ -104,7 +104,7 @@ create or replace package body P_STATISTIC_GROUP is
     nTXT_SEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_STATISTIC_GROUP',
+     (sVersion || '-' || sModule || '.UPDATE_STATISTIC_GROUP',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME || '~' ||
         to_char(pnPPG_ID));
@@ -168,7 +168,7 @@ create or replace package body P_STATISTIC_GROUP is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STATISTIC_GROUP',
+     (sVersion || '-' || sModule || '.SET_STATISTIC_GROUP',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' ||
         to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD')  || '~' ||
         to_char(pnDST_ID) || '~' || psSTTG_CODE || '~' ||
@@ -211,7 +211,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTG_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_STATISTIC_GROUP',
+     (sVersion || '-' || sModule || '.DELETE_STATISTIC_GROUP',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -254,7 +254,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTG_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STG_TEXT',
+     (sVersion || '-' || sModule || '.SET_STG_TEXT',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' ||
         to_char(pnSEQ_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psText)) || ':' || psText);
@@ -299,7 +299,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTG_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_STG_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_STG_TEXT',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' ||
         to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -343,7 +343,7 @@ create or replace package body P_STATISTIC_GROUP is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_STG_ATTRIBUTE_TYPE',
+     (sVersion || '-' || sModule || '.INSERT_STG_ATTRIBUTE_TYPE',
       psCODE || '~' || psDATA_TYPE || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
@@ -379,7 +379,7 @@ create or replace package body P_STATISTIC_GROUP is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_STG_ATTRIBUTE_TYPE',
+     (sVersion || '-' || sModule || '.UPDATE_STG_ATTRIBUTE_TYPE',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psDATA_TYPE || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
@@ -448,7 +448,7 @@ create or replace package body P_STATISTIC_GROUP is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STG_ATTRIBUTE_TYPE',
+     (sVersion || '-' || sModule || '.SET_STG_ATTRIBUTE_TYPE',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psDATA_TYPE || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
@@ -485,7 +485,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTGAT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_STG_ATTRIBUTE_TYPE',
+     (sVersion || '-' || sModule || '.DELETE_STG_ATTRIBUTE_TYPE',
       psCODE || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -522,7 +522,7 @@ create or replace package body P_STATISTIC_GROUP is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STGAT_DESCRIPTION',
+     (sVersion || '-' || sModule || '.SET_STGAT_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -545,7 +545,7 @@ create or replace package body P_STATISTIC_GROUP is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_STGAT_DESCRIPTION',
+     (sVersion || '-' || sModule || '.REMOVE_STGAT_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE);
   --
     REMOVE_STGAT_TEXT(psCODE, pnVERSION_NBR, 'DESCR', 1, psLANG_CODE);
@@ -573,7 +573,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTGAT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STGAT_TEXT',
+     (sVersion || '-' || sModule || '.SET_STGAT_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' ||
         to_char(pnSEQ_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psText)) || ':' || psText);
@@ -618,7 +618,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTGAT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_STGAT_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_STGAT_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' ||
         to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -661,7 +661,7 @@ create or replace package body P_STATISTIC_GROUP is
     sACTIVE_FLAG P_BASE.tsSTGAT_ACTIVE_FLAG;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_STG_ATTRIBUTE',
+     (sVersion || '-' || sModule || '.INSERT_STG_ATTRIBUTE',
       to_char(pnSTG_ID) || '~' || psSTGAT_CODE || '~' || psCHAR_VALUE || '~' ||
         to_char(pnNUM_VALUE) || '~' || to_char(pdDATE_VALUE, 'YYYY-MM-DD HH24:MI:SS'));
   --
@@ -707,7 +707,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTGA_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_STG_ATTRIBUTE',
+     (sVersion || '-' || sModule || '.UPDATE_STG_ATTRIBUTE',
       to_char(pnSTG_ID) || '~' || psSTGAT_CODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psCHAR_VALUE || '~' || to_char(pnNUM_VALUE) || '~' ||
         to_char(pdDATE_VALUE, 'YYYY-MM-DD HH24:MI:SS'));
@@ -752,7 +752,7 @@ create or replace package body P_STATISTIC_GROUP is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STG_ATTRIBUTE',
+     (sVersion || '-' || sModule || '.SET_STG_ATTRIBUTE',
       to_char(pnSTG_ID) || '~' || psSTGAT_CODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psCHAR_VALUE || '~' || to_char(pnNUM_VALUE) || '~' ||
         to_char(pdDATE_VALUE, 'YYYY-MM-DD HH24:MI:SS'));
@@ -788,7 +788,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTGA_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_STG_ATTRIBUTE',
+     (sVersion || '-' || sModule || '.DELETE_STG_ATTRIBUTE',
       to_char(pnSTG_ID) || '~' || psSTGAT_CODE || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -833,7 +833,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTGA_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STGA_TEXT',
+     (sVersion || '-' || sModule || '.SET_STGA_TEXT',
       to_char(pnSTG_ID) || '~' || psSTGAT_CODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psText)) || ':' || psText);
@@ -881,7 +881,7 @@ create or replace package body P_STATISTIC_GROUP is
     xSTGA_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_STGA_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_STGA_TEXT',
       to_char(pnSTG_ID) || '~' || psSTGAT_CODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -915,12 +915,16 @@ create or replace package body P_STATISTIC_GROUP is
 -- =====================================
 --
 begin
-  if sComponent != 'STG'
-  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
+  if sModule != $$PLSQL_UNIT
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
   end if;
 --
   if sVersion != 'D0.1'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
+  end if;
+--
+  if sComponent != 'STG'
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 3, 'Component code mismatch');
   end if;
 --
 end P_STATISTIC_GROUP;

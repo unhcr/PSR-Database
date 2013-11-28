@@ -8,8 +8,6 @@ create table S_LOCATION_SUBDIVISIONS
   LOC_TYPE_DESCRIPTION_EN varchar2(1000),
   LOC_START_DATE date,
   LOC_END_DATE date,
-  ACTIVE_FLAG varchar2(1),
-  LOCATION_NAME_FROM varchar2(1000),
   LOCR_START_DATE date,
   LOCR_END_DATE date,
   COU_CODE_PREV varchar2(3),
@@ -19,7 +17,7 @@ organization external
   default directory PSRDATA
   access parameters 
    (records delimited by '\r\n'
-    characterset UTF8
+    characterset WE8MSWIN1252
     badfile 'LOCATION_SUBDIVISIONS.bad'
     nodiscardfile
     logfile PSRLOG:'LOCATION_SUBDIVISIONS.log'
@@ -37,8 +35,6 @@ organization external
       LOC_TYPE_DESCRIPTION_EN char(4000),
       LOC_START_DATE date "YYYY-MM-DD",
       LOC_END_DATE date "YYYY-MM-DD",
-      ACTIVE_FLAG char(4000),
-      LOCATION_NAME_FROM char(4000),
       LOCR_START_DATE date "YYYY-MM-DD",
       LOCR_END_DATE date "YYYY-MM-DD",
       COU_CODE_PREV char(4000),

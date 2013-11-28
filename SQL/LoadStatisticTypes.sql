@@ -11,7 +11,7 @@ declare
 begin
   for rSTTG in
    (select CODE, DESCRIPTION_EN, DISPLAY_SEQ, DESCRIPTION_FR, NOTES
-    from S_STATISTIC_TYPE_GROUPS)
+    from STAGE.S_STATISTIC_TYPE_GROUPS)
   loop
     iCount1 := iCount1 + 1;
   --
@@ -41,7 +41,7 @@ begin
       DIM_ID4_FLAG, DIMT_CODE4, DIM_ID5_FLAG, DIMT_CODE5, SEX_CODE_FLAG, AGR_ID_FLAG,
       PGR_ID_SUBGROUP_FLAG, STTG_CODE1, STTG_CODE2, STTG_CODE3, STTG_CODE4,
       DISPLAY_SEQ, DESCRIPTION_FR, NOTES
-    from S_STATISTIC_TYPES)
+    from STAGE.S_STATISTIC_TYPES)
   loop
     iCount2 := iCount2 + 1;
   --
@@ -95,7 +95,7 @@ begin
 --
   for rSTTIG in
    (select STTG_CODE, STCT_CODE, NOTES
-    from S_STATISTIC_TYPES_IN_GROUPS
+    from STAGE.S_STATISTIC_TYPES_IN_GROUPS
     where (STTG_CODE, STCT_CODE) not in
      (select STTG_CODE, STCT_CODE
       from T_STATISTIC_TYPES_IN_GROUPS))

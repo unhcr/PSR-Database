@@ -9,7 +9,7 @@ begin
    (select A.CODE, A.NAME_EN, A.DISPLAY_SEQ, A.ACTIVE_FLAG,
       A.NAME_FR, A.NAME_ES, A.NAME_RU, A.NAME_AR, A.NAME_ZH,
       A.NOTES, B.VERSION_NBR
-    from S_LANGUAGES A
+    from STAGE.S_LANGUAGES A
     left outer join T_LANGUAGES B
       on B.CODE = A.CODE
     order by A.CODE)

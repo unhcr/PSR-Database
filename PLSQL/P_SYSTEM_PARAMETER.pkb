@@ -21,7 +21,7 @@ create or replace package body P_SYSTEM_PARAMETER is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_SYSTEM_PARAMETER',
+     (sVersion || '-' || sModule || '.INSERT_SYSTEM_PARAMETER',
       psCODE|| '~' || psDATA_TYPE || '~' || psCHAR_VALUE || '~' || to_char(pnNUM_VALUE) || '~' ||
         to_char(pdDATE_VALUE, 'YYYY-MM-DD HH24:MI:SS') || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
@@ -57,7 +57,7 @@ create or replace package body P_SYSTEM_PARAMETER is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_SYSTEM_PARAMETER',
+     (sVersion || '-' || sModule || '.UPDATE_SYSTEM_PARAMETER',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psDATA_TYPE || '~' || psCHAR_VALUE || '~' ||
         to_char(pnNUM_VALUE) || '~' || to_char(pdDATE_VALUE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
@@ -108,7 +108,7 @@ create or replace package body P_SYSTEM_PARAMETER is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_SYSTEM_PARAMETER',
+     (sVersion || '-' || sModule || '.SET_SYSTEM_PARAMETER',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psDATA_TYPE || '~' || psCHAR_VALUE || '~' ||
         to_char(pnNUM_VALUE) || '~' || to_char(pdDATE_VALUE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
@@ -143,7 +143,7 @@ create or replace package body P_SYSTEM_PARAMETER is
     xSYP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_SYSTEM_PARAMETER',
+     (sVersion || '-' || sModule || '.DELETE_SYSTEM_PARAMETER',
       psCODE || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -180,7 +180,7 @@ create or replace package body P_SYSTEM_PARAMETER is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_SYP_DESCRIPTION',
+     (sVersion || '-' || sModule || '.SET_SYP_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -203,7 +203,7 @@ create or replace package body P_SYSTEM_PARAMETER is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_SYP_DESCRIPTION',
+     (sVersion || '-' || sModule || '.REMOVE_SYP_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE);
   --
     REMOVE_SYP_TEXT(psCODE, pnVERSION_NBR, 'DESCR', 1, psLANG_CODE);
@@ -231,7 +231,7 @@ create or replace package body P_SYSTEM_PARAMETER is
     xSYP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_SYP_TEXT',
+     (sVersion || '-' || sModule || '.SET_SYP_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psText)) || ':' || psText);
@@ -276,7 +276,7 @@ create or replace package body P_SYSTEM_PARAMETER is
     xSYP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_SYP_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_SYP_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -309,12 +309,16 @@ create or replace package body P_SYSTEM_PARAMETER is
 -- =====================================
 --
 begin
-  if sComponent != 'SYP'
-  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
+  if sModule != $$PLSQL_UNIT
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
   end if;
 --
   if sVersion != 'D0.1'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
+  end if;
+--
+  if sComponent != 'SYP'
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 3, 'Component code mismatch');
   end if;
 --
 end P_SYSTEM_PARAMETER;

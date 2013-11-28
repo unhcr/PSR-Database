@@ -7,7 +7,7 @@ declare
 begin
   for rDIMT in
    (select CODE, DESCRIPTION_EN, DISPLAY_SEQ, DESCRIPTION_FR, NOTES
-    from S_DIMENSION_TYPES)
+    from STAGE.S_DIMENSION_TYPES)
   loop
     iCount := iCount + 1;
   --
@@ -38,7 +38,7 @@ declare
 begin
   for rDIM in
    (select DIMT_CODE, CODE, DESCRIPTION_EN, DISPLAY_SEQ, START_DATE, END_DATE, DESCRIPTION_FR, NOTES
-    from S_DIMENSION_VALUES)
+    from STAGE.S_DIMENSION_VALUES)
   loop
     iCount := iCount + 1;
   --

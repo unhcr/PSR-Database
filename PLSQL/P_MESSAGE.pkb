@@ -19,7 +19,7 @@ create or replace package body P_MESSAGE is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_COMPONENT',
+     (sVersion || '-' || sModule || '.INSERT_COMPONENT',
       psCODE || '~' || to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -52,7 +52,7 @@ create or replace package body P_MESSAGE is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_COMPONENT',
+     (sVersion || '-' || sModule || '.UPDATE_COMPONENT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnDISPLAY_SEQ) || '~' ||
         psACTIVE_FLAG || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
@@ -99,7 +99,7 @@ create or replace package body P_MESSAGE is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_COMPONENT',
+     (sVersion || '-' || sModule || '.SET_COMPONENT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnDISPLAY_SEQ) || '~' ||
         psACTIVE_FLAG || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
@@ -135,7 +135,7 @@ create or replace package body P_MESSAGE is
     xCOMP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_COMPONENT', psCODE || '~' || to_char(pnVERSION_NBR));
+     (sVersion || '-' || sModule || '.DELETE_COMPONENT', psCODE || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
     into nITM_ID, nVERSION_NBR, xCOMP_ROWID
@@ -171,7 +171,7 @@ create or replace package body P_MESSAGE is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_COMP_DESCRIPTION',
+     (sVersion || '-' || sModule || '.SET_COMP_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -194,7 +194,7 @@ create or replace package body P_MESSAGE is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_COMP_DESCRIPTION',
+     (sVersion || '-' || sModule || '.REMOVE_COMP_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE);
   --
     REMOVE_COMP_TEXT(psCODE, pnVERSION_NBR, 'DESCR', 1, psLANG_CODE);
@@ -222,7 +222,7 @@ create or replace package body P_MESSAGE is
     xCOMP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_COMP_TEXT',
+     (sVersion || '-' || sModule || '.SET_COMP_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' || to_char(pnSEQ_NBR) ||
         '~' || psLANG_CODE || '~' || to_char(length(psText)) || ':' || psText);
   --
@@ -266,7 +266,7 @@ create or replace package body P_MESSAGE is
     xCOMP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_COMP_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_COMP_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -310,7 +310,7 @@ create or replace package body P_MESSAGE is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_MESSAGE',
+     (sVersion || '-' || sModule || '.INSERT_MESSAGE',
       psCOMP_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psSEVERITY || '~' ||
         psLANG_CODE || '~' || to_char(length(psMessage)) || ':' || psMessage);
   --
@@ -367,7 +367,7 @@ create or replace package body P_MESSAGE is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_MESSAGE',
+     (sVersion || '-' || sModule || '.UPDATE_MESSAGE',
       psCOMP_CODE || '~' || to_char(pnSEQ_NBR) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psSEVERITY || '~' || psLANG_CODE || '~' || to_char(length(psMessage)) || ':' || psMessage);
   --
@@ -413,7 +413,7 @@ create or replace package body P_MESSAGE is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_MESSAGE',
+     (sVersion || '-' || sModule || '.SET_MESSAGE',
       psCOMP_CODE || '~' || to_char(pnSEQ_NBR) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psSEVERITY || '~' || psLANG_CODE || '~' || to_char(length(psMessage)) || ':' || psMessage);
   --
@@ -446,7 +446,7 @@ create or replace package body P_MESSAGE is
     xMSG_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_MESSAGE',
+     (sVersion || '-' || sModule || '.DELETE_MESSAGE',
       psCOMP_CODE || '~' || to_char(pnSEQ_NBR) || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -485,7 +485,7 @@ create or replace package body P_MESSAGE is
     nSEQ_NBR T_TEXT_ITEMS.SEQ_NBR%type := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_MSG_MESSAGE',
+     (sVersion || '-' || sModule || '.SET_MSG_MESSAGE',
       psCOMP_CODE || '~' || to_char(pnSEQ_NBR) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psLANG_CODE || '~' || to_char(length(psMessage)) || ':' || psMessage);
   --
@@ -509,7 +509,7 @@ create or replace package body P_MESSAGE is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_MSG_MESSAGE',
+     (sVersion || '-' || sModule || '.REMOVE_MSG_MESSAGE',
       psCOMP_CODE || '~' || to_char(pnSEQ_NBR) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psLANG_CODE);
   --
@@ -539,7 +539,7 @@ create or replace package body P_MESSAGE is
     xMSG_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_MSG_TEXT',
+     (sVersion || '-' || sModule || '.SET_MSG_TEXT',
       psCOMP_CODE || '~' || to_char(pnSEQ_NBR) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnTXI_SEQ_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psText)) || ':' || psText);
@@ -586,7 +586,7 @@ create or replace package body P_MESSAGE is
     xMSG_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_MSG_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_MSG_TEXT',
       psCOMP_CODE || '~' || to_char(pnSEQ_NBR) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnTXI_SEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -632,7 +632,7 @@ create or replace package body P_MESSAGE is
     sPREFIX_MESSAGE P_BASE.tsNormalText;  -- Prefix message
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DISPLAY_MESSAGE',
+     (sVersion || '-' || sModule || '.DISPLAY_MESSAGE',
       psCOMP_CODE || '~' || pnSEQ_NBR || '~' || psSEVERITY|| '~' ||
         to_char(length(psEnglishMessage)) || ':' || psEnglishMessage);
   --
@@ -699,12 +699,16 @@ create or replace package body P_MESSAGE is
 -- =====================================
 --
 begin
-  if sComponent != 'MSG'
-  then DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
+  if sModule != $$PLSQL_UNIT
+  then DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
   end if;
 --
   if sVersion != 'D0.1'
   then DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
+  end if;
+--
+  if sComponent != 'MSG'
+  then DISPLAY_MESSAGE('GEN', 3, 'Component name mismatch');
   end if;
 --
 end P_MESSAGE;

@@ -3,16 +3,17 @@ create or replace package P_SYSTEM_USER is
 -- -------------------------------------------------------------------------------------------------
 --
 --  Package P_SYSTEM_USER
---  Procedures for maintenance of system users and their associated attributes, attribute types,
---   preferences and roles.
+--  Procedures for maintenance of system users and their associated preferences, attributes and
+--   attribute types.
 --
 --  Change History:
---  14-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  16-Nov-2012 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
-  sComponent varchar2(30) := 'USR';
+  sModule varchar2(30) := $$PLSQL_UNIT;
   sVersion varchar2(10) := 'D0.1';
+  sComponent varchar2(30) := 'USR';
 --
 -- ========================================
 -- Program unit definitions
@@ -613,39 +614,16 @@ create or replace package P_SYSTEM_USER is
     pnPREF_SEQ in P_BASE.tnULP_PREF_SEQ := null);
 --
 -- ----------------------------------------
--- INSERT_USER_ROLE
+-- USER_LOGIN
 -- ----------------------------------------
 --
--- Associate a system user with a role, and with a specific country if the role is country_oriented.
+-- Perform housekeeping on user login.
 --
 -- Parameters:
 --  psUSERID - User identifier (mandatory).
---  pnROL_ID - Role identifier (mandatory).
---  pnLOC_ID - Location identifier of country (mandatory when the role is country-oriented, must be
---    absent or null otherwise).
 --
-  procedure INSERT_USER_ROLE
-   (psUSERID in P_BASE.tmsUSR_USERID,
-    pnROL_ID in P_BASE.tmnROL_ID,
-    pnLOC_ID in P_BASE.tnLOC_ID := null);
---
--- ----------------------------------------
--- DELETE_USER_ROLE
--- ----------------------------------------
---
--- Remove a system user's association with a role, or with a role and country if the role is
---   country-oriented.
---
--- Parameters:
---  psUSERID - User identifier (mandatory).
---  pnROL_ID - Role identifier (mandatory).
---  pnLOC_ID - Location identifier of country (mandatory when the role is country-oriented, must be
---    absent or null otherwise).
---
-  procedure DELETE_USER_ROLE
-   (psUSERID in P_BASE.tmsUSR_USERID,
-    pnROL_ID in P_BASE.tmnROL_ID,
-    pnLOC_ID in P_BASE.tnLOC_ID := null);
+  procedure USER_LOGIN
+   (psUSERID in P_BASE.tmsUSR_USERID);
 --
 end P_SYSTEM_USER;
 /

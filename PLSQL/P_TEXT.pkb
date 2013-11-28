@@ -23,7 +23,7 @@ create or replace package body P_TEXT is
     nTXT_SEQ_NBR_MAX P_BASE.tnTXT_SEQ_NBR_MAX;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_TEXT',
+     (sVersion || '-' || sModule || '.SET_TEXT',
       to_char(pnITM_ID) || '~' || psTAB_ALIAS || '~' || psTXTT_CODE || '~' || to_char(pnSEQ_NBR) ||
         '~' || psLANG_CODE || '~' || to_char(length(psTEXT)) || ':' || psTEXT);
   --
@@ -215,7 +215,7 @@ create or replace package body P_TEXT is
     nItemCount2 integer;  -- Count of text items to be deleted.
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_TEXT',
+     (sVersion || '-' || sModule || '.DELETE_TEXT',
       to_char(pnITM_ID) || '~' || psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
   -- Determine if text to be deleted is of a mandatory text type (not necessary if all text is to be
@@ -356,12 +356,16 @@ create or replace package body P_TEXT is
 -- =====================================
 --
 begin
-  if sComponent != 'TXT'
-  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
+  if sModule != $$PLSQL_UNIT
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
   end if;
 --
   if sVersion != 'D0.1'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
+  end if;
+--
+  if sComponent != 'TXT'
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 3, 'Component code mismatch');
   end if;
 --
 end P_TEXT;

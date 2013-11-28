@@ -7,37 +7,18 @@ declare
   iCount pls_integer := 0;
 begin
   for rDST in
-   (select CODE, DESCRIPTION_EN, START_DATE, END_DATE, DISPLAY_SEQ, DESCRIPTION_FR,
-      SHORTDESCR_EN, SHORTDESCR_FR, NOTES
-    from S_DISPLACEMENT_STATUSES)
+   (select CODE, DESCRIPTION_EN, START_DATE, END_DATE, DISPLAY_SEQ, DESCRIPTION_FR, NOTES
+    from STAGE.S_DISPLACEMENT_STATUSES)
   loop
     iCount := iCount + 1;
   --
     P_DISPLACEMENT_STATUS.INSERT_DISPLACEMENT_STATUS
-     (nDST_ID, 'en', rDST.DESCRIPTION_EN, rDST.CODE, rDST.START_DATE, rDST.END_DATE,
-      rDST.DISPLAY_SEQ);
+     (nDST_ID, 'en', rDST.DESCRIPTION_EN, rDST.CODE, rDST.START_DATE, rDST.END_DATE, rDST.DISPLAY_SEQ);
     nVERSION_NBR := 1;
   --
     if rDST.DESCRIPTION_FR is not null
     then
       P_DISPLACEMENT_STATUS.SET_DST_DESCRIPTION(nDST_ID, nVERSION_NBR, 'fr', rDST.DESCRIPTION_FR);
-    end if;
-  --
-    if rDST.SHORTDESCR_EN is not null or rDST.SHORTDESCR_FR is not null
-    then
-      nSEQ_NBR := null;
-    --
-      if rDST.SHORTDESCR_EN is not null
-      then
-        P_DISPLACEMENT_STATUS.SET_DST_TEXT
-         (nDST_ID, nVERSION_NBR, 'SHORTDESCR', nSEQ_NBR, 'en', rDST.SHORTDESCR_EN);
-      end if;
-    --
-      if rDST.SHORTDESCR_FR is not null
-      then
-        P_DISPLACEMENT_STATUS.SET_DST_TEXT
-         (nDST_ID, nVERSION_NBR, 'SHORTDESCR', nSEQ_NBR, 'fr', rDST.SHORTDESCR_FR);
-      end if;
     end if;
   --
     if rDST.NOTES is not null

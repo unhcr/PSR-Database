@@ -50,7 +50,7 @@ Q_DESCRIPTIONS as
       on LANG.CODE = TXT.LANG_CODE
     left outer join T_USER_LANGUAGE_PREFERENCES ULP
       on ULP.LANG_CODE = TXT.LANG_CODE
-      and ULP.USERID = sys_context('PSR', 'USERID')
+      and ULP.USERID = SYS_CONTEXT('PSR', 'USERID')
     where TXT.TXTT_CODE = 'DESCR'
     and TXT.SEQ_NBR = 1)
   where RANK = 1)
@@ -189,7 +189,7 @@ Q_NAMES as
       on LANG.CODE = TXT.LANG_CODE
     left outer join T_USER_LANGUAGE_PREFERENCES ULP
       on ULP.LANG_CODE = TXT.LANG_CODE
-      and ULP.USERID = sys_context('PSR', 'USERID')
+      and ULP.USERID = SYS_CONTEXT('PSR', 'USERID')
     where TXT.TXTT_CODE = 'NAME'
     and TXT.SEQ_NBR = 1)
   where RANK = 1)
@@ -206,7 +206,7 @@ Q_NOTES as
       on LANG.CODE = TXT.LANG_CODE
     left outer join T_USER_LANGUAGE_PREFERENCES ULP
       on ULP.LANG_CODE = TXT.LANG_CODE
-      and ULP.USERID = sys_context('PSR', 'USERID')
+      and ULP.USERID = SYS_CONTEXT('PSR', 'USERID')
     where TXT.TXTT_CODE = 'NOTE')
   where RANK = 1)
 --

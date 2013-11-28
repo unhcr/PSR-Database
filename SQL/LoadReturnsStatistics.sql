@@ -18,7 +18,6 @@ begin
         when STC.COU_CODE_ASYLUM = 'VAR' then null
         else nvl(COU.ID, -1)
       end as LOC_ID_ASYLUM_COUNTRY,
-      STC.SOURCE, STC.BASIS,
       STC.STCT_CODE,
       STC.VALUE,
       row_number() over
@@ -28,7 +27,7 @@ begin
      (select STATSYEAR,
         to_date(STATSYEAR || '0101', 'YYYYMMDD') as START_DATE,
         add_months(to_date(STATSYEAR || '0101', 'YYYYMMDD'), 12) as END_DATE,
-        DST_CODE, COU_CODE_ASYLUM, COU_CODE_ORIGIN, SOURCE, BASIS,
+        DST_CODE, COU_CODE_ASYLUM, COU_CODE_ORIGIN,
         DATA_POINT as STCT_CODE,
         VALUE
       from S_ASR_RETURNS) STC
@@ -84,14 +83,6 @@ begin
           pnLOC_ID_ASYLUM_COUNTRY => rSTC.LOC_ID_ASYLUM_COUNTRY,
           pnLOC_ID_ORIGIN_COUNTRY => rSTC.LOC_ID_ORIGIN_COUNTRY);
         iCount1 := iCount1 + 1;
-      --
-        if rSTC.SOURCE is not null
-        then P_STATISTIC_GROUP.INSERT_STG_ATTRIBUTE(nSTG_ID, 'SOURCE', rSTC.SOURCE);
-        end if;
-      --
-        if rSTC.BASIS is not null
-        then P_STATISTIC_GROUP.INSERT_STG_ATTRIBUTE(nSTG_ID, 'BASIS', rSTC.BASIS);
-        end if;
       end if;
     --
       P_STATISTIC.INSERT_STATISTIC

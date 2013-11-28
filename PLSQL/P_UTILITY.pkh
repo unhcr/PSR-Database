@@ -6,10 +6,11 @@ create or replace package P_UTILITY is
 --  Procedures of general use in other packages (tracing and logging).
 --
 --  Change History:
---  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  16-Nov-2012 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
+  sModule varchar2(30) := $$PLSQL_UNIT;
   sVersion varchar2(10) := 'D0.1';
 --
 --

@@ -6,12 +6,13 @@ create or replace package P_BASE is
 --  Type definitions and data values used throughout the PSR system.
 --
 --  Change History:
---  11-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  22-Nov-2012 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
-  sComponent varchar2(30) := 'BAS';
+  sModule varchar2(30) := $$PLSQL_UNIT;
   sVersion varchar2(10) := 'D0.1';
+  sComponent varchar2(30) := 'BASE';
 --
 -- ========================================
 -- Subtype definitions
@@ -31,7 +32,6 @@ create or replace package P_BASE is
   subtype tnYear is number(4);
   subtype tmnYear is tnYear not null;
   subtype tsCountryCode is varchar2(3);
-  subtype tmsCountryCode is tsCountryCode not null;
 --
 -- T_AGE_PROFILES
 --
@@ -52,24 +52,6 @@ create or replace package P_BASE is
   subtype tmnAGR_AGE_TO is tnAGR_AGE_TO not null;
   subtype tnAGR_VERSION_NBR is T_AGE_RANGES.VERSION_NBR%type;
 --
--- T_CODE_TYPES
---
-  subtype tsCDET_CODE is T_CODE_TYPES.CODE%type;
-  subtype tmsCDET_CODE is tsCDET_CODE not null;
-  subtype tnCDET_DISPLAY_SEQ is T_CODE_TYPES.DISPLAY_SEQ%type;
-  subtype tsCDET_ACTIVE_FLAG is T_CODE_TYPES.ACTIVE_FLAG%type;
-  subtype tmsCDET_ACTIVE_FLAG is tsCDET_ACTIVE_FLAG not null;
-  subtype tnCDET_VERSION_NBR is T_CODE_TYPES.VERSION_NBR%type;
---
--- T_CODES
---
-  subtype tsCDE_CODE is T_CODES.CODE%type;
-  subtype tmsCDE_CODE is tsCDE_CODE not null;
-  subtype tnCDE_DISPLAY_SEQ is T_CODES.DISPLAY_SEQ%type;
-  subtype tsCDE_ACTIVE_FLAG is T_CODES.ACTIVE_FLAG%type;
-  subtype tmsCDE_ACTIVE_FLAG is tsCDE_ACTIVE_FLAG not null;
-  subtype tnCDE_VERSION_NBR is T_CODES.VERSION_NBR%type;
---
 -- T_COMPONENTS
 --
   subtype tsCOMP_CODE is T_COMPONENTS.CODE%type;
@@ -82,7 +64,6 @@ create or replace package P_BASE is
 -- T_DATA_ITEMS
 --
   subtype tnITM_ID is T_DATA_ITEMS.ID%type;
-  subtype tmnITM_ID is tnITM_ID not null;
 --
 -- T_DIMENSION_TYPES
 --
@@ -128,8 +109,6 @@ create or replace package P_BASE is
 --
   subtype tnLOC_ID is T_LOCATIONS.ID%type;
   subtype tmnLOC_ID is tnLOC_ID not null;
-  subtype tsLOC_ACTIVE_FLAG is T_LOCATIONS.ACTIVE_FLAG%type;
-  subtype tmsLOC_ACTIVE_FLAG is tsLOC_ACTIVE_FLAG not null;
   subtype tnLOC_VERSION_NBR is T_LOCATIONS.VERSION_NBR%type;
 --
 -- T_LOCATION_ATTRIBUTES
@@ -190,19 +169,6 @@ create or replace package P_BASE is
   subtype tsMSG_SEVERITY is T_MESSAGES.SEVERITY%type;
   subtype tnMSG_VERSION_NBR is T_MESSAGES.VERSION_NBR%type;
 --
--- T_PERMISSIONS
---
-  subtype tnPRM_ID is T_PERMISSIONS.ID%type;
-  subtype tmnPRM_ID is tnPRM_ID not null;
-  subtype tsPRM_WRITE_FLAG is T_PERMISSIONS.WRITE_FLAG%type;
-  subtype tmsPRM_WRITE_FLAG is tsPRM_WRITE_FLAG not null;
-  subtype tsPRM_ANNOTATE_FLAG is T_PERMISSIONS.ANNOTATE_FLAG%type;
-  subtype tmsPRM_ANNOTATE_FLAG is tsPRM_ANNOTATE_FLAG not null;
-  subtype tnPRM_DISPLAY_SEQ is T_PERMISSIONS.DISPLAY_SEQ%type;
-  subtype tsPRM_ACTIVE_FLAG is T_PERMISSIONS.ACTIVE_FLAG%type;
-  subtype tmsPRM_ACTIVE_FLAG is tsPRM_ACTIVE_FLAG not null;
-  subtype tnPRM_VERSION_NBR is T_PERMISSIONS.VERSION_NBR%type;
---
 -- T_POPULATION_PLANNING_GROUPS
 --
   subtype tnPPG_ID is T_POPULATION_PLANNING_GROUPS.ID%type;
@@ -210,17 +176,6 @@ create or replace package P_BASE is
   subtype tsPPG_CODE is T_POPULATION_PLANNING_GROUPS.PPG_CODE%type;
   subtype tmsPPG_CODE is tsPPG_CODE not null;
   subtype tnPPG_VERSION_NBR is T_POPULATION_PLANNING_GROUPS.VERSION_NBR%type;
---
--- T_ROLES
---
-  subtype tnROL_ID is T_ROLES.ID%type;
-  subtype tmnROL_ID is tnROL_ID not null;
-  subtype tsROL_COUNTRY_FLAG is T_ROLES.COUNTRY_FLAG%type;
-  subtype tmsROL_COUNTRY_FLAG is tsROL_COUNTRY_FLAG not null;
-  subtype tnROL_DISPLAY_SEQ is T_ROLES.DISPLAY_SEQ%type;
-  subtype tsROL_ACTIVE_FLAG is T_ROLES.ACTIVE_FLAG%type;
-  subtype tmsROL_ACTIVE_FLAG is tsROL_ACTIVE_FLAG not null;
-  subtype tnROL_VERSION_NBR is T_ROLES.VERSION_NBR%type;
 --
 -- T_SEXES
 --

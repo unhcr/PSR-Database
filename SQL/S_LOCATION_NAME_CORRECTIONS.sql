@@ -8,7 +8,7 @@ organization external
   default directory PSRDATA
   access parameters 
    (records delimited by '\r\n'
-    characterset UTF8
+    characterset WE8MSWIN1252
     badfile 'LOCATION_NAME_CORRECTIONS.bad'
     nodiscardfile
     logfile PSRLOG:'LOCATION_NAME_CORRECTIONS.log'

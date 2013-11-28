@@ -1166,7 +1166,14 @@ from
     select STATSYEAR, DISPLACEMENT_STATUS,
       COU_CODE_ASYLUM, LOCATION_NAME, NEW_LOCATION_NAME, COU_CODE_ORIGIN,
       decode(URBAN_RURAL_STATUS, 'Urban', 'U', URBAN_RURAL_STATUS) as URBAN_RURAL_STATUS,
-      ACCOMMODATION_TYPE, PPG_NAME, BASIS,
+      ACCOMMODATION_TYPE,
+      case
+        when COU_CODE_ASYLUM = 'SRB' and
+          LOCATION_NAME = 'Kosovo (S/RES/1244 (1999)) : Dispersed in the country / territory'
+        then PPG_NAME || ' (Kosovo)'
+        else PPG_NAME
+      end as PPG_NAME,
+      BASIS,
       F0, F5, F12, F18, F60, FOTHER, FTOTAL,
       M0, M5, M12, M18, M60, MOTHER, MTOTAL,
       TOTAL
@@ -1195,7 +1202,7 @@ select STATSYEAR, DST_CODE, COU_CODE_ASYLUM, LOCATION_NAME_EN, LOC_TYPE_DESCRIPT
 from
  (select STATSYEAR, DST_CODE, COU_CODE_ASYLUM, LOCATION_NAME_EN, LOC_TYPE_DESCRIPTION_EN,
     COU_CODE_ORIGIN, URBAN_RURAL_STATUS, ACMT_CODE, PPG_NAME,
-    CHARAGG(BASIS) as BASIS,
+    STAGE.CHARAGG(BASIS) as BASIS,
     round(sum(F0)) as F0, round(sum(F5)) as F5, round(sum(F12)) as F12, round(sum(F18)) as F18,
     round(sum(F60)) as F60, round(sum(FOTHER)) as FOTHER,
     round(sum(M0)) as M0, round(sum(M5)) as M5, round(sum(M12)) as M12, round(sum(M18)) as M18,

@@ -13,13 +13,12 @@ organization external
   default DIRECTORY PSRDATA
   access parameters 
    (records delimited by '\r\n'
-    characterset UTF8
+    characterset UTF16
     badfile 'TEXT_TYPES.bad'
     nodiscardfile
     logfile PSRLOG:'TEXT_TYPES.log'
     skip 1 
-    fields terminated by ','
-    optionally enclosed by '"' and '"'
+    fields terminated by X'0009'
     lrtrim
     missing field values are null
      (CODE char(4000),
@@ -31,7 +30,7 @@ organization external
       DESCRIPTION_AR char(4000),
       DESCRIPTION_ZH char(4000),
       NOTES char(4000)))
-  location ('TEXT_TYPES.csv'))
+  location ('TEXT_TYPES.tsv'))
 reject limit unlimited;
 
 grant select on S_TEXT_TYPES to PSR_STAGE;

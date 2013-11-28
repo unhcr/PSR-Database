@@ -6,12 +6,13 @@ create or replace package P_STATISTIC is
 --  Procedures for maintenance of statistics.
 --
 --  Change History:
---  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  22-Nov-2012 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
-  sComponent varchar2(30) := 'STC';
+  sModule varchar2(30) := $$PLSQL_UNIT;
   sVersion varchar2(10) := 'D0.1';
+  sComponent varchar2(30) := 'STC';
 --
 -- ========================================
 -- Program unit definitions

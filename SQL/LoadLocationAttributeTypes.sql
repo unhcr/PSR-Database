@@ -7,7 +7,7 @@ declare
 begin
   for rLOCAT in
    (select CODE, DESCRIPTION_EN, DATA_TYPE, DISPLAY_SEQ, DESCRIPTION_FR, NOTES
-    from S_LOCATION_ATTRIBUTE_TYPES)
+    from STAGE.S_LOCATION_ATTRIBUTE_TYPES)
   loop
     nCount := nCount + 1;
   --

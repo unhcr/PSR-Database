@@ -19,7 +19,7 @@ create or replace package body P_TEXT_TYPE is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_TEXT_TYPE',
+     (sVersion || '-' || sModule || '.INSERT_TEXT_TYPE',
       psCODE || '~' || to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -52,7 +52,7 @@ create or replace package body P_TEXT_TYPE is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_TEXT_TYPE',
+     (sVersion || '-' || sModule || '.UPDATE_TEXT_TYPE',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnDISPLAY_SEQ) || '~' ||
         psACTIVE_FLAG || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
@@ -99,7 +99,7 @@ create or replace package body P_TEXT_TYPE is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_TEXT_TYPE',
+     (sVersion || '-' || sModule || '.SET_TEXT_TYPE',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnDISPLAY_SEQ) || '~' ||
         psACTIVE_FLAG || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
@@ -135,7 +135,7 @@ create or replace package body P_TEXT_TYPE is
     xTXTT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_TEXT_TYPE', psCODE || '~' || to_char(pnVERSION_NBR));
+     (sVersion || '-' || sModule || '.DELETE_TEXT_TYPE', psCODE || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
     into nITM_ID, nVERSION_NBR, xTXTT_ROWID
@@ -171,7 +171,7 @@ create or replace package body P_TEXT_TYPE is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_TXTT_DESCRIPTION',
+     (sVersion || '-' || sModule || '.SET_TXTT_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -194,7 +194,7 @@ create or replace package body P_TEXT_TYPE is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_TXTT_DESCRIPTION',
+     (sVersion || '-' || sModule || '.REMOVE_TXTT_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE);
   --
     REMOVE_TXTT_TEXT(psCODE, pnVERSION_NBR, 'DESCR', 1, psLANG_CODE);
@@ -222,7 +222,7 @@ create or replace package body P_TEXT_TYPE is
     xTXTT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_TXTT_TEXT',
+     (sVersion || '-' || sModule || '.SET_TXTT_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' || to_char(pnSEQ_NBR) ||
         '~' || psLANG_CODE || '~' || to_char(length(psText)) || ':' || psText);
   --
@@ -266,7 +266,7 @@ create or replace package body P_TEXT_TYPE is
     xTXTT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_TXTT_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_TXTT_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -307,7 +307,7 @@ create or replace package body P_TEXT_TYPE is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_TEXT_TYPE_PROPERTIES',
+     (sVersion || '-' || sModule || '.INSERT_TEXT_TYPE_PROPERTIES',
       psTXTT_CODE || '~' || psTAB_ALIAS || '~' || psMANDATORY_FLAG || '~' ||
         psMULTI_INSTANCE_FLAG || '~' || psLONG_TEXT_FLAG);
   --
@@ -338,7 +338,7 @@ create or replace package body P_TEXT_TYPE is
     xTTP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_TEXT_TYPE_PROPERTIES',
+     (sVersion || '-' || sModule || '.UPDATE_TEXT_TYPE_PROPERTIES',
       psTXTT_CODE || '~' || psTAB_ALIAS || '~' || to_char(pnVERSION_NBR) || '~' ||
         psMANDATORY_FLAG || '~' || psMULTI_INSTANCE_FLAG || '~' || psLONG_TEXT_FLAG);
   --
@@ -382,7 +382,7 @@ create or replace package body P_TEXT_TYPE is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_TEXT_TYPE_PROPERTIES',
+     (sVersion || '-' || sModule || '.SET_TEXT_TYPE_PROPERTIES',
       psTXTT_CODE || '~' || psTAB_ALIAS || '~' || to_char(pnVERSION_NBR) || '~' ||
         psMANDATORY_FLAG || '~' || psMULTI_INSTANCE_FLAG || '~' || psLONG_TEXT_FLAG);
   --
@@ -418,7 +418,7 @@ create or replace package body P_TEXT_TYPE is
     xTTP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_TEXT_TYPE_PROPERTIES',
+     (sVersion || '-' || sModule || '.DELETE_TEXT_TYPE_PROPERTIES',
       psTXTT_CODE || '~' || psTAB_ALIAS || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -463,7 +463,7 @@ create or replace package body P_TEXT_TYPE is
     xTTP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_TTP_TEXT',
+     (sVersion || '-' || sModule || '.SET_TTP_TEXT',
       psTXTT_CODE || '~' || psTAB_ALIAS || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE_TEXT || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psText)) || ':' || psText);
@@ -511,7 +511,7 @@ create or replace package body P_TEXT_TYPE is
     xTTP_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_TTP_TEXT',
+     (sVersion || '-' || sModule || '.SET_TTP_TEXT',
       psTXTT_CODE || '~' || psTAB_ALIAS || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE_TEXT || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -545,12 +545,16 @@ create or replace package body P_TEXT_TYPE is
 -- =====================================
 --
 begin
-  if sComponent != 'TTP'
-  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
+  if sModule != $$PLSQL_UNIT
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
   end if;
 --
   if sVersion != 'D0.1'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
+  end if;
+--
+  if sComponent != 'TXTT'
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 3, 'Component code mismatch');
   end if;
 --
 end P_TEXT_TYPE;

@@ -19,7 +19,7 @@ create or replace package body P_DIMENSION is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_DIMENSION_TYPE',
+     (sVersion || '-' || sModule || '.INSERT_DIMENSION_TYPE',
       psCODE || '~' || to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -52,7 +52,7 @@ create or replace package body P_DIMENSION is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_DIMENSION_TYPE',
+     (sVersion || '-' || sModule || '.UPDATE_DIMENSION_TYPE',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnDISPLAY_SEQ) ||
         '~' || psACTIVE_FLAG || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
@@ -99,7 +99,7 @@ create or replace package body P_DIMENSION is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_DIMENSION_TYPE',
+     (sVersion || '-' || sModule || '.SET_DIMENSION_TYPE',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnDISPLAY_SEQ) || '~' ||
         psACTIVE_FLAG || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
@@ -135,7 +135,7 @@ create or replace package body P_DIMENSION is
     xDIMT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_DIMENSION_TYPE',
+     (sVersion || '-' || sModule || '.DELETE_DIMENSION_TYPE',
       psCODE || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -172,7 +172,7 @@ create or replace package body P_DIMENSION is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_DIMT_DESCRIPTION',
+     (sVersion || '-' || sModule || '.SET_DIMT_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -195,7 +195,7 @@ create or replace package body P_DIMENSION is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_DIMT_DESCRIPTION',
+     (sVersion || '-' || sModule || '.REMOVE_DIMT_DESCRIPTION',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE);
   --
     REMOVE_DIMT_TEXT(psCODE, pnVERSION_NBR, 'DESCR', 1, psLANG_CODE);
@@ -223,7 +223,7 @@ create or replace package body P_DIMENSION is
     xDIMT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_DIMT_TEXT',
+     (sVersion || '-' || sModule || '.SET_DIMT_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' || to_char(pnSEQ_NBR) ||
         '~' || psLANG_CODE || '~' || to_char(length(psText)) || ':' || psText);
   --
@@ -267,7 +267,7 @@ create or replace package body P_DIMENSION is
     xDIMT_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_DIMT_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_DIMT_TEXT',
       psCODE || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -314,10 +314,10 @@ create or replace package body P_DIMENSION is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_DIMENSION_VALUE',
+     (sVersion || '-' || sModule || '.INSERT_DIMENSION_VALUE',
       '~' || psDIMT_CODE || '~' || psCODE || '~' ||
-        to_char(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
-        to_char(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -340,7 +340,7 @@ create or replace package body P_DIMENSION is
       when NO_DATA_FOUND then null;
     --
       when TOO_MANY_ROWS
-      then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 3, 'Dimension value with this type and code already exists');
+      then P_MESSAGE.DISPLAY_MESSAGE('DST', 3, 'Dimension value with this type and code already exists');
     end;
   --
     P_TEXT.SET_TEXT(nITM_ID, 'DIM', 'DESCR', nSEQ_NBR, psLANG_CODE, psDescription);
@@ -357,8 +357,8 @@ create or replace package body P_DIMENSION is
   --
     P_UTILITY.TRACE_CONTEXT
      (to_char(pnID) || '~' || psDIMT_CODE || '~' || psCODE || '~' ||
-        to_char(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
-        to_char(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -395,10 +395,10 @@ create or replace package body P_DIMENSION is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_DIMENSION_VALUE',
+     (sVersion || '-' || sModule || '.UPDATE_DIMENSION_VALUE',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psCODE || '~' ||
-        to_char(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
-        to_char(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -473,8 +473,8 @@ create or replace package body P_DIMENSION is
   --
     P_UTILITY.TRACE_CONTEXT
      (to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psCODE || '~' ||
-        to_char(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
-        to_char(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -502,11 +502,11 @@ create or replace package body P_DIMENSION is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_DIMENSION_VALUE',
+     (sVersion || '-' || sModule || '.SET_DIMENSION_VALUE',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psDIMT_CODE || '~' || psCODE || '~' ||
-        to_char(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
-        to_char(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -529,8 +529,8 @@ create or replace package body P_DIMENSION is
     P_UTILITY.TRACE_CONTEXT
      (to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psDIMT_CODE || '~' || psCODE || '~' ||
-        to_char(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
-        to_char(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdSTART_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
+        to_date(pdEND_DATE, 'YYYY-MM-DD HH24:MI:SS') || '~' ||
         to_char(pnDISPLAY_SEQ) || '~' || psACTIVE_FLAG || '~' ||
         psLANG_CODE || '~' || to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -553,7 +553,7 @@ create or replace package body P_DIMENSION is
     xDIM_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_DIMENSION_VALUE',
+     (sVersion || '-' || sModule || '.DELETE_DIMENSION_VALUE',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -590,7 +590,7 @@ create or replace package body P_DIMENSION is
     nSEQ_NBR P_BASE.tnTXT_SEQ_NBR := 1;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_DIM_DESCRIPTION',
+     (sVersion || '-' || sModule || '.SET_DIM_DESCRIPTION',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psDescription)) || ':' || psDescription);
   --
@@ -613,7 +613,7 @@ create or replace package body P_DIMENSION is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_DIM_DESCRIPTION',
+     (sVersion || '-' || sModule || '.REMOVE_DIM_DESCRIPTION',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE);
   --
     REMOVE_DIM_TEXT(pnID, pnVERSION_NBR, 'DESCR', 1, psLANG_CODE);
@@ -641,7 +641,7 @@ create or replace package body P_DIMENSION is
     xDIM_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_DIM_TEXT',
+     (sVersion || '-' || sModule || '.SET_DIM_TEXT',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' || to_char(pnSEQ_NBR) ||
         '~' || psLANG_CODE || '~' || to_char(length(psText)) || ':' || psText);
   --
@@ -685,7 +685,7 @@ create or replace package body P_DIMENSION is
     xDIM_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_DIM_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_DIM_TEXT',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -718,12 +718,16 @@ create or replace package body P_DIMENSION is
 -- =====================================
 --
 begin
-  if sComponent != 'DIM'
-  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
+  if sModule != $$PLSQL_UNIT
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
   end if;
 --
   if sVersion != 'D0.1'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
+  end if;
+--
+  if sComponent != 'DIM'
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 3, 'Component code mismatch');
   end if;
 --
 end P_DIMENSION;

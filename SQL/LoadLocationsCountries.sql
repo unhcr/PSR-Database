@@ -11,15 +11,11 @@ declare
 begin
   for rLOC in
    (select LOC.KEY, LOC.ISO3166A3, LOC.ISO_NAME_EN, LOC.LOCT_CODE, LOC.START_DATE, LOC.END_DATE,
-      nvl(LOC.ACTIVE_FLAG, 'Y') as ACTIVE_FLAG, LOC.ISO3166A2, LOC.ISO3166NUM, LOC.HCRCC,
+      LOC.ISO3166A2, LOC.ISO3166NUM, LOC.HCRCC,
       LOC.ISO_NAME_FR, LOC.ISO_FULL_NAME_EN, LOC.ISO_FULL_NAME_FR,
-      LOC.GAWCC, LOC.GAACC, LOC.GAHCC, LOC.NOTES, LID.ID,
+      LOC.GAWCC, LOC.GAACC, LOC.GAHCC, LOC.NOTES,
       LOCA1.LOC_ID as LOC_ID_UNSD, LOCA2.LOC_ID as LOC_ID_HCRRESP1, LOCA3.LOC_ID as LOC_ID_HCRRESP2
     from S_LOCATION_COUNTRIES LOC
-    left outer join S_LOCATION_IDS LID
-      on LID.LOCT_CODE = LOC.LOCT_CODE
-      and LID.NAME_EN = LOC.ISO_NAME_EN
-      and nvl(LID.START_DATE, P_BASE.MIN_DATE) = nvl(LOC.START_DATE, P_BASE.MIN_DATE)
     left outer join T_LOCATION_ATTRIBUTES LOCA1
       on LOCA1.LOCAT_CODE = 'UNSDNUM'
       and LOCA1.CHAR_VALUE = LOC.UNSD_FROM
@@ -33,20 +29,10 @@ begin
   loop
     iCount1 := iCount1 + 1;
   --
-    if rLOC.ID is null
-    then
-      P_LOCATION.INSERT_LOCATION
-       (nLOC_ID, 'en', rLOC.ISO_NAME_EN, rLOC.LOCT_CODE,
-        case when rLOC.LOCT_CODE = 'COUNTRY' then rLOC.ISO3166A3 end,
-        rLOC.START_DATE, rLOC.END_DATE, rLOC.ACTIVE_FLAG);
-    else
-      P_LOCATION.INSERT_LOCATION_WITH_ID
-       (rLOC.ID, 'en', rLOC.ISO_NAME_EN, rLOC.LOCT_CODE,
-        case when rLOC.LOCT_CODE = 'COUNTRY' then rLOC.ISO3166A3 end,
-        rLOC.START_DATE, rLOC.END_DATE, rLOC.ACTIVE_FLAG);
-      nLOC_ID := rLOC.ID;
-    end if;
-  --
+    P_LOCATION.INSERT_LOCATION
+     (nLOC_ID, 'en', rLOC.ISO_NAME_EN, rLOC.LOCT_CODE,
+      case when rLOC.LOCT_CODE = 'COUNTRY' then rLOC.ISO3166A3 end,
+      rLOC.START_DATE, rLOC.END_DATE);
     anLOC_ID(rLOC.KEY) := nLOC_ID;
     nVERSION_NBR := 1;
   --
@@ -156,37 +142,6 @@ begin
   if iCount2 = 1
   then dbms_output.put_line('1 LOCATION_RELATIONSHIPS record inserted');
   else dbms_output.put_line(to_char(iCount2) || ' LOCATION_RELATIONSHIPS records inserted');
-  end if;
---
-  iCount1 := 0;
---
-  for rLOC in
-   (select KEY, TXTT_CODE, NAME_EN, NAME_FR
-    from S_LOCATION_COUNTRY_NAMES)
-  loop
-    select ID, VERSION_NBR
-    into nLOC_ID, nVERSION_NBR
-    from T_LOCATIONS
-    where ID = anLOC_ID(rLOC.KEY);
-  --
-    nSEQ_NBR := null;
-  --
-    if rLOC.NAME_EN is not null
-    then
-      iCount1 := iCount1 + 1;
-      P_LOCATION.SET_LOC_TEXT(nLOC_ID, nVERSION_NBR, rLOC.TXTT_CODE, nSEQ_NBR, 'en', rLOC.NAME_EN);
-    end if;
-  --
-    if rLOC.NAME_FR is not null
-    then
-      iCount1 := iCount1 + 1;
-      P_LOCATION.SET_LOC_TEXT(nLOC_ID, nVERSION_NBR, rLOC.TXTT_CODE, nSEQ_NBR, 'fr', rLOC.NAME_FR);
-    end if;
-  end loop;
---
-  if iCount1 = 1
-  then dbms_output.put_line('1 additional TEXT_ITEMS record inserted');
-  else dbms_output.put_line(to_char(iCount1) || ' additional TEXT_ITEMS records inserted');
   end if;
 end;
 /

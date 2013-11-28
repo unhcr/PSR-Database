@@ -6,8 +6,6 @@ create table S_DISPLACEMENT_STATUSES
   DISPLAY_SEQ number(5),
   ACTIVE_FLAG varchar2(1),
   DESCRIPTION_FR varchar2(1000),
-  SHORTDESCR_EN varchar2(1000),
-  SHORTDESCR_FR varchar2(1000),
   NOTES varchar2(4000))
 organization external
  (type oracle_loader
@@ -30,8 +28,6 @@ organization external
       DISPLAY_SEQ char(4000),
       ACTIVE_FLAG char(4000),
       DESCRIPTION_FR char(4000),
-      SHORTDESCR_EN char(4000),
-      SHORTDESCR_FR char(4000),
       NOTES char(4000)))
   location ('DISPLACEMENT_STATUSES.csv'))
 reject limit unlimited;

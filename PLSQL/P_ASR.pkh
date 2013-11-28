@@ -6,26 +6,27 @@ create or replace package P_ASR is
 --  Procedures for maintenance of statistics.
 --
 --  Change History:
---  3-Oct-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  23-Nov-2012 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
-  sComponent varchar2(30) := 'ASR';
+  sModule varchar2(30) := $$PLSQL_UNIT;
   sVersion varchar2(10) := 'D0.1';
+  sComponent varchar2(30) := 'ASR';
 --
 -- ========================================
 -- Program unit definitions
 -- ========================================
 --
 -- ----------------------------------------
--- INSERT_ASR_RETURNEES
+-- INSERT_TABLE7AB
 -- ----------------------------------------
 --
--- Create a new row in ASR returnees table.
+-- Create a new row in ASR table 7A/7B.
 --
 -- Parameters:
 --
-  procedure INSERT_ASR_RETURNEES
+  procedure INSERT_TABLE7AB
    (pnASR_YEAR in P_BASE.tmnYear,
     pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID,
     pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
@@ -36,14 +37,14 @@ create or replace package P_ASR is
     pnREFRTN_AH_VALUE in P_BASE.tnSTC_VALUE);
 --
 -- ----------------------------------------
--- UPDATE_ASR_RETURNEES
+-- UPDATE_TABLE7AB
 -- ----------------------------------------
 --
--- Update an existing row in ASR returnees table.
+-- Update an existing row in ASR table 7A/7B.
 --
 -- Parameters:
 --
-  procedure UPDATE_ASR_RETURNEES
+  procedure UPDATE_TABLE7AB
    (pnASR_YEAR in P_BASE.tmnYear,
     pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID,
     pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
@@ -62,14 +63,14 @@ create or replace package P_ASR is
     pnREFRTN_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR);
 --
 -- ----------------------------------------
--- DELETE_ASR_RETURNEES
+-- DELETE_TABLE7AB
 -- ----------------------------------------
 --
--- Delete a row in ASR returnees table.
+-- Delete a row in ASR table 7A/7B.
 --
 -- Parameters:
 --
-  procedure DELETE_ASR_RETURNEES
+  procedure DELETE_TABLE7AB
    (pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID,
     pnSTG_VERSION_NBR in P_BASE.tnSTG_VERSION_NBR,
     pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,

@@ -48,16 +48,6 @@ end TR_STG_RBU_AUDIT;
 /
 
 
-create or replace trigger TR_RLC_RBU_AUDIT
-before update on T_ROLE_COUNTRIES
-for each row
-begin
-  :new.UPDATE_TIMESTAMP := systimestamp;
-  :new.UPDATE_USERID := nvl(sys_context('PSR', 'USERID'), '*' || user);
-end TR_RLC_RBU_AUDIT;
-/
-
-
 create or replace trigger TR_ROL_RBU_AUDIT
 before update on T_ROLES
 for each row
@@ -105,16 +95,6 @@ begin
   :new.UPDATE_TIMESTAMP := systimestamp;
   :new.UPDATE_USERID := nvl(sys_context('PSR', 'USERID'), '*' || user);
 end TR_UIR_RBU_AUDIT;
-/
-
-
-create or replace trigger TR_UIRC_RBU_AUDIT
-before update on T_USERS_IN_ROLE_COUNTRIES
-for each row
-begin
-  :new.UPDATE_TIMESTAMP := systimestamp;
-  :new.UPDATE_USERID := nvl(sys_context('PSR', 'USERID'), '*' || user);
-end TR_UIRC_RBU_AUDIT;
 /
 
 

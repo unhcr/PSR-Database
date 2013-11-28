@@ -419,6 +419,10 @@ create or replace package body P_UTILITY is
 -- ========================================
 --
 begin
+  if sModule != $$PLSQL_UNIT
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
+  end if;
+--
   if sVersion != 'D0.1'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
   end if;

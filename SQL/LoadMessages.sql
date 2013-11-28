@@ -7,7 +7,7 @@ declare
 begin
   for rCOMP in
    (select CODE, DESCRIPTION_EN, DISPLAY_SEQ, DESCRIPTION_FR, NOTES
-    from S_COMPONENTS)
+    from STAGE.S_COMPONENTS)
   loop
     iCount := iCount + 1;
   --
@@ -37,7 +37,7 @@ declare
 begin
   for rMSG in
    (select COMP_CODE, MESSAGE_EN, SEVERITY, SEQ_NBR, MESSAGE_FR, NOTES
-    from S_MESSAGES)
+    from STAGE.S_MESSAGES)
   loop
     iCount := iCount + 1;
   --

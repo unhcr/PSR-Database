@@ -14,13 +14,12 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset UTF8
+    characterset UTF16
     badfile 'LANGUAGES.bad'
     nodiscardfile
     logfile PSRLOG:'LANGUAGES.log'
     skip 1
-    fields terminated by ','
-    optionally enclosed by '"' and '"'
+    fields terminated by X'0009'
     lrtrim
     missing field values are null
      (CODE char(4000),
@@ -33,7 +32,7 @@ organization external
       NAME_AR char(4000),
       NAME_ZH char(4000),
       NOTES char(4000)))
-  location ('LANGUAGES.csv'))
+  location ('LANGUAGES.tsv'))
 reject limit unlimited;
 
 grant select on S_LANGUAGES to PSR_STAGE;

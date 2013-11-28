@@ -6,74 +6,25 @@ create or replace package P_CONTEXT is
 --  Procedures for managing the PSR application context.
 --
 --  Change History:
---  14-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  16-Nov-2012 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
+  sModule varchar2(30) := $$PLSQL_UNIT;
   sVersion varchar2(10) := 'D0.1';
-  sComponent varchar2(30) := 'CTX';
+  sComponent varchar2(30) := 'CTXT';
 --
 -- ----------------------------------------
 -- SET_USERID
 -- ----------------------------------------
 --
--- Set the user id in the PSR application context.
+-- Create a new language record or update an existing one.
 --
 -- Parameters:
---  psUSERID - The user ID to be set (mandatory).
+--  psUSERID - The user ID to be set in the PSR application context.
 --
   procedure SET_USERID
    (psUSERID in P_BASE.tmsUSR_USERID);
---
--- ----------------------------------------
--- CLEAR_USERID
--- ----------------------------------------
---
--- Clear the user id in the PSR application context.
---
-  procedure CLEAR_USERID;
---
--- ----------------------------------------
--- SET_COUNTRY
--- ----------------------------------------
---
--- Set the location id of the current country in the PSR application context.
---
--- Parameters:
---  pnLOC_ID_COUNTRY - The country location id to be set (mandatory).
---
-  procedure SET_COUNTRY
-   (pnLOC_ID_COUNTRY in P_BASE.tmnLOC_ID);
---
--- ----------------------------------------
--- CLEAR_COUNTRY
--- ----------------------------------------
---
--- Clear the country location id in the PSR application context.
---
-  procedure CLEAR_COUNTRY;
---
--- ----------------------------------------
--- SET_CONTEXT
--- ----------------------------------------
---
--- Set the location id of the current country in the PSR application context.
---
--- Parameters:
---  psUSERID - The user ID to be set (mandatory).
---  pnLOC_ID_COUNTRY - The country location id to be set (optional).
---
-  procedure SET_CONTEXT
-   (psUSERID in P_BASE.tmsUSR_USERID,
-    pnLOC_ID_COUNTRY in P_BASE.tnLOC_ID := null);
---
--- ----------------------------------------
--- CLEAR_CONTEXT
--- ----------------------------------------
---
--- Clear the PSR application context.
---
-  procedure CLEAR_CONTEXT;
 --
 end P_CONTEXT;
 /

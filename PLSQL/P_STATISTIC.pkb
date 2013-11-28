@@ -50,7 +50,7 @@ create or replace package body P_STATISTIC is
     nSTG_SEQ_NBR P_BASE.tnSTG_SEQ_NBR;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_STATISTIC',
+     (sVersion || '-' || sModule || '.INSERT_STATISTIC',
       '~' || psSTCT_CODE || '~' ||
         to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD')  || '~' ||
         to_char(pnDST_ID) || '~' ||
@@ -199,7 +199,7 @@ create or replace package body P_STATISTIC is
     xSTC_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.UPDATE_STATISTIC',
+     (sVersion || '-' || sModule || '.UPDATE_STATISTIC',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnVALUE));
   --
     select VERSION_NBR, rowid
@@ -251,7 +251,7 @@ create or replace package body P_STATISTIC is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STATISTIC',
+     (sVersion || '-' || sModule || '.SET_STATISTIC',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psSTCT_CODE || '~' ||
         to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD')  || '~' ||
         to_char(pnDST_ID) || '~' ||
@@ -295,7 +295,7 @@ create or replace package body P_STATISTIC is
     xSTC_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_STATISTIC',
+     (sVersion || '-' || sModule || '.DELETE_STATISTIC',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
@@ -338,7 +338,7 @@ create or replace package body P_STATISTIC is
     xSTC_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_STC_TEXT',
+     (sVersion || '-' || sModule || '.SET_STC_TEXT',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' ||
         psLANG_CODE || '~' || to_char(length(psText)) || ':' || psText);
@@ -383,7 +383,7 @@ create or replace package body P_STATISTIC is
     xSTC_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.REMOVE_STC_TEXT',
+     (sVersion || '-' || sModule || '.REMOVE_STC_TEXT',
       to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' ||
         psTXTT_CODE || '~' || to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
@@ -423,7 +423,7 @@ create or replace package body P_STATISTIC is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.INSERT_STATISTIC_IN_GROUP',
+     (sVersion || '-' || sModule || '.INSERT_STATISTIC_IN_GROUP',
       to_char(pnSTC_ID) || '~' || to_char(pnSTG_ID));
   --
     insert into T_STATISTICS_IN_GROUPS (STC_ID, STG_ID)
@@ -445,7 +445,7 @@ create or replace package body P_STATISTIC is
   is
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.DELETE_STATISTIC_IN_GROUP',
+     (sVersion || '-' || sModule || '.DELETE_STATISTIC_IN_GROUP',
       to_char(pnSTC_ID) || '~' || to_char(pnSTG_ID));
   --
     delete from T_STATISTICS_IN_GROUPS
@@ -463,12 +463,16 @@ create or replace package body P_STATISTIC is
 -- =====================================
 --
 begin
-  if sComponent != 'STC'
-  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
+  if sModule != $$PLSQL_UNIT
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Module name mismatch');
   end if;
 --
   if sVersion != 'D0.1'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
+  end if;
+--
+  if sComponent != 'STC'
+  then P_MESSAGE.DISPLAY_MESSAGE('GEN', 3, 'Component code mismatch');
   end if;
 --
 end P_STATISTIC;

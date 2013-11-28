@@ -24,17 +24,17 @@ begin
       STC.URBAN_RURAL_STATUS, DIM1.ID as DIM_ID1,
       STC.ACMT_CODE, DIM2.ID as DIM_ID2,
       STC.BASIS, DIM3.ID as DIM_ID3,
-      STC.PPG_NAME, PPG.ID as PPG_ID,
-      case when STC.PPG_COUNT > 1 then STC.PPG_NAME end as SUBGROUP_NAME,
+      STC.PPG_NAME, nvl(PPG1.ID, PPG2.ID) as PPG_ID,
+      case when STC.PPG_COUNT > 1 then STC.PPG_NAME end as SUBGROUP_NAME, 
       STC.STCT_CODE,
       STC.SEX_CODE,
       STC.AGE_FROM, AGR.ID as AGR_ID,
       STC.VALUE,
       row_number() over
        (partition by STC.STATSYEAR, DST.ID, COU.ID, LOC1.ID, OGN.ID, DIM1.ID, DIM2.ID, DIM3.ID,
-          case when STC.PPG_COUNT > 1 then STC.PPG_NAME end
+          nvl(PPG1.ID, PPG2.ID)
         order by STC.STCT_CODE, STC.SEX_CODE, AGR.ID) as STG_CHILD_NUMBER
-    from
+    from 
      (select STATSYEAR,
         to_date(STATSYEAR || '0101', 'YYYYMMDD') as START_DATE_YEAR,
         add_months(to_date(STATSYEAR || '0101', 'YYYYMMDD'), 12) as END_DATE_YEAR,
@@ -59,13 +59,11 @@ begin
         to_number(substr(DATA_POINT, 2)) as AGE_FROM,
         VALUE
       from S_ASR_DEMOGRAPHICS) STC
-    -- Displacement status
     left outer join T_DISPLACEMENT_STATUSES DST
       on DST.CODE = STC.DST_CODE
       and DST.START_DATE < STC.END_DATE_YEAR
       and DST.END_DATE >= STC.END_DATE_YEAR
-    -- Country of asylum
-    left outer join
+    left outer join -- Country of asylum
      (select LOCA.CHAR_VALUE as UNHCR_COUNTRY_CODE, LOC.START_DATE, LOC.END_DATE, LOC.ID
       from T_LOCATION_ATTRIBUTES LOCA
       inner join T_LOCATIONS LOC
@@ -75,8 +73,7 @@ begin
       on COU.UNHCR_COUNTRY_CODE = STC.COU_CODE_ASYLUM
       and COU.START_DATE < STC.END_DATE_YEAR
       and COU.END_DATE >= STC.END_DATE_YEAR
-    -- Asylum location (matching on name and type)
-    left outer join
+    left outer join -- Asylum location (matching on name and type)
      (select LOCR.LOC_ID_FROM, LOCR.LOCRT_CODE, LOCR.START_DATE, LOCR.END_DATE, LOC.ID,
         LOC.NAME_EN, nvl(LOCTV.DESCRIPTION_EN, LOCT.DESCRIPTION_EN) as LOC_TYPE_DESCRIPTION_EN
       from T_LOCATION_RELATIONSHIPS LOCR
@@ -114,8 +111,7 @@ begin
       and LOC1.END_DATE >= STC.END_DATE_YEAR
       and LOC1.NAME_EN = STC.LOCATION_NAME_EN
       and LOC1.LOC_TYPE_DESCRIPTION_EN = nvl(STC.LOC_TYPE_DESCRIPTION_EN, 'Undefined')
-    -- Asylum location (matching on name only)
-    left outer join
+    left outer join -- Asylum location (matching on name only)
      (select LOCR.LOC_ID_FROM, LOCR.LOCRT_CODE, LOCR.START_DATE, LOCR.END_DATE, LOC.ID, LOC.NAME_EN
       from T_LOCATION_RELATIONSHIPS LOCR
       inner join
@@ -133,8 +129,7 @@ begin
       and LOC2.START_DATE < STC.END_DATE_YEAR
       and LOC2.END_DATE >= STC.END_DATE_YEAR
       and LOC2.NAME_EN = STC.LOCATION_NAME_EN
-    -- Origin
-    left outer join
+    left outer join -- Origin
      (select LOCA.CHAR_VALUE as UNHCR_COUNTRY_CODE, LOC.START_DATE,
         lead(LOC.START_DATE, 1, P_BASE.MAX_DATE) over
          (partition by LOCA.CHAR_VALUE order by LOC.START_DATE) as END_DATE,
@@ -147,42 +142,66 @@ begin
       on OGN.UNHCR_COUNTRY_CODE = STC.COU_CODE_ORIGIN
       and OGN.START_DATE < STC.END_DATE_YEAR
       and OGN.END_DATE >= STC.END_DATE_YEAR
-    -- Urban/rural indicator
     left outer join T_DIMENSION_VALUES DIM1
       on DIM1.DIMT_CODE = 'UR'
       and DIM1.CODE = STC.URBAN_RURAL_STATUS
       and DIM1.START_DATE < STC.END_DATE_YEAR
       and DIM1.END_DATE >= STC.END_DATE_YEAR
-    -- Accommodation type
     left outer join T_DIMENSION_VALUES DIM2
       on DIM2.DIMT_CODE = 'ACMT'
       and DIM2.CODE = STC.ACMT_CODE
       and DIM2.START_DATE < STC.END_DATE_YEAR
       and DIM2.END_DATE >= STC.END_DATE_YEAR
-    -- Registered indicator
     left outer join T_DIMENSION_VALUES DIM3
       on DIM3.DIMT_CODE = 'REG'
       and DIM3.CODE = STC.REGISTERED_INDICATOR
       and DIM3.START_DATE < STC.END_DATE_YEAR
       and DIM3.END_DATE >= STC.END_DATE_YEAR
-    -- PPGs
-    left outer join S_COUNTRY_PPGS CPG1
-      on CPG1.COU_CODE = STC.COU_CODE_ASYLUM
-      and CPG1.START_DATE < STC.END_DATE_YEAR
-      and CPG1.END_DATE >= STC.END_DATE_YEAR
-      and CPG1.DESCRIPTION = upper(STC.PPG_NAME)
-      and CPG1.LOCATION_NAME_EN = STC.LOCATION_NAME_EN
-    left outer join S_COUNTRY_PPGS CPG2
-      on CPG2.COU_CODE = STC.COU_CODE_ASYLUM
-      and CPG2.START_DATE < STC.END_DATE_YEAR
-      and CPG2.END_DATE >= STC.END_DATE_YEAR
-      and CPG2.DESCRIPTION = upper(STC.PPG_NAME)
-      and CPG2.LOCATION_NAME_EN is null
-    left outer join T_POPULATION_PLANNING_GROUPS PPG
-      on PPG.PPG_CODE = nvl(CPG1 .PPG_CODE, CPG2.PPG_CODE)
-      and PPG.START_DATE < STC.END_DATE_YEAR
-      and PPG.END_DATE >= STC.END_DATE_YEAR
-    -- Age ranges
+    left outer join -- Country operation PPGs
+     (select LOCA.CHAR_VALUE as UNHCR_COUNTRY_CODE, PPG.ID, TXT.TEXT as PPG_NAME,
+        greatest(LOC.START_DATE, PPG.START_DATE) as START_DATE,
+        least(LOC.END_DATE, PPG.END_DATE) as END_DATE
+      from T_LOCATIONS LOC
+      inner join T_LOCATION_ATTRIBUTES LOCA
+        on LOCA.LOC_ID = LOC.ID
+        and LOCA.LOCAT_CODE = 'HCRCC'
+      inner join T_POPULATION_PLANNING_GROUPS PPG
+        on PPG.LOC_ID = LOC.ID
+      inner join T_TEXT_ITEMS TXT
+        on TXT.ITM_ID = PPG.ITM_ID
+        and TXT.TXTT_CODE = 'DESCR'
+        and TXT.SEQ_NBR = 1
+        and TXT.LANG_CODE = 'en'
+      where LOC.LOCT_CODE = 'COUNTRY') PPG1
+      on PPG1.UNHCR_COUNTRY_CODE = STC.COU_CODE_ASYLUM
+      and upper(PPG1.PPG_NAME) = upper(STC.PPG_NAME)
+      and PPG1.START_DATE < STC.END_DATE_YEAR
+      and PPG1.END_DATE >= STC.END_DATE_YEAR
+    left outer join -- Regional operation PPGs
+     (select LOCA.CHAR_VALUE as UNHCR_COUNTRY_CODE, PPG.ID, TXT.TEXT as PPG_NAME,
+        greatest(LOC1.START_DATE, LOC2.START_DATE, PPG.START_DATE) as START_DATE,
+        least(LOC1.END_DATE, LOC2.END_DATE, PPG.END_DATE) as END_DATE
+      from T_LOCATIONS LOC1
+      inner join T_LOCATION_ATTRIBUTES LOCA
+        on LOCA.LOC_ID = LOC1.ID
+        and LOCA.LOCAT_CODE = 'HCRCC'
+      inner join LOCATION_RELATIONSHIPS LOCR
+        on LOCR.LOC_ID_TO = LOC1.ID
+        and LOCR.LOCRT_CODE = 'HCRRESP'
+      inner join LOCATIONS LOC2
+        on LOC2.ID = LOCR.LOC_ID_FROM
+        and LOC2.LOCT_CODE = 'HCR-ROF'
+      inner join POPULATION_PLANNING_GROUPS PPG
+        on PPG.LOC_ID = LOC2.ID
+      inner join T_TEXT_ITEMS TXT
+        on TXT.ITM_ID = PPG.ITM_ID
+        and TXT.TXTT_CODE = 'DESCR'
+        and TXT.SEQ_NBR = 1
+        and TXT.LANG_CODE = 'en') PPG2
+      on PPG2.UNHCR_COUNTRY_CODE = STC.COU_CODE_ASYLUM
+      and upper(PPG2.PPG_NAME) = upper(STC.PPG_NAME)
+      and PPG2.START_DATE < STC.END_DATE_YEAR
+      and PPG2.END_DATE >= STC.END_DATE_YEAR
     left outer join T_AGE_RANGES AGR
       on AGR.AGP_CODE = case when STATSYEAR <= '2005' then 'STD1' else 'STD' end
       and AGR.AGE_FROM = STC.AGE_FROM
@@ -193,8 +212,8 @@ begin
       STC.URBAN_RURAL_STATUS, DIM1.ID,
       STC.ACMT_CODE, DIM2.ID,
       STC.BASIS, DIM3.ID,
-      STC.PPG_NAME, PPG.ID,
-      case when STC.PPG_COUNT > 1 then STC.PPG_NAME end,
+      STC.PPG_NAME, nvl(PPG1.ID, PPG2.ID),
+      case when STC.PPG_COUNT > 1 then STC.PPG_NAME end, 
       STC.STCT_CODE,
       STC.SEX_CODE,
       STC.AGE_FROM, AGR.ID,

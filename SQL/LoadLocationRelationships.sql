@@ -25,7 +25,7 @@ begin
         to_char(rLOCR.LOC_START_DATE_TO, 'YYYY-MM-DD'));
     P_UTILITY.TRACE_POINT('Trace');
   --
-    if rLOCR.LOCT_CODE_FROM not in ('COUNTRY', 'HCR-ROF', 'HCR-COP')
+    if rLOCR.LOCT_CODE_FROM not in ('COUNTRY', 'HCR-ROF')
     then 
       dbms_output.put_line
        ('Unsupported from location type: ' || rLOCR.LOCT_CODE_FROM);
@@ -34,30 +34,45 @@ begin
       dbms_output.put_line
        ('Unsupported to location type: ' || rLOCR.LOCT_CODE_TO);
     else
-      select LOC.ID
-      into nLOC_ID_FROM
-      from T_LOCATION_ATTRIBUTES LOCA
-      inner join T_LOCATIONS LOC
-        on LOC.ID = LOCA.LOC_ID
-      where LOCA.LOCAT_CODE =
-        case when rLOCR.LOCT_CODE_FROM = 'COUNTRY' then 'ISO3166A3' else 'HCRCD' end
-      and LOCA.CHAR_VALUE = rLOCR.LOC_CODE_FROM
-      and LOC.LOCT_CODE = rLOCR.LOCT_CODE_FROM
-      and LOC.START_DATE = rLOCR.LOC_START_DATE_FROM;
+      if rLOCR.LOCT_CODE_FROM = 'COUNTRY'
+      then
+        select LOC.ID into nLOC_ID_FROM
+        from T_LOCATION_ATTRIBUTES LOCA
+        inner join T_LOCATIONS LOC
+          on LOC.ID = LOCA.LOC_ID
+        where LOCA.LOCAT_CODE = 'ISO3166A3'
+        and LOCA.CHAR_VALUE = rLOCR.LOC_CODE_FROM
+        and LOC.LOCT_CODE = 'COUNTRY'
+        and LOC.START_DATE = rLOCR.LOC_START_DATE_FROM;
+      elsif rLOCR.LOCT_CODE_FROM = 'HCR-ROF'
+      then
+        select LOC.ID into nLOC_ID_FROM
+        from T_LOCATIONS LOC
+        inner join T_TEXT_ITEMS TXT
+          on TXT.ITM_ID = LOC.ITM_ID
+          and TXT.TXTT_CODE = 'NAME'
+          and TXT.SEQ_NBR = 1
+          and TXT.LANG_CODE = 'en'
+        where LOC.LOCT_CODE = 'HCR-ROF'
+        and LOC.START_DATE = rLOCR.LOC_START_DATE_FROM
+        and TXT.TEXT = rLOCR.LOC_NAME_FROM_EN;
+      end if;
     --
-      select LOC.ID
-      into nLOC_ID_TO
-      from T_LOCATION_ATTRIBUTES LOCA
-      inner join T_LOCATIONS LOC
-        on LOC.ID = LOCA.LOC_ID
-      where LOCA.LOCAT_CODE = 'ISO3166A3'
-      and LOCA.CHAR_VALUE = rLOCR.LOC_CODE_TO
-      and LOC.LOCT_CODE = 'COUNTRY'
-      and LOC.START_DATE = rLOCR.LOC_START_DATE_TO;
+      if rLOCR.LOCT_CODE_TO = 'COUNTRY'
+      then
+        select LOC.ID into nLOC_ID_TO
+        from T_LOCATION_ATTRIBUTES LOCA
+        inner join T_LOCATIONS LOC
+          on LOC.ID = LOCA.LOC_ID
+        where LOCA.LOCAT_CODE = 'ISO3166A3'
+        and LOCA.CHAR_VALUE = rLOCR.LOC_CODE_TO
+        and LOC.LOCT_CODE = 'COUNTRY'
+        and LOC.START_DATE = rLOCR.LOC_START_DATE_TO;
+      end if;
     --
       iCount := iCount + 1;
-      P_LOCATION.INSERT_LOCATION_RELATIONSHIP
-       (nLOC_ID_FROM, nLOC_ID_TO, rLOCR.LOCRT_CODE, rLOCR.LOCR_START_DATE, rLOCR.LOCR_END_DATE);
+      P_LOCATION.INSERT_LOCATION_RELATIONSHIP(nLOC_ID_FROM, nLOC_ID_TO, rLOCR.LOCRT_CODE,
+                                              rLOCR.LOCR_START_DATE, rLOCR.LOCR_END_DATE);
     end if;
   end loop;
 --

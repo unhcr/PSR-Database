@@ -2055,38 +2055,49 @@ unpivot
 --
 create or replace view V_ASR_DEMOGRAPHICS_EN as
 with Q_DEMOGRAPHICS as
- (select ASR_YEAR, DST_ID, LOC_ID_ASYLUM_COUNTRY, LOC_ID_ASYLUM, LOC_ID_ORIGIN_COUNTRY,
-    F0_VALUE, F5_VALUE, F12_VALUE, F18_VALUE, F60_VALUE,
-    case when STCT_CODE = 'POCPOPS' then FOTHER_VALUE end as FOTHER_VALUE,
-    M0_VALUE, M5_VALUE, M12_VALUE, M18_VALUE, M60_VALUE,
-    case when STCT_CODE = 'POCPOPS' then MOTHER_VALUE end as MOTHER_VALUE,
-    case when STCT_CODE = 'POCPOPN' then TOTAL_VALUE end as TOTAL_VALUE
+ (select ASR_YEAR, LOC_ID_ASYLUM_COUNTRY, LOC_ID_ASYLUM,
+    sum(F0_VALUE) as F0_VALUE,
+    sum(F5_VALUE) as F5_VALUE,
+    sum(F12_VALUE) as F12_VALUE,
+    sum(F18_VALUE) as F18_VALUE,
+    sum(F60_VALUE) as F60_VALUE,
+    sum(FOTHER_VALUE) as FOTHER_VALUE,
+    sum(FTOTAL_VALUE) as FTOTAL_VALUE,
+    sum(M0_VALUE) as M0_VALUE,
+    sum(M5_VALUE) as M5_VALUE,
+    sum(M12_VALUE) as M12_VALUE,
+    sum(M18_VALUE) as M18_VALUE,
+    sum(M60_VALUE) as M60_VALUE,
+    sum(MOTHER_VALUE) as MOTHER_VALUE,
+    sum(MTOTAL_VALUE) as MTOTAL_VALUE,
+    sum(TOTAL_VALUE) as TOTAL_VALUE
   from
-   (select extract(year from STC.START_DATE) as ASR_YEAR, STC.STCT_CODE, STC.DST_ID,
-      STC.LOC_ID_ASYLUM_COUNTRY, STC.LOC_ID_ASYLUM, STC.LOC_ID_ORIGIN_COUNTRY,
-      STC.SEX_CODE || nvl(to_char(AGR.AGE_FROM), 'X') as DATA_POINT,
-      STC.VALUE
-    from T_STATISTIC_TYPES_IN_GROUPS STTIG
-    inner join T_STATISTICS STC
-      on STC.STCT_CODE = STTIG.STCT_CODE
-    left outer join T_AGE_RANGES AGR
-      on AGR.ID = STC.AGR_ID
-    where STTIG.STTG_CODE = 'DEMOGR')
-  pivot
-   (sum(VALUE) as VALUE
-    for DATA_POINT
-    in ('F0' as F0, 'F5' as F5, 'F12' as F12, 'F18' as F18, 'F60' as F60, 'FX' as FOTHER,
-        'M0' as M0, 'M5' as M5, 'M12' as M12, 'M18' as M18, 'M60' as M60, 'MX' as MOTHER,
-        'X' as TOTAL))),
---
-Q_DISPLACEMENT_STATUSES_EN as
- (select DST.ID, DST.CODE, TXT.TEXT as DESCRIPTION_EN
-  from T_DISPLACEMENT_STATUSES DST
-  inner join T_TEXT_ITEMS TXT
-    on TXT.ITM_ID = DST.ITM_ID
-    and TXT.TXTT_CODE = 'DESCR'
-    and TXT.SEQ_NBR = 1
-    and TXT.LANG_CODE = 'en'),
+   (select ASR_YEAR, LOC_ID_ASYLUM_COUNTRY, LOC_ID_ASYLUM,
+      F0_VALUE, F5_VALUE, F12_VALUE, F18_VALUE, F60_VALUE,
+      case when STCT_CODE = 'POCPOPAS' then FOTHER_VALUE end as FOTHER_VALUE,
+      case when STCT_CODE = 'POCPOPS' then FOTHER_VALUE end as FTOTAL_VALUE,
+      M0_VALUE, M5_VALUE, M12_VALUE, M18_VALUE, M60_VALUE,
+      case when STCT_CODE = 'POCPOPAS' then MOTHER_VALUE end as MOTHER_VALUE,
+      case when STCT_CODE = 'POCPOPS' then MOTHER_VALUE end as MTOTAL_VALUE,
+      case when STCT_CODE = 'POCPOPN' then TOTAL_VALUE end as TOTAL_VALUE
+    from
+     (select extract(year from STC.START_DATE) as ASR_YEAR, STC.STCT_CODE,
+        STC.LOC_ID_ASYLUM_COUNTRY, STC.LOC_ID_ASYLUM,
+        STC.SEX_CODE || nvl(to_char(AGR.AGE_FROM), 'X') as DATA_POINT,
+        STC.VALUE
+      from T_STATISTIC_TYPES_IN_GROUPS STTIG
+      inner join T_STATISTICS STC
+        on STC.STCT_CODE = STTIG.STCT_CODE
+      left outer join T_AGE_RANGES AGR
+        on AGR.ID = STC.AGR_ID
+      where STTIG.STTG_CODE = 'DEMOGR')
+    pivot
+     (sum(VALUE) as VALUE
+      for DATA_POINT
+      in ('F0' as F0, 'F5' as F5, 'F12' as F12, 'F18' as F18, 'F60' as F60, 'FX' as FOTHER,
+          'M0' as M0, 'M5' as M5, 'M12' as M12, 'M18' as M18, 'M60' as M60, 'MX' as MOTHER,
+          'X' as TOTAL)))
+  group by ASR_YEAR, LOC_ID_ASYLUM_COUNTRY, LOC_ID_ASYLUM),
 --
 Q_COUNTRIES_EN as
  (select LOC.ID, LOCA.CHAR_VALUE as ISO3166_ALPHA3_CODE, TXT.TEXT as NAME_EN
@@ -2130,8 +2141,6 @@ select ASR_YEAR,
     when LOC_COUNT > 1 then LOC_NAME_RESIDENCE_EN || ' (' || LOCATION_TYPE_EN || ')'
     else LOC_NAME_RESIDENCE_EN
   end as LOC_NAME_RESIDENCE_EN,
-  --COU_CODE_ORIGIN, COU_NAME_ORIGIN_EN,
-  --DST_CODE, DST_DESCRIPTION_EN,
   F0_VALUE, F0_REDACTED_FLAG,
   F5_VALUE, F5_REDACTED_FLAG,
   F12_VALUE, F12_REDACTED_FLAG,
@@ -2139,16 +2148,13 @@ select ASR_YEAR,
   F60_VALUE, F60_REDACTED_FLAG,
   FOTHER_VALUE, FOTHER_REDACTED_FLAG,
   case
-    when nvl(F0_VALUE, 0) + nvl(F5_VALUE, 0) + nvl(F12_VALUE, 0) + nvl(F18_VALUE, 0) +
-        nvl(F60_VALUE, 0) + nvl(FOTHER_VALUE, 0) >= REDACTION_LIMIT
+    when coalesce(F0_VALUE, F5_VALUE, F12_VALUE, F18_VALUE, F60_VALUE, FOTHER_VALUE,
+                  FTOTAL_VALUE) is not null
     then nvl(F0_VALUE, 0) + nvl(F5_VALUE, 0) + nvl(F12_VALUE, 0) + nvl(F18_VALUE, 0) +
-        nvl(F60_VALUE, 0) + nvl(FOTHER_VALUE, 0)
+        nvl(F60_VALUE, 0) + nvl(FOTHER_VALUE, 0) + nvl(FTOTAL_VALUE, 0)
   end as FTOTAL_VALUE,
-  case
-    when coalesce(F0_REDACTED_FLAG, F5_REDACTED_FLAG, F12_REDACTED_FLAG,
-                  F18_REDACTED_FLAG, F60_REDACTED_FLAG, FOTHER_REDACTED_FLAG) = 1
-    then 1
-  end as FTOTAL_REDACTED_FLAG,
+  coalesce(F0_REDACTED_FLAG, F5_REDACTED_FLAG, F12_REDACTED_FLAG, F18_REDACTED_FLAG,
+           F60_REDACTED_FLAG, FOTHER_REDACTED_FLAG, FTOTAL_REDACTED_FLAG) as FTOTAL_REDACTED_FLAG,
   M0_VALUE, M0_REDACTED_FLAG,
   M5_VALUE, M5_REDACTED_FLAG,
   M12_VALUE, M12_REDACTED_FLAG,
@@ -2156,138 +2162,131 @@ select ASR_YEAR,
   M60_VALUE, M60_REDACTED_FLAG,
   MOTHER_VALUE, MOTHER_REDACTED_FLAG,
   case
-    when nvl(M0_VALUE, 0) + nvl(M5_VALUE, 0) + nvl(M12_VALUE, 0) + nvl(M18_VALUE, 0) +
-        nvl(M60_VALUE, 0) + nvl(MOTHER_VALUE, 0) >= REDACTION_LIMIT
+    when coalesce(M0_VALUE, M5_VALUE, M12_VALUE, M18_VALUE, M60_VALUE, MOTHER_VALUE,
+                  MTOTAL_VALUE) is not null
     then nvl(M0_VALUE, 0) + nvl(M5_VALUE, 0) + nvl(M12_VALUE, 0) + nvl(M18_VALUE, 0) +
-        nvl(M60_VALUE, 0) + nvl(MOTHER_VALUE, 0)
+        nvl(M60_VALUE, 0) + nvl(MOTHER_VALUE, 0) + nvl(MTOTAL_VALUE, 0)
   end as MTOTAL_VALUE,
+  coalesce(M0_REDACTED_FLAG, M5_REDACTED_FLAG, M12_REDACTED_FLAG, M18_REDACTED_FLAG,
+           M60_REDACTED_FLAG, MOTHER_REDACTED_FLAG, MTOTAL_REDACTED_FLAG) as MTOTAL_REDACTED_FLAG,
   case
-    when coalesce(M0_REDACTED_FLAG, M5_REDACTED_FLAG, M12_REDACTED_FLAG,
-                  M18_REDACTED_FLAG, M60_REDACTED_FLAG, MOTHER_REDACTED_FLAG) = 1
-    then 1
-  end as MTOTAL_REDACTED_FLAG,
-  case
-    when TOTAL_VALUE is not null or TOTAL_REDACTED_FLAG = 1 then TOTAL_VALUE
-    when nvl(F0_VALUE, 0) + nvl(F5_VALUE, 0) + nvl(F12_VALUE, 0) + nvl(F18_VALUE, 0) +
-        nvl(F60_VALUE, 0) + nvl(FOTHER_VALUE, 0) +
-        nvl(M0_VALUE, 0) + nvl(M5_VALUE, 0) + nvl(M12_VALUE, 0) + nvl(M18_VALUE, 0) +
-        nvl(M60_VALUE, 0) + nvl(MOTHER_VALUE, 0) >= REDACTION_LIMIT
+    when coalesce(F0_VALUE, F5_VALUE, F12_VALUE, F18_VALUE, F60_VALUE, FOTHER_VALUE, FTOTAL_VALUE,
+                  M0_VALUE, M5_VALUE, M12_VALUE, M18_VALUE, M60_VALUE, MOTHER_VALUE, MTOTAL_VALUE,
+                  TOTAL_VALUE) is not null
     then nvl(F0_VALUE, 0) + nvl(F5_VALUE, 0) + nvl(F12_VALUE, 0) + nvl(F18_VALUE, 0) +
-        nvl(F60_VALUE, 0) + nvl(FOTHER_VALUE, 0) +
+        nvl(F60_VALUE, 0) + nvl(FOTHER_VALUE, 0) + nvl(FTOTAL_VALUE, 0) +
         nvl(M0_VALUE, 0) + nvl(M5_VALUE, 0) + nvl(M12_VALUE, 0) + nvl(M18_VALUE, 0) +
-        nvl(M60_VALUE, 0) + nvl(MOTHER_VALUE, 0)
+        nvl(M60_VALUE, 0) + nvl(MOTHER_VALUE, 0) + nvl(MTOTAL_VALUE, 0) + nvl(TOTAL_VALUE, 0)
   end as TOTAL_VALUE,
-  case
-    when coalesce(F0_REDACTED_FLAG, F5_REDACTED_FLAG, F12_REDACTED_FLAG,
-                  F18_REDACTED_FLAG, F60_REDACTED_FLAG, FOTHER_REDACTED_FLAG,
-                  M0_REDACTED_FLAG, M5_REDACTED_FLAG, M12_REDACTED_FLAG,
-                  M18_REDACTED_FLAG, M60_REDACTED_FLAG, MOTHER_REDACTED_FLAG) = 1
-    then 1
-  end as TOTAL_REDACTED_FLAG
+  coalesce(F0_REDACTED_FLAG, F5_REDACTED_FLAG, F12_REDACTED_FLAG, F18_REDACTED_FLAG,
+           F60_REDACTED_FLAG, FOTHER_REDACTED_FLAG, FTOTAL_REDACTED_FLAG,
+           M0_REDACTED_FLAG, M5_REDACTED_FLAG, M12_REDACTED_FLAG, M18_REDACTED_FLAG,
+           M60_REDACTED_FLAG, MOTHER_REDACTED_FLAG, MTOTAL_REDACTED_FLAG,
+           MTOTAL_REDACTED_FLAG) as TOTAL_REDACTED_FLAG
 from
  (select DEM.ASR_YEAR,
-    COU1.ISO3166_ALPHA3_CODE as COU_CODE_RESIDENCE, COU1.NAME_EN as COU_NAME_RESIDENCE_EN,
+    COU.ISO3166_ALPHA3_CODE as COU_CODE_RESIDENCE, COU.NAME_EN as COU_NAME_RESIDENCE_EN,
     LOC.NAME_EN as LOC_NAME_RESIDENCE_EN,
     LOC.LOCT_CODE, LOC.LOCATION_TYPE_EN,
     count(distinct DEM.LOC_ID_ASYLUM) over
-      (partition by DEM.ASR_YEAR, COU1.ISO3166_ALPHA3_CODE, LOC.NAME_EN) as LOC_COUNT,
-    --COU2.ISO3166_ALPHA3_CODE as COU_CODE_ORIGIN, nvl(COU2.NAME_EN, 'Various') as COU_NAME_ORIGIN_EN,
-    --DST.CODE as DST_CODE, DST.DESCRIPTION_EN as DST_DESCRIPTION_EN,
+      (partition by DEM.ASR_YEAR, COU.ISO3166_ALPHA3_CODE, LOC.NAME_EN) as LOC_COUNT,
     case
-      when abs(sum(DEM.F0_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.F0_VALUE)
+      when abs(DEM.F0_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.F0_VALUE
     end as F0_VALUE,
     case
-      when abs(sum(DEM.F0_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.F0_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as F0_REDACTED_FLAG,
     case
-      when abs(sum(DEM.F5_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.F5_VALUE)
+      when abs(DEM.F5_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.F5_VALUE
     end as F5_VALUE,
     case
-      when abs(sum(DEM.F5_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.F5_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as F5_REDACTED_FLAG,
     case
-      when abs(sum(DEM.F12_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.F12_VALUE)
+      when abs(DEM.F12_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.F12_VALUE
     end as F12_VALUE,
     case
-      when abs(sum(DEM.F12_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.F12_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as F12_REDACTED_FLAG,
     case
-      when abs(sum(DEM.F18_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.F18_VALUE)
+      when abs(DEM.F18_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.F18_VALUE
     end as F18_VALUE,
     case
-      when abs(sum(DEM.F18_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.F18_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as F18_REDACTED_FLAG,
     case
-      when abs(sum(DEM.F60_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.F60_VALUE)
+      when abs(DEM.F60_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.F60_VALUE
     end as F60_VALUE,
     case
-      when abs(sum(DEM.F60_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.F60_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as F60_REDACTED_FLAG,
     case
-      when abs(sum(DEM.FOTHER_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.FOTHER_VALUE)
+      when abs(DEM.FOTHER_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.FOTHER_VALUE
     end as FOTHER_VALUE,
     case
-      when abs(sum(DEM.FOTHER_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.FOTHER_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as FOTHER_REDACTED_FLAG,
     case
-      when abs(sum(DEM.M0_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.M0_VALUE)
+      when abs(DEM.FTOTAL_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.FTOTAL_VALUE
+    end as FTOTAL_VALUE,
+    case
+      when abs(DEM.FTOTAL_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+    end as FTOTAL_REDACTED_FLAG,
+    case
+      when abs(DEM.M0_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.M0_VALUE
     end as M0_VALUE,
     case
-      when abs(sum(DEM.M0_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.M0_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as M0_REDACTED_FLAG,
     case
-      when abs(sum(DEM.M5_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.M5_VALUE)
+      when abs(DEM.M5_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.M5_VALUE
     end as M5_VALUE,
     case
-      when abs(sum(DEM.M5_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.M5_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as M5_REDACTED_FLAG,
     case
-      when abs(sum(DEM.M12_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.M12_VALUE)
+      when abs(DEM.M12_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.M12_VALUE
     end as M12_VALUE,
     case
-      when abs(sum(DEM.M12_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.M12_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as M12_REDACTED_FLAG,
     case
-      when abs(sum(DEM.M18_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.M18_VALUE)
+      when abs(DEM.M18_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.M18_VALUE
     end as M18_VALUE,
     case
-      when abs(sum(DEM.M18_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.M18_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as M18_REDACTED_FLAG,
     case
-      when abs(sum(DEM.M60_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.M60_VALUE)
+      when abs(DEM.M60_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.M60_VALUE
     end as M60_VALUE,
     case
-      when abs(sum(DEM.M60_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.M60_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as M60_REDACTED_FLAG,
     case
-      when abs(sum(DEM.MOTHER_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.MOTHER_VALUE)
+      when abs(DEM.MOTHER_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.MOTHER_VALUE
     end as MOTHER_VALUE,
     case
-      when abs(sum(DEM.MOTHER_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+      when abs(DEM.MOTHER_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
     end as MOTHER_REDACTED_FLAG,
     case
-      when abs(sum(DEM.TOTAL_VALUE)) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then sum(DEM.TOTAL_VALUE)
+      when abs(DEM.MTOTAL_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.MTOTAL_VALUE
+    end as MTOTAL_VALUE,
+    case
+      when abs(DEM.MTOTAL_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+    end as MTOTAL_REDACTED_FLAG,
+    case
+      when abs(DEM.TOTAL_VALUE) >= PAR.NUM_VALUE or DEM.ASR_YEAR != '2012' then DEM.TOTAL_VALUE
     end as TOTAL_VALUE,
     case
-      when abs(sum(DEM.TOTAL_VALUE)) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
-    end as TOTAL_REDACTED_FLAG,
-    PAR.NUM_VALUE as REDACTION_LIMIT
+      when abs(DEM.TOTAL_VALUE) < PAR.NUM_VALUE and DEM.ASR_YEAR = '2012' then 1
+    end as TOTAL_REDACTED_FLAG
   from Q_DEMOGRAPHICS DEM
-  inner join Q_COUNTRIES_EN COU1
-    on COU1.ID = DEM.LOC_ID_ASYLUM_COUNTRY
+  inner join Q_COUNTRIES_EN COU
+    on COU.ID = DEM.LOC_ID_ASYLUM_COUNTRY
   inner join Q_LOCATIONS_EN LOC
     on LOC.ID = DEM.LOC_ID_ASYLUM
-  left outer join Q_COUNTRIES_EN COU2
-    on COU2.ID = DEM.LOC_ID_ORIGIN_COUNTRY
-  inner join Q_DISPLACEMENT_STATUSES_EN DST
-    on DST.ID = DEM.DST_ID
   cross join T_SYSTEM_PARAMETERS PAR
-  where PAR.CODE = 'REDACTION LIMIT'
-  group by DEM.ASR_YEAR, COU1.ISO3166_ALPHA3_CODE, COU1.NAME_EN,
-    LOC.NAME_EN, LOC.LOCT_CODE, LOC.LOCATION_TYPE_EN, DEM.LOC_ID_ASYLUM,
-    --COU2.ISO3166_ALPHA3_CODE, COU2.NAME_EN,
-    --DST.CODE, DST.DESCRIPTION_EN,
-    PAR.NUM_VALUE);
+  where PAR.CODE = 'REDACTION LIMIT');
 
 --
 -- V_ASR_RSD_EN

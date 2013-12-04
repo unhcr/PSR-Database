@@ -1919,41 +1919,49 @@ left outer join T_LOCATION_ATTRIBUTES LOCA2
 create or replace view V_ASR_POC_SUMMARY_EN as
 with Q_POC_SUMMARY as
  (select ASR_YEAR, LOC_ID_RESIDENCE, LOC_ID_ORIGIN,
-    REFPOP_VALUE, ASYPOP_VALUE,
-    greatest(nvl(VOLREP_VALUE, REFRTN_VALUE), nvl(REFRTN_VALUE, VOLREP_VALUE)) as REFRTN_VALUE,
-    IDPHPOP_VALUE, IDPHRTN_VALUE, STAPOP_VALUE, OOCPOP_VALUE
+    sum(REFPOP_VALUE) as REFPOP_VALUE, sum(ASYPOP_VALUE) as ASYPOP_VALUE,
+    sum(REFRTN_VALUE) as REFRTN_VALUE,
+    sum(IDPHPOP_VALUE) as IDPHPOP_VALUE, sum(IDPHRTN_VALUE) as IDPHRTN_VALUE,
+    sum(STAPOP_VALUE) as STAPOP_VALUE, sum(OOCPOP_VALUE) as OOCPOP_VALUE
   from
-   (select to_char(extract(year from STC.START_DATE)) as ASR_YEAR,
-      case
-        when STC.STCT_CODE in ('VOLREP', 'REFRTN') then STC.LOC_ID_ORIGIN_COUNTRY
-        else STC.LOC_ID_ASYLUM_COUNTRY
-      end as LOC_ID_RESIDENCE,
-      case
-        when STC.STCT_CODE in ('VOLREP', 'REFRTN') then STC.LOC_ID_ASYLUM_COUNTRY
-        else STC.LOC_ID_ORIGIN_COUNTRY
-      end as LOC_ID_ORIGIN,
-      STC.STCT_CODE,
-      VALUE
-    from T_STATISTICS STC
-    where extract(day from STC.END_DATE) = 1
-    and STC.STCT_CODE in
-     ('REFPOP', 'ASYPOP', 'VOLREP', 'REFRTN', 'IDPHPOP', 'IDPHRTN', 'STAPOP', 'OOCPOP')
-    and nvl(STC.DIM_ID1, -1) !=
-     (select ID
-      from T_DIMENSION_VALUES
-      where DIMT_CODE = 'OFFICIAL'
-      and CODE = 'N'))
-  pivot
-   (sum(VALUE) as VALUE
-    for STCT_CODE
-    in ('REFPOP' as REFPOP,
-        'ASYPOP' as ASYPOP,
-        'VOLREP' as VOLREP,
-        'REFRTN' as REFRTN,
-        'IDPHPOP' as IDPHPOP,
-        'IDPHRTN' as IDPHRTN,
-        'STAPOP' as STAPOP,
-        'OOCPOP' as OOCPOP))),
+   (select ASR_YEAR, DST_ID, LOC_ID_RESIDENCE, LOC_ID_ORIGIN,
+      REFPOP_VALUE, ASYPOP_VALUE,
+      greatest(nvl(VOLREP_VALUE, REFRTN_VALUE), nvl(REFRTN_VALUE, VOLREP_VALUE)) as REFRTN_VALUE,
+      IDPHPOP_VALUE, IDPHRTN_VALUE, STAPOP_VALUE, OOCPOP_VALUE
+    from
+     (select to_char(extract(year from STC.START_DATE)) as ASR_YEAR,
+        STC.DST_ID,
+        case
+          when STC.STCT_CODE in ('VOLREP', 'REFRTN') then STC.LOC_ID_ORIGIN_COUNTRY
+          else STC.LOC_ID_ASYLUM_COUNTRY
+        end as LOC_ID_RESIDENCE,
+        case
+          when STC.STCT_CODE in ('VOLREP', 'REFRTN') then STC.LOC_ID_ASYLUM_COUNTRY
+          else STC.LOC_ID_ORIGIN_COUNTRY
+        end as LOC_ID_ORIGIN,
+        STC.STCT_CODE,
+        VALUE
+      from T_STATISTICS STC
+      where extract(day from STC.END_DATE) = 1
+      and STC.STCT_CODE in
+       ('REFPOP', 'ASYPOP', 'VOLREP', 'REFRTN', 'IDPHPOP', 'IDPHRTN', 'STAPOP', 'OOCPOP')
+      and nvl(STC.DIM_ID1, -1) !=
+       (select ID
+        from T_DIMENSION_VALUES
+        where DIMT_CODE = 'OFFICIAL'
+        and CODE = 'N'))
+    pivot
+     (sum(VALUE) as VALUE
+      for STCT_CODE
+      in ('REFPOP' as REFPOP,
+          'ASYPOP' as ASYPOP,
+          'VOLREP' as VOLREP,
+          'REFRTN' as REFRTN,
+          'IDPHPOP' as IDPHPOP,
+          'IDPHRTN' as IDPHRTN,
+          'STAPOP' as STAPOP,
+          'OOCPOP' as OOCPOP)))
+  group by ASR_YEAR, LOC_ID_RESIDENCE, LOC_ID_ORIGIN),
 --
 Q_COUNTRIES_EN as
  (select LOC.ID, LOCA.CHAR_VALUE as ISO3166_ALPHA3_CODE, TXT.TEXT as NAME_EN
@@ -1968,8 +1976,15 @@ Q_COUNTRIES_EN as
     and TXT.LANG_CODE = 'en')
 --
 select SUM.ASR_YEAR,
-  COU1.ISO3166_ALPHA3_CODE as COU_CODE_RESIDENCE,
-  COU1.NAME_EN as COU_NAME_RESIDENCE_EN,
+  case
+    when COU1.ISO3166_ALPHA3_CODE = 'XXA' then 'VAR'
+    else COU1.ISO3166_ALPHA3_CODE
+  end as COU_CODE_RESIDENCE,
+  case
+    when COU1.NAME_EN is null then 'Various'
+    when COU1.ISO3166_ALPHA3_CODE = 'XXA' then 'Various'
+    else COU1.NAME_EN
+  end as COU_NAME_RESIDENCE_EN,
   COU2.ISO3166_ALPHA3_CODE as COU_CODE_ORIGIN,
   case
     when COU2.NAME_EN is null then 'Various'
@@ -2020,7 +2035,7 @@ select SUM.ASR_YEAR,
     when abs(SUM.OOCPOP_VALUE) < PAR.NUM_VALUE and ASR_YEAR = '2012' then 1
   end as OOCPOP_REDACTED_FLAG
 from Q_POC_SUMMARY SUM
-inner join Q_COUNTRIES_EN COU1
+left outer join Q_COUNTRIES_EN COU1
   on COU1.ID = SUM.LOC_ID_RESIDENCE
 left outer join Q_COUNTRIES_EN COU2
   on COU2.ID = SUM.LOC_ID_ORIGIN

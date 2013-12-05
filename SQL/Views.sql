@@ -1977,20 +1977,18 @@ Q_COUNTRIES_EN as
 --
 select SUM.ASR_YEAR,
   case
-    when COU1.ISO3166_ALPHA3_CODE = 'XXA' then 'VAR'
-    else COU1.ISO3166_ALPHA3_CODE
+    when COU1.ISO3166_ALPHA3_CODE = 'XXA' then 'XXX'
+    else nvl(COU1.ISO3166_ALPHA3_CODE, 'XXX')
   end as COU_CODE_RESIDENCE,
   case
-    when COU1.NAME_EN is null then 'Various'
     when COU1.ISO3166_ALPHA3_CODE = 'XXA' then 'Various'
-    else COU1.NAME_EN
+    else nvl(COU1.NAME_EN, 'Various')
   end as COU_NAME_RESIDENCE_EN,
-  COU2.ISO3166_ALPHA3_CODE as COU_CODE_ORIGIN,
+  nvl(COU2.ISO3166_ALPHA3_CODE, 'XXX') as COU_CODE_ORIGIN,
   case
-    when COU2.NAME_EN is null then 'Various'
     when COU2.NAME_EN = 'State of Palestine' then 'Palestinian'
     when COU2.NAME_EN = 'Palestinian Territory, Occupied' then 'Palestinian'
-    else COU2.NAME_EN
+    else nvl(COU2.NAME_EN, 'Various')
   end as COU_NAME_ORIGIN_EN,
   case
     when abs(SUM.REFPOP_VALUE) >= PAR.NUM_VALUE or ASR_YEAR != '2012' then SUM.REFPOP_VALUE

@@ -6,7 +6,7 @@ create or replace package P_ASR is
 --  Procedures for maintenance of statistics.
 --
 --  Change History:
---  3-Oct-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  10-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
@@ -53,7 +53,6 @@ create or replace package P_ASR is
     pnREFRTN_VALUE in P_BASE.tnSTC_VALUE,
     pnREFRTN_AH_VALUE in P_BASE.tnSTC_VALUE,
     pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
-    pnSTG_VERSION_NBR in P_BASE.tnSTG_VERSION_NBR,  --  ** Not required
     pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
     pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
     pnREFRTN_STC_ID in P_BASE.tnSTC_ID,

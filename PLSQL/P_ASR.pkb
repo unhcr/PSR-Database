@@ -60,9 +60,9 @@ create or replace package body P_ASR is
     then P_STATISTIC_GROUP.INSERT_STG_ATTRIBUTE(nSTG_ID, 'BASIS', psBASIS);
     end if;
   --
-  -- Create statistics for the REFRTN and REFRTN_AH statistic types.
+  -- Create statistics for the REFRTN and REFRTN-AH statistic types.
   --
-    if nvl(pnREFRTN_VALUE, 0) != 0
+    if pnREFRTN_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
        (nSTC_ID, 'REFRTN', dSTART_DATE, dEND_DATE,
@@ -73,10 +73,10 @@ create or replace package body P_ASR is
         pnVALUE => pnREFRTN_VALUE);
     end if;
   --
-    if nvl(pnREFRTN_AH_VALUE, 0) != 0
+    if pnREFRTN_AH_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'REFRTN_AH', dSTART_DATE, dEND_DATE,
+       (nSTC_ID, 'REFRTN-AH', dSTART_DATE, dEND_DATE,
         pnDST_ID => pnDST_ID,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
@@ -104,7 +104,6 @@ create or replace package body P_ASR is
     pnREFRTN_VALUE in P_BASE.tnSTC_VALUE,
     pnREFRTN_AH_VALUE in P_BASE.tnSTC_VALUE,
     pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
-    pnSTG_VERSION_NBR in P_BASE.tnSTG_VERSION_NBR,
     pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
     pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
     pnREFRTN_STC_ID in P_BASE.tnSTC_ID,
@@ -168,12 +167,12 @@ create or replace package body P_ASR is
        (pnSTG_ID_PRIMARY, 'BASIS', nSTGA_VERSION_NBR_BASIS, psBASIS);
     end if;
   --
-  -- Update or insert statistics for the REFRTN and REFRTN_AH statistic types. Delete statistics
+  -- Update or insert statistics for the REFRTN and REFRTN-AH statistic types. Delete statistics
   --  where the new value is null or zero.
   -- 
-    if nvl(pnREFRTN_VALUE, 0) = 0 and pnREFRTN_STC_ID is not null
+    if pnREFRTN_VALUE is null and pnREFRTN_STC_ID is not null
     then P_STATISTIC.DELETE_STATISTIC(pnREFRTN_STC_ID, pnREFRTN_VERSION_NBR);
-    elsif nvl(pnREFRTN_VALUE, 0) != 0 and pnREFRTN_STC_ID is null
+    elsif pnREFRTN_VALUE is not null and pnREFRTN_STC_ID is null
     then
       P_STATISTIC.INSERT_STATISTIC
        (nSTC_ID, 'REFRTN', dSTART_DATE, dEND_DATE,
@@ -186,12 +185,12 @@ create or replace package body P_ASR is
       P_STATISTIC.UPDATE_STATISTIC(pnREFRTN_STC_ID, nREFRTN_VERSION_NBR, pnREFRTN_VALUE);
     end if;
   --
-    if nvl(pnREFRTN_AH_VALUE, 0) = 0 and pnREFRTN_AH_STC_ID is not null
+    if pnREFRTN_AH_VALUE is null and pnREFRTN_AH_STC_ID is not null
     then P_STATISTIC.DELETE_STATISTIC(pnREFRTN_AH_STC_ID, pnREFRTN_AH_VERSION_NBR);
-    elsif nvl(pnREFRTN_AH_VALUE, 0) != 0 and pnREFRTN_AH_STC_ID is null
+    elsif pnREFRTN_AH_VALUE is not null and pnREFRTN_AH_STC_ID is null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'REFRTN_AH', dSTART_DATE, dEND_DATE,
+       (nSTC_ID, 'REFRTN-AH', dSTART_DATE, dEND_DATE,
         pnDST_ID => pnDST_ID,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
@@ -234,7 +233,7 @@ create or replace package body P_ASR is
         to_char(pnREFRTN_STC_ID) || '~' || to_char(pnREFRTN_VERSION_NBR) || '~' ||
         to_char(pnREFRTN_AH_STC_ID) || '~' || to_char(pnREFRTN_AH_VERSION_NBR));
   --
-  -- Delete the REFRTN and REFRTN_AH statistics.
+  -- Delete the REFRTN and REFRTN-AH statistics.
   --
     if pnREFRTN_STC_ID is not null
     then P_STATISTIC.DELETE_STATISTIC(pnREFRTN_STC_ID, nREFRTN_VERSION_NBR);

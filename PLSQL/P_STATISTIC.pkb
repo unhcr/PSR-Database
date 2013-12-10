@@ -211,8 +211,10 @@ create or replace package body P_STATISTIC is
     if pnVERSION_NBR = nVERSION_NBR
     then
       update T_STATISTICS
-      set VALUE = pnVALUE
-      where rowid = xSTC_ROWID;
+      set VALUE = pnVALUE,
+        VERSION_NBR = VERSION_NBR + 1
+      where rowid = xSTC_ROWID
+      returning VERSION_NBR into pnVERSION_NBR;
     else
       P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'Statistic has been updated by another user');
     end if;

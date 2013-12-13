@@ -6,12 +6,12 @@ create or replace package P_ASR is
 --  Procedures for maintenance of statistics.
 --
 --  Change History:
---  10-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  12-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
   sComponent varchar2(30) := 'ASR';
-  sVersion varchar2(10) := 'D0.1';
+  sVersion varchar2(10) := 'D1.0';
 --
 -- ========================================
 -- Program unit definitions
@@ -24,11 +24,21 @@ create or replace package P_ASR is
 -- Create a new row in ASR returnees table.
 --
 -- Parameters:
+--  pnASR_YEAR - Year of ASR statistics.
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of country of return.
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of previous country of asylum (can be null).
+--  pnDST_ID - Displacement status identifier.
+--  psSOURCE - Code(s) for source of data (can be null).
+--  psBASIS - Code(s) for basis of data (can be null).
+--  pnREFRTN_VALUE - Total returns during year statistic value (can be null).
+--  pnREFRTN_AH_VALUE - UNHCR-assisted returns during year statistic value (can be null).
+--
+-- All parameters must be specified. Null value parameters are only allowed where indicated.
 --
   procedure INSERT_ASR_RETURNEES
    (pnASR_YEAR in P_BASE.tmnYear,
     pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID,
-    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID,
     pnDST_ID in P_BASE.tmnDST_ID,
     psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
     psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
@@ -42,17 +52,42 @@ create or replace package P_ASR is
 -- Update an existing row in ASR returnees table.
 --
 -- Parameters:
+--  pnASR_YEAR - Year of ASR statistics.
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of country of return.
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of previous country of asylum (can be null).
+--  pnDST_ID - Displacement status identifier.
+--  psSOURCE - Code(s) for source of data (can be null).
+--  psBASIS - Code(s) for basis of data (can be null).
+--  pnREFRTN_VALUE - Total returns during year statistic value (can be null).
+--  pnREFRTN_AH_VALUE - UNHCR-assisted returns during year statistic value (can be null).
+--  pnSTG_ID_PRIMARY - Primary statistics group identifier.
+--  pnSTG_VERSION_NBR - Primary statistics group version number.
+--  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
+--    source code previously existed).
+--  pnSTGA_VERSION_NBR_BASIS - Version number of code for basis of data (can only be null if no
+--    basis code previously existed).
+--  pnREFRTN_STC_ID - Statistic identifier for total returns during year statistic (can only be null
+--    if no total returns statistic previously existed).
+--  pnREFRTN_VERSION_NBR - Version number for total returns during year statistic (can only be null
+--    if no total returns statistic previously existed).
+--  pnREFRTN_AH_STC_ID - Statistic identifier for UNHCR-assisted returns during year statistic
+--    (can only be null if no UNHCR-assisted returns statistic previously existed).
+--  pnREFRTN_AH_VERSION_NBR - Version number for UNHCR-assisted returns during year statistic (can
+--    only be null if no UNHCR-assisted returns statistic previously existed).
+--
+-- All parameters must be passed. Null value parameters are only allowed where indicated.
 --
   procedure UPDATE_ASR_RETURNEES
    (pnASR_YEAR in P_BASE.tmnYear,
     pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID,
-    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID,
     pnDST_ID in P_BASE.tmnDST_ID,
     psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
     psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
     pnREFRTN_VALUE in P_BASE.tnSTC_VALUE,
     pnREFRTN_AH_VALUE in P_BASE.tnSTC_VALUE,
     pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
     pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
     pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
     pnREFRTN_STC_ID in P_BASE.tnSTC_ID,
@@ -67,10 +102,26 @@ create or replace package P_ASR is
 -- Delete a row in ASR returnees table.
 --
 -- Parameters:
+--  pnSTG_ID_PRIMARY - Primary statistics group identifier.
+--  pnSTG_VERSION_NBR - Primary statistics group version number.
+--  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
+--    source code previously existed).
+--  pnSTGA_VERSION_NBR_BASIS - Version number of code for basis of data (can only be null if no
+--    basis code previously existed).
+--  pnREFRTN_STC_ID - Statistic identifier for total returns during year statistic (can only be null
+--    if no total returns statistic exists).
+--  pnREFRTN_VERSION_NBR - Version number for total returns during year statistic (can only be null
+--    if no total returns statistic exists).
+--  pnREFRTN_AH_STC_ID - Statistic identifier for UNHCR-assisted returns during year statistic
+--    (can only be null if no UNHCR-assisted returns statistic exists).
+--  pnREFRTN_AH_VERSION_NBR - Version number for UNHCR-assisted returns during year statistic (can
+--    only be null if no UNHCR-assisted returns statistic exists).
+--
+-- All parameters must be specified. Null value parameters are only allowed where indicated.
 --
   procedure DELETE_ASR_RETURNEES
-   (pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID,
-    pnSTG_VERSION_NBR in P_BASE.tnSTG_VERSION_NBR,
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
     pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
     pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
     pnREFRTN_STC_ID in P_BASE.tnSTC_ID,

@@ -233,6 +233,7 @@ create or replace package P_BASE is
   subtype tnSTC_VALUE is T_STATISTICS.VALUE%type;
   subtype tmnSTC_VALUE is tnSTC_VALUE not null;
   subtype tnSTC_VERSION_NBR is T_STATISTICS.VERSION_NBR%type;
+  subtype tmnSTC_VERSION_NBR is tnSTC_VERSION_NBR not null;
 --
 -- T_STATISTIC_GROUPS
 --
@@ -240,6 +241,7 @@ create or replace package P_BASE is
   subtype tmnSTG_ID is tnSTG_ID not null;
   subtype tnSTG_SEQ_NBR is T_STATISTIC_GROUPS.SEQ_NBR%type;
   subtype tnSTG_VERSION_NBR is T_STATISTIC_GROUPS.VERSION_NBR%type;
+  subtype tmnSTG_VERSION_NBR is tnSTG_VERSION_NBR not null;
 --
 -- T_STATISTIC_TYPES
 --

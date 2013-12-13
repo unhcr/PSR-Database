@@ -9,7 +9,7 @@ create or replace package body P_STATISTIC_GROUP is
 -- ----------------------------------------
 --
   procedure INSERT_STATISTIC_GROUP
-   (pnID out P_BASE.tnSTG_ID,
+   (pnSTG_ID out P_BASE.tnSTG_ID,
     pdSTART_DATE in P_BASE.tmdDate,
     pdEND_DATE in P_BASE.tmdDate,
     psSTTG_CODE in P_BASE.tsSTTG_CODE := null,
@@ -78,7 +78,7 @@ create or replace package body P_STATISTIC_GROUP is
       pnLOC_ID_ASYLUM_COUNTRY, pnLOC_ID_ASYLUM, pnLOC_ID_ORIGIN_COUNTRY, pnLOC_ID_ORIGIN,
       pnDIM_ID1, pnDIM_ID2, pnDIM_ID3, pnDIM_ID4, pnDIM_ID5, psSEX_CODE, pnAGR_ID,
       nSTG_SEQ_NBR_MAX, pnPPG_ID, nITM_ID)
-    returning ID into pnID;
+    returning ID into pnSTG_ID;
   --
     P_UTILITY.END_MODULE;
   exception
@@ -91,7 +91,7 @@ create or replace package body P_STATISTIC_GROUP is
 -- ----------------------------------------
 --
   procedure UPDATE_STATISTIC_GROUP
-   (pnID in P_BASE.tmnSTG_ID,
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
     psLANG_CODE in P_BASE.tsLANG_CODE := null,
     psSUBGROUP_NAME in P_BASE.tsText := null,
@@ -105,14 +105,14 @@ create or replace package body P_STATISTIC_GROUP is
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.UPDATE_STATISTIC_GROUP',
-      to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
+      to_char(pnSTG_ID) || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME || '~' ||
         to_char(pnPPG_ID));
   --
     select SEQ_NBR, ITM_ID, VERSION_NBR, rowid
     into nSTG_SEQ_NBR, nITM_ID, nVERSION_NBR, xSTG_ROWID
     from T_STATISTIC_GROUPS
-    where ID = pnID
+    where ID = pnSTG_ID
     for update;
   --
     if pnVERSION_NBR = nVERSION_NBR
@@ -145,7 +145,7 @@ create or replace package body P_STATISTIC_GROUP is
 -- ----------------------------------------
 --
   procedure SET_STATISTIC_GROUP
-   (pnID in out P_BASE.tnSTG_ID,
+   (pnSTG_ID in out P_BASE.tnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
     pdSTART_DATE in P_BASE.tdDate := null,
     pdEND_DATE in P_BASE.tdDate := null,
@@ -169,7 +169,7 @@ create or replace package body P_STATISTIC_GROUP is
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.SET_STATISTIC_GROUP',
-      to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' ||
+      to_char(pnSTG_ID) || '~' || to_char(pnVERSION_NBR) || '~' ||
         to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD')  || '~' ||
         to_char(pnDST_ID) || '~' || psSTTG_CODE || '~' ||
         to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' || to_char(pnLOC_ID_ASYLUM) || '~' ||
@@ -182,14 +182,14 @@ create or replace package body P_STATISTIC_GROUP is
     if pnVERSION_NBR is null
     then
       INSERT_STATISTIC_GROUP
-       (pnID, pdSTART_DATE, pdEND_DATE, psSTTG_CODE, pnDST_ID,
+       (pnSTG_ID, pdSTART_DATE, pdEND_DATE, psSTTG_CODE, pnDST_ID,
         pnLOC_ID_ASYLUM_COUNTRY, pnLOC_ID_ASYLUM, pnLOC_ID_ORIGIN_COUNTRY, pnLOC_ID_ORIGIN,
         pnDIM_ID1, pnDIM_ID2, pnDIM_ID3, pnDIM_ID4, pnDIM_ID5, psSEX_CODE, pnAGR_ID,
         psLANG_CODE, psSUBGROUP_NAME, pnPPG_ID);
     --
       pnVERSION_NBR := 1;
     else
-      UPDATE_STATISTIC_GROUP(pnID, pnVERSION_NBR, psLANG_CODE, psSUBGROUP_NAME, pnPPG_ID);
+      UPDATE_STATISTIC_GROUP(pnSTG_ID, pnVERSION_NBR, psLANG_CODE, psSUBGROUP_NAME, pnPPG_ID);
     end if;
   --
     P_UTILITY.END_MODULE;
@@ -203,7 +203,7 @@ create or replace package body P_STATISTIC_GROUP is
 -- ----------------------------------------
 --
   procedure DELETE_STATISTIC_GROUP
-   (pnID in P_BASE.tmnSTG_ID,
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in P_BASE.tnSTG_VERSION_NBR)
   is
     nITM_ID P_BASE.tnITM_ID;
@@ -212,12 +212,12 @@ create or replace package body P_STATISTIC_GROUP is
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.DELETE_STATISTIC_GROUP',
-      to_char(pnID) || '~' || to_char(pnVERSION_NBR));
+      to_char(pnSTG_ID) || '~' || to_char(pnVERSION_NBR));
   --
     select ITM_ID, VERSION_NBR, rowid
     into nITM_ID, nVERSION_NBR, xSTG_ROWID
     from T_STATISTIC_GROUPS
-    where ID = pnID
+    where ID = pnSTG_ID
     for update;
   --
     if pnVERSION_NBR = nVERSION_NBR
@@ -242,7 +242,7 @@ create or replace package body P_STATISTIC_GROUP is
 -- ----------------------------------------
 --
   procedure SET_STG_TEXT
-   (pnID in P_BASE.tmnSTG_ID,
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
     psTXTT_CODE in P_BASE.tmsTXTT_CODE,
     pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
@@ -255,14 +255,14 @@ create or replace package body P_STATISTIC_GROUP is
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.SET_STG_TEXT',
-      to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' ||
+      to_char(pnSTG_ID) || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' ||
         to_char(pnSEQ_NBR) || '~' || psLANG_CODE || '~' ||
         to_char(length(psText)) || ':' || psText);
   --
     select ITM_ID, VERSION_NBR, rowid
     into nITM_ID, nVERSION_NBR, xSTG_ROWID
     from T_STATISTIC_GROUPS
-    where ID = pnID
+    where ID = pnSTG_ID
     for update;
   --
     if pnVERSION_NBR = nVERSION_NBR
@@ -288,7 +288,7 @@ create or replace package body P_STATISTIC_GROUP is
 -- ----------------------------------------
 --
   procedure REMOVE_STG_TEXT
-   (pnID in P_BASE.tmnSTG_ID,
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
     psTXTT_CODE in P_BASE.tmsTXTT_CODE,
     pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
@@ -300,13 +300,13 @@ create or replace package body P_STATISTIC_GROUP is
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.REMOVE_STG_TEXT',
-      to_char(pnID) || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' ||
+      to_char(pnSTG_ID) || '~' || to_char(pnVERSION_NBR) || '~' || psTXTT_CODE || '~' ||
         to_char(pnSEQ_NBR) || '~' || psLANG_CODE);
   --
     select ITM_ID, VERSION_NBR, rowid
     into nITM_ID, nVERSION_NBR, xSTG_ROWID
     from T_STATISTIC_GROUPS
-    where ID = pnID
+    where ID = pnSTG_ID
     for update;
   --
     if pnVERSION_NBR = nVERSION_NBR
@@ -759,13 +759,16 @@ create or replace package body P_STATISTIC_GROUP is
   --
     if pnVERSION_NBR is null
     then
-      INSERT_STG_ATTRIBUTE
-       (pnSTG_ID, psSTGAT_CODE, psCHAR_VALUE, pnNUM_VALUE, pdDATE_VALUE);
+      INSERT_STG_ATTRIBUTE(pnSTG_ID, psSTGAT_CODE,
+                           psCHAR_VALUE, pnNUM_VALUE, pdDATE_VALUE);
     --
       pnVERSION_NBR := 1;
+    elsif psCHAR_VALUE is null and pnNUM_VALUE is null and pdDATE_VALUE is null
+    then
+      DELETE_STG_ATTRIBUTE(pnSTG_ID, psSTGAT_CODE, pnVERSION_NBR);
     else
-      UPDATE_STG_ATTRIBUTE
-       (pnSTG_ID, psSTGAT_CODE, pnVERSION_NBR, psCHAR_VALUE, pnNUM_VALUE, pdDATE_VALUE);
+      UPDATE_STG_ATTRIBUTE(pnSTG_ID, psSTGAT_CODE, pnVERSION_NBR,
+                           psCHAR_VALUE, pnNUM_VALUE, pdDATE_VALUE);
     end if;
   --
     P_UTILITY.END_MODULE;
@@ -919,7 +922,7 @@ begin
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
   end if;
 --
-  if sVersion != 'D0.1'
+  if sVersion != 'D1.0'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
   end if;
 --

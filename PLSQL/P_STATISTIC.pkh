@@ -6,12 +6,12 @@ create or replace package P_STATISTIC is
 --  Procedures for maintenance of statistics.
 --
 --  Change History:
---  10-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  11-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
 --
 -- -------------------------------------------------------------------------------------------------
 --
   sComponent varchar2(30) := 'STC';
-  sVersion varchar2(10) := 'D0.1';
+  sVersion varchar2(10) := 'D1.0';
 --
 -- ========================================
 -- Program unit definitions
@@ -24,7 +24,7 @@ create or replace package P_STATISTIC is
 -- Create a new statistic.
 --
 -- Parameters:
---  pnID - New statistic identifier (returned).
+--  pnSTC_ID - New statistic identifier (returned).
 --  psSTCT_CODE - Statistic type code (mandatory).
 --  pdSTART_DATE - Statistic start date (mandatory).
 --  pdEND_DATE - Statistic end date (mandatory).
@@ -45,7 +45,7 @@ create or replace package P_STATISTIC is
 --  pnVALUE - The value of the statistic (mandatory).
 --
   procedure INSERT_STATISTIC
-   (pnID out P_BASE.tnSTC_ID,
+   (pnSTC_ID out P_BASE.tnSTC_ID,
     psSTCT_CODE in P_BASE.tmsSTCT_CODE,
     pdSTART_DATE in P_BASE.tmdDate,
     pdEND_DATE in P_BASE.tmdDate,
@@ -72,13 +72,13 @@ create or replace package P_STATISTIC is
 -- Update an existing statistic.
 --
 -- Parameters:
---  pnID - Statistic identifier (mandatory).
+--  pnSTC_ID - Statistic identifier (mandatory).
 --  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
 --    returned).
 --  pnVALUE - The value of the statistic (mandatory).
 --
   procedure UPDATE_STATISTIC
-   (pnID in P_BASE.tmnSTC_ID,
+   (pnSTC_ID in P_BASE.tmnSTC_ID,
     pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
     pnVALUE in P_BASE.tnSTC_VALUE);
 --
@@ -86,10 +86,11 @@ create or replace package P_STATISTIC is
 -- SET_STATISTIC
 -- ----------------------------------------
 --
--- Create a new statistic or update an existing one.
+-- Create a new statistic, update an existing one or delete an existing one if the statistic value
+--  is null.
 --
 -- Parameters:
---  pnID - Statistic identifier (optional: if null, a new one is generated and returned).
+--  pnSTC_ID - Statistic identifier (optional: if null, a new one is generated and returned).
 --  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
 --    returned; for a new statistic, null must be specified and 1 will be returned).
 --  psSTCT_CODE - Statistic type code (mandatory when creating a new statistic; ignored when
@@ -132,7 +133,7 @@ create or replace package P_STATISTIC is
 --  pnVALUE - The value of the statistic (mandatory).
 --
   procedure SET_STATISTIC
-   (pnID in out P_BASE.tnSTC_ID,
+   (pnSTC_ID in out P_BASE.tnSTC_ID,
     pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
     psSTCT_CODE in P_BASE.tsSTCT_CODE := null,
     pdSTART_DATE in P_BASE.tdDate := null,
@@ -160,11 +161,11 @@ create or replace package P_STATISTIC is
 -- Delete a statistic record.
 --
 -- Parameters:
---  pnID - Identifier of statistic to be deleted (mandatory).
+--  pnSTC_ID - Identifier of statistic to be deleted (mandatory).
 --  pnVERSION_NBR - Update version number of statistic record (mandatory).
 --
   procedure DELETE_STATISTIC
-   (pnID in P_BASE.tmnSTC_ID,
+   (pnSTC_ID in P_BASE.tmnSTC_ID,
     pnVERSION_NBR in P_BASE.tnSTC_VERSION_NBR);
 --
 -- ----------------------------------------
@@ -174,7 +175,7 @@ create or replace package P_STATISTIC is
 -- Add a general text item in a given language to a statistic, or update an existing text item.
 --
 -- Parameters:
---  pnID - Identifier of statistic for which text item is to be added or updated (mandatory).
+--  pnSTC_ID - Identifier of statistic for which text item is to be added or updated (mandatory).
 --  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
 --    returned).
 --  psTXTT_CODE - Type of text item (mandatory).
@@ -183,7 +184,7 @@ create or replace package P_STATISTIC is
 --  psText - Text associated with statistic (mandatory).
 --
   procedure SET_STC_TEXT
-   (pnID in P_BASE.tmnSTC_ID,
+   (pnSTC_ID in P_BASE.tmnSTC_ID,
     pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
     psTXTT_CODE in P_BASE.tmsTXTT_CODE,
     pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
@@ -205,7 +206,7 @@ create or replace package P_STATISTIC is
 --    the text type is mandatory.
 --
 -- Parameters:
---  pnID - Identifier of statistic from which text item is to be removed (mandatory).
+--  pnSTC_ID - Identifier of statistic from which text item is to be removed (mandatory).
 --  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
 --    returned).
 --  psTXTT_CODE - Type of text item (mandatory).
@@ -213,7 +214,7 @@ create or replace package P_STATISTIC is
 --  psLANG_CODE - Language code of the text item to be removed (optional).
 --
   procedure REMOVE_STC_TEXT
-   (pnID in P_BASE.tmnSTC_ID,
+   (pnSTC_ID in P_BASE.tmnSTC_ID,
     pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
     psTXTT_CODE in P_BASE.tmsTXTT_CODE,
     pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,

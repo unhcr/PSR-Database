@@ -7,12 +7,12 @@ create or replace package P_STATISTIC_GROUP is
 --   types.
 --
 --  Change History:
---  18-Sep-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  12-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
   sComponent varchar2(30) := 'STG';
-  sVersion varchar2(10) := 'D0.1';
+  sVersion varchar2(10) := 'D1.0';
 --
 -- ========================================
 -- Program unit definitions
@@ -25,7 +25,7 @@ create or replace package P_STATISTIC_GROUP is
 -- Create a new statistic group record.
 --
 -- Parameters:
---  pnID - New statistic group identifier (returned).
+--  pnSTG_ID - New statistic group identifier (returned).
 --  pdSTART_DATE - Statistic group start date (mandatory).
 --  pdEND_DATE - Statistic group end date (mandatory).
 --  psSTTG_CODE - Statistic type group code (optional).
@@ -48,7 +48,7 @@ create or replace package P_STATISTIC_GROUP is
 --  pnPPG_ID - PPG identifier (optional).
 --
   procedure INSERT_STATISTIC_GROUP
-   (pnID out P_BASE.tnSTG_ID,
+   (pnSTG_ID out P_BASE.tnSTG_ID,
     pdSTART_DATE in P_BASE.tmdDate,
     pdEND_DATE in P_BASE.tmdDate,
     psSTTG_CODE in P_BASE.tsSTTG_CODE := null,
@@ -75,7 +75,7 @@ create or replace package P_STATISTIC_GROUP is
 -- Update an existing statistic group record.
 --
 -- Parameters:
---  pnID - Statistic group identifier (mandatory).
+--  pnSTG_ID - Statistic group identifier (mandatory).
 --  pnVERSION_NBR - Update version number of statistic group record (mandatory: new version number
 --    is returned).
 --  psLANG_CODE - Language code of the population subgroup name (optional, must be specified when
@@ -86,7 +86,7 @@ create or replace package P_STATISTIC_GROUP is
 --    linkage is left unchanged).
 --
   procedure UPDATE_STATISTIC_GROUP
-   (pnID in P_BASE.tmnSTG_ID,
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
     psLANG_CODE in P_BASE.tsLANG_CODE := null,
     psSUBGROUP_NAME in P_BASE.tsText := null,
@@ -99,7 +99,7 @@ create or replace package P_STATISTIC_GROUP is
 -- Create a new statistic group record or update an existing one.
 --
 -- Parameters:
---  pnID - Statistic group identifier (optional: if null, a new one is generated and returned).
+--  pnSTG_ID - Statistic group identifier (optional: if null, a new one is generated and returned).
 --  pnVERSION_NBR - Update version number of statistic group record (mandatory: new version
 --    number is returned; for a new statistic group, null must be specified and 1 will be
 --    returned).
@@ -140,7 +140,7 @@ create or replace package P_STATISTIC_GROUP is
 --    parameter is omitted).
 --
   procedure SET_STATISTIC_GROUP
-   (pnID in out P_BASE.tnSTG_ID,
+   (pnSTG_ID in out P_BASE.tnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
     pdSTART_DATE in P_BASE.tdDate := null,
     pdEND_DATE in P_BASE.tdDate := null,
@@ -168,11 +168,11 @@ create or replace package P_STATISTIC_GROUP is
 -- Delete a statistic group record.
 --
 -- Parameters:
---  pnID - Statistic group identifier (mandatory).
+--  pnSTG_ID - Statistic group identifier (mandatory).
 --  pnVERSION_NBR - Update version number of statistic group record (mandatory).
 --
   procedure DELETE_STATISTIC_GROUP
-   (pnID in P_BASE.tmnSTG_ID,
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in P_BASE.tnSTG_VERSION_NBR);
 --
 -- ----------------------------------------
@@ -182,7 +182,7 @@ create or replace package P_STATISTIC_GROUP is
 -- Create or update a general text item in a given language for a statistic group record.
 --
 -- Parameters:
---  pnID - Statistic group identifier (mandatory).
+--  pnSTG_ID - Statistic group identifier (mandatory).
 --  pnVERSION_NBR - Update version number of statistic group (mandatory: new version number is
 --    returned).
 --  psTXTT_CODE - Type of text item (mandatory).
@@ -191,7 +191,7 @@ create or replace package P_STATISTIC_GROUP is
 --  psText - Text associated with statistic group (mandatory).
 --
   procedure SET_STG_TEXT
-   (pnID in P_BASE.tmnSTG_ID,
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
     psTXTT_CODE in P_BASE.tmsTXTT_CODE,
     pnSEQ_NBR in out P_BASE.tnTXT_SEQ_NBR,
@@ -213,7 +213,7 @@ create or replace package P_STATISTIC_GROUP is
 --    the text type is mandatory.
 --
 -- Parameters:
---  pnID - Statistic group identifier (mandatory).
+--  pnSTG_ID - Statistic group identifier (mandatory).
 --  pnVERSION_NBR - Update version number of statistic group (mandatory: new version number is
 --    returned).
 --  psTXTT_CODE - Type of text item (mandatory).
@@ -221,7 +221,7 @@ create or replace package P_STATISTIC_GROUP is
 --  psLANG_CODE - Language code of the text item to be removed (optional).
 --
   procedure REMOVE_STG_TEXT
-   (pnID in P_BASE.tmnSTG_ID,
+   (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
     psTXTT_CODE in P_BASE.tmsTXTT_CODE,
     pnSEQ_NBR in P_BASE.tnTXT_SEQ_NBR := null,
@@ -478,7 +478,8 @@ create or replace package P_STATISTIC_GROUP is
 -- SET_STG_ATTRIBUTE
 -- ----------------------------------------
 --
--- Create an attribute for a statistic group or update an existing statistic group attribute.
+-- Create an attribute for a statistic group, update an existing statistic group attribute or delete
+--  an existing statistic group attribute if the attribute value is null.
 --
 -- Parameters:
 --  pnSTG_ID - Statistic group identifier (mandatory).

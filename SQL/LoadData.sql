@@ -26,6 +26,10 @@ prompt LoadOOCStatistics
 prompt =================
 @LoadOOCStatistics
 
+prompt CreateASRTableStatisticGroups
+prompt =============================
+@CreateASRTableStatisticGroups
+
 prompt InitRedactionLimit
 prompt ==================
 @InitRedactionLimit

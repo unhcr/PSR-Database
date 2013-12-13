@@ -6,12 +6,12 @@ create or replace package P_BASE is
 --  Type definitions and data values used throughout the PSR system.
 --
 --  Change History:
---  11-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  13-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
   sComponent varchar2(30) := 'BAS';
-  sVersion varchar2(10) := 'D0.1';
+  sVersion varchar2(10) := 'D1.0';
 --
 -- ========================================
 -- Subtype definitions

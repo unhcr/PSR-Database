@@ -46,7 +46,7 @@ begin
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
   end if;
 --
-  if sVersion != 'D0.1'
+  if sVersion != 'D1.0'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
   end if;
 --

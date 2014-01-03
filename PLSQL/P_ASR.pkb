@@ -4,9 +4,9 @@ create or replace package body P_ASR is
 -- Private global variables
 -- ========================================
 --
--- Location identifier for "Stateless" origin.
---
-  gnLOC_ID_STATELESS P_BASE.tnLOC_ID;
+  gnDST_ID_STATELESS P_BASE.tnDST_ID;  -- Displacement status identifier for "Stateless".
+  gnDST_ID_OOC P_BASE.tnDST_ID;  -- Displacement status identifier for "Others of concern".
+  gnLOC_ID_STATELESS P_BASE.tnLOC_ID;  -- Location identifier for "Stateless" origin.
 --
 -- ========================================
 -- Private program units
@@ -594,7 +594,7 @@ create or replace package body P_ASR is
     if pnSTAPOP_START_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'STAPOP', dSTART_DATE_START, dEND_DATE_START,
+       (nSTC_ID, 'STAPOP', dSTART_DATE_START, dEND_DATE_START, gnDST_ID_STATELESS,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
         pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
@@ -607,7 +607,7 @@ create or replace package body P_ASR is
     if pnSTAPOP_AH_START_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'STAPOP-AH', dSTART_DATE_START, dEND_DATE_START,
+       (nSTC_ID, 'STAPOP-AH', dSTART_DATE_START, dEND_DATE_START, gnDST_ID_STATELESS,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
         pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
@@ -620,7 +620,7 @@ create or replace package body P_ASR is
     if pnNATLOSS_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'NATLOSS', dSTART_DATE_START, dEND_DATE_END,
+       (nSTC_ID, 'NATLOSS', dSTART_DATE_START, dEND_DATE_END, gnDST_ID_STATELESS,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
         pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
@@ -633,7 +633,7 @@ create or replace package body P_ASR is
     if pnSTAOTHINC_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'STAOTHINC', dSTART_DATE_START, dEND_DATE_END,
+       (nSTC_ID, 'STAOTHINC', dSTART_DATE_START, dEND_DATE_END, gnDST_ID_STATELESS,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
         pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
@@ -646,7 +646,7 @@ create or replace package body P_ASR is
     if pnNATACQ_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'NATACQ', dSTART_DATE_START, dEND_DATE_END,
+       (nSTC_ID, 'NATACQ', dSTART_DATE_START, dEND_DATE_END, gnDST_ID_STATELESS,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
         pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
@@ -659,7 +659,7 @@ create or replace package body P_ASR is
     if pnSTAOTHDEC_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'STAOTHDEC', dSTART_DATE_START, dEND_DATE_END,
+       (nSTC_ID, 'STAOTHDEC', dSTART_DATE_START, dEND_DATE_END, gnDST_ID_STATELESS,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
         pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
@@ -672,7 +672,7 @@ create or replace package body P_ASR is
     if pnSTAPOP_END_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'STAPOP', dSTART_DATE_END, dEND_DATE_END,
+       (nSTC_ID, 'STAPOP', dSTART_DATE_END, dEND_DATE_END, gnDST_ID_STATELESS,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
         pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
@@ -685,7 +685,7 @@ create or replace package body P_ASR is
     if pnSTAPOP_AH_END_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'STAPOP-AH', dSTART_DATE_END, dEND_DATE_END,
+       (nSTC_ID, 'STAPOP-AH', dSTART_DATE_END, dEND_DATE_END, gnDST_ID_STATELESS,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
         pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
@@ -1091,7 +1091,7 @@ create or replace package body P_ASR is
     if pnOOCPOP_START_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'OOCPOP', dSTART_DATE_START, dEND_DATE_START,
+       (nSTC_ID, 'OOCPOP', dSTART_DATE_START, dEND_DATE_START, gnDST_ID_OOC,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
         pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
@@ -1103,7 +1103,7 @@ create or replace package body P_ASR is
     if pnOOCPOP_AH_START_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'OOCPOP-AH', dSTART_DATE_START, dEND_DATE_START,
+       (nSTC_ID, 'OOCPOP-AH', dSTART_DATE_START, dEND_DATE_START, gnDST_ID_OOC,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
         pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
@@ -1115,7 +1115,7 @@ create or replace package body P_ASR is
     if pnOOCARR_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'OOCARR', dSTART_DATE_START, dEND_DATE_END,
+       (nSTC_ID, 'OOCARR', dSTART_DATE_START, dEND_DATE_END, gnDST_ID_OOC,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
         pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
@@ -1127,7 +1127,7 @@ create or replace package body P_ASR is
     if pnOOCOTHINC_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'OOCOTHINC', dSTART_DATE_START, dEND_DATE_END,
+       (nSTC_ID, 'OOCOTHINC', dSTART_DATE_START, dEND_DATE_END, gnDST_ID_OOC,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
         pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
@@ -1139,7 +1139,7 @@ create or replace package body P_ASR is
     if pnOOCRTN_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'OOCRTN', dSTART_DATE_START, dEND_DATE_END,
+       (nSTC_ID, 'OOCRTN', dSTART_DATE_START, dEND_DATE_END, gnDST_ID_OOC,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
         pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
@@ -1151,7 +1151,7 @@ create or replace package body P_ASR is
     if pnOOCOTHDEC_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'OOCOTHDEC', dSTART_DATE_START, dEND_DATE_END,
+       (nSTC_ID, 'OOCOTHDEC', dSTART_DATE_START, dEND_DATE_END, gnDST_ID_OOC,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
         pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
@@ -1163,7 +1163,7 @@ create or replace package body P_ASR is
     if pnOOCPOP_END_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'OOCPOP', dSTART_DATE_END, dEND_DATE_END,
+       (nSTC_ID, 'OOCPOP', dSTART_DATE_END, dEND_DATE_END, gnDST_ID_OOC,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
         pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
@@ -1175,7 +1175,7 @@ create or replace package body P_ASR is
     if pnOOCPOP_AH_END_VALUE is not null
     then
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, 'OOCPOP-AH', dSTART_DATE_END, dEND_DATE_END,
+       (nSTC_ID, 'OOCPOP-AH', dSTART_DATE_END, dEND_DATE_END, gnDST_ID_OOC,
         pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
         pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
@@ -1505,6 +1505,22 @@ begin
   if sVersion != 'D1.0'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
   end if;
+--
+  select ID
+  into gnDST_ID_STATELESS
+  from T_DISPLACEMENT_STATUSES
+  where CODE = 'STA'
+  and START_DATE <= sysdate
+  and END_DATE > sysdate
+  and ACTIVE_FLAG = 'Y';
+--
+  select ID
+  into gnDST_ID_OOC
+  from T_DISPLACEMENT_STATUSES
+  where CODE = 'OOC'
+  and START_DATE <= sysdate
+  and END_DATE > sysdate
+  and ACTIVE_FLAG = 'Y';
 --
   select LOC_ID
   into gnLOC_ID_STATELESS

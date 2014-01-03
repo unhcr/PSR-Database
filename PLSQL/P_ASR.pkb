@@ -695,7 +695,7 @@ create or replace package body P_ASR is
       P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
     end if;
   --
-  -- Update the statistic group for the whole returnee table to record latest update time and user.
+  -- Update the statistic group for the whole stateless table to record latest update time and user.
   --
     P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
   --
@@ -763,8 +763,7 @@ create or replace package body P_ASR is
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.UPDATE_ASR_STATELESS',
       to_char(pnASR_YEAR) || '~' || to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' ||
-        to_char(pnDIM_ID_SPOPTYPE) || '~' || psSUBGROUP_NAME || '~' ||
-        psSOURCE || '~' || psBASIS || '~' ||
+        to_char(pnDIM_ID_SPOPTYPE) || '~' || psSOURCE || '~' || psBASIS || '~' ||
         to_char(pnSTAPOP_START_VALUE) || '~' || to_char(pnSTAPOP_AH_START_VALUE) || '~' ||
         to_char(pnNATLOSS_VALUE) || '~' || to_char(pnSTAOTHINC_VALUE) || '~' ||
         to_char(pnNATACQ_VALUE) || '~' || to_char(pnSTAOTHDEC_VALUE) || '~' ||
@@ -778,7 +777,8 @@ create or replace package body P_ASR is
         to_char(pnNATACQ_STC_ID) || '~' || to_char(pnNATACQ_VERSION_NBR) || '~' ||
         to_char(pnSTAOTHDEC_STC_ID) || '~' || to_char(pnSTAOTHDEC_VERSION_NBR) || '~' ||
         to_char(pnSTAPOP_END_STC_ID) || '~' || to_char(pnSTAPOP_END_VERSION_NBR) || '~' ||
-        to_char(pnSTAPOP_AH_END_STC_ID) || '~' || to_char(pnSTAPOP_AH_END_VERSION_NBR));
+        to_char(pnSTAPOP_AH_END_STC_ID) || '~' || to_char(pnSTAPOP_AH_END_VERSION_NBR) || '~' ||
+        psLANG_CODE || '~' || to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME);
   --
   -- Check that UNHCR-assisted values are not greater than total values.
   --
@@ -787,7 +787,7 @@ create or replace package body P_ASR is
     then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'UNHCR-assisted value may not be greater than total value');
     end if;
   --
-  -- Get identifier and version number of statistic group representing the whole returnee table for
+  -- Get identifier and version number of statistic group representing the whole stateless table for
   --  this year and country.
   --
     GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnASR_YEAR, 'STATELESS',
@@ -947,7 +947,7 @@ create or replace package body P_ASR is
         to_char(pnSTAPOP_END_STC_ID) || '~' || to_char(pnSTAPOP_END_VERSION_NBR) || '~' ||
         to_char(pnSTAPOP_AH_END_STC_ID) || '~' || to_char(pnSTAPOP_AH_END_VERSION_NBR));
   --
-  -- Get identifier and version number of statistic group representing the whole returnee table for
+  -- Get identifier and version number of statistic group representing the whole stateless table for
   --  this year and country.
   --
     GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
@@ -1000,7 +1000,7 @@ create or replace package body P_ASR is
   --
     P_STATISTIC_GROUP.DELETE_STATISTIC_GROUP(pnSTG_ID_PRIMARY, nSTG_VERSION_NBR);
   --
-  -- Update the statistic group for the whole returnee table to record latest update time and user.
+  -- Update the statistic group for the whole stateless table to record latest update time and user.
   --
     P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
   --
@@ -1009,6 +1009,489 @@ create or replace package body P_ASR is
     when others
     then P_UTILITY.TRACE_EXCEPTION;
   end DELETE_ASR_STATELESS;
+--
+-- ----------------------------------------
+-- INSERT_ASR_OOC
+-- ----------------------------------------
+--
+  procedure INSERT_ASR_OOC
+   (pnASR_YEAR in P_BASE.tmnYear,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID,
+    psLANG_CODE in P_BASE.tsLANG_CODE,
+    psSUBGROUP_NAME in P_BASE.tsText,
+    psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
+    psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
+    pnOOCPOP_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCPOP_AH_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCARR_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCOTHINC_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCRTN_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCOTHDEC_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCPOP_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCPOP_AH_END_VALUE in P_BASE.tnSTC_VALUE)
+  is
+    dSTART_DATE_START P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-01-01', 'YYYY-MM-DD');
+    dEND_DATE_START P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-01-02', 'YYYY-MM-DD');
+    dSTART_DATE_END P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-12-31', 'YYYY-MM-DD');
+    dEND_DATE_END P_BASE.tdDate := to_date(to_char(pnASR_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
+  --
+    nSTG_ID_TABLE P_BASE.tnSTG_ID;
+    nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
+    nSTG_ID_PRIMARY P_BASE.tnSTG_ID;
+    nSTG_VERSION_NBR_PRIMARY P_BASE.tnSTG_VERSION_NBR;
+    nTXT_SEQ_NBR_PRIMARY P_BASE.tnTXT_SEQ_NBR;
+    nSTC_ID P_BASE.tnSTC_ID;
+  begin
+    P_UTILITY.START_MODULE
+     (sVersion || '-' || sComponent || '.INSERT_ASR_OOC',
+      to_char(pnASR_YEAR)  || '~' || to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' ||
+        to_char(pnLOC_ID_ORIGIN_COUNTRY) || '~' || psSOURCE || '~' || psBASIS || '~' ||
+        to_char(pnOOCPOP_START_VALUE) || '~' || to_char(pnOOCPOP_AH_START_VALUE) || '~' ||
+        to_char(pnOOCARR_VALUE) || '~' || to_char(pnOOCOTHINC_VALUE) || '~' ||
+        to_char(pnOOCRTN_VALUE) || '~' || to_char(pnOOCOTHDEC_VALUE) || '~' ||
+        to_char(pnOOCPOP_END_VALUE) || '~' || to_char(pnOOCPOP_AH_END_VALUE) || '~' ||
+        psLANG_CODE || '~' || to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME);
+  --
+  -- Check that UNHCR-assisted values are not greater than total values.
+  --
+    if pnOOCPOP_AH_START_VALUE > pnOOCPOP_START_VALUE
+      or pnOOCPOP_AH_END_VALUE > pnOOCPOP_END_VALUE
+    then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'UNHCR-assisted value may not be greater than total value');
+    end if;
+  --
+  -- Get identifier and version number of statistic group representing the whole others of concern
+  --  table for this year and country, creating a new statistic group for this purpose if necessary.
+  --
+    GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnASR_YEAR, 'OOC',
+                              pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY);
+  --
+  -- Create new statistic group representing this others of concern table row.
+  --
+    P_STATISTIC_GROUP.INSERT_STATISTIC_GROUP
+     (nSTG_ID_PRIMARY, dSTART_DATE_START, dEND_DATE_END, 'OOC',
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      psLANG_CODE => psLANG_CODE,
+      psSUBGROUP_NAME => psSUBGROUP_NAME);
+  --
+  -- Create statistic group attributes for the source and basis.
+  --
+    if psSOURCE is not null
+    then P_STATISTIC_GROUP.INSERT_STG_ATTRIBUTE(nSTG_ID_PRIMARY, 'SOURCE', psSOURCE);
+    end if;
+  --
+    if psBASIS is not null
+    then P_STATISTIC_GROUP.INSERT_STG_ATTRIBUTE(nSTG_ID_PRIMARY, 'BASIS', psBASIS);
+    end if;
+  --
+  -- Create statistics for each of the others of concern statistic types and link them to the
+  --  statistic group for the table.
+  --
+    if pnOOCPOP_START_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'OOCPOP', dSTART_DATE_START, dEND_DATE_START,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnOOCPOP_START_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnOOCPOP_AH_START_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'OOCPOP-AH', dSTART_DATE_START, dEND_DATE_START,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnOOCPOP_AH_START_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnOOCARR_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'OOCARR', dSTART_DATE_START, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnOOCARR_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnOOCOTHINC_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'OOCOTHINC', dSTART_DATE_START, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnOOCOTHINC_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnOOCRTN_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'OOCRTN', dSTART_DATE_START, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnOOCRTN_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnOOCOTHDEC_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'OOCOTHDEC', dSTART_DATE_START, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnOOCOTHDEC_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnOOCPOP_END_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'OOCPOP', dSTART_DATE_END, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnOOCPOP_END_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnOOCPOP_AH_END_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'OOCPOP-AH', dSTART_DATE_END, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnOOCPOP_AH_END_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+  -- Update the statistic group for the whole others of concern table to record latest update time
+  --  and user.
+  --
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+  --
+    P_UTILITY.END_MODULE;
+  exception
+    when others
+    then P_UTILITY.TRACE_EXCEPTION;
+  end INSERT_ASR_OOC;
+--
+-- ----------------------------------------
+-- UPDATE_ASR_OOC
+-- ----------------------------------------
+--
+  procedure UPDATE_ASR_OOC
+   (pnASR_YEAR in P_BASE.tmnYear,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID,
+    psLANG_CODE in P_BASE.tsLANG_CODE,
+    psSUBGROUP_NAME in P_BASE.tsText,
+    psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
+    psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
+    pnOOCPOP_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCPOP_AH_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCARR_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCOTHINC_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCRTN_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCOTHDEC_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCPOP_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnOOCPOP_AH_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
+    pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
+    pnOOCPOP_START_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCPOP_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCPOP_AH_START_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCPOP_AH_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCARR_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCARR_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCOTHINC_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCOTHINC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCRTN_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCRTN_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCOTHDEC_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCOTHDEC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCPOP_END_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCPOP_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCPOP_AH_END_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCPOP_AH_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR)
+  is
+    dSTART_DATE_START P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-01-01', 'YYYY-MM-DD');
+    dEND_DATE_START P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-01-02', 'YYYY-MM-DD');
+    dSTART_DATE_END P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-12-31', 'YYYY-MM-DD');
+    dEND_DATE_END P_BASE.tdDate := to_date(to_char(pnASR_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
+    nSTG_VERSION_NBR P_BASE.tnSTG_VERSION_NBR := pnSTG_VERSION_NBR;
+    nSTGA_VERSION_NBR_SOURCE P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_SOURCE;
+    nSTGA_VERSION_NBR_BASIS P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_BASIS;
+  --
+    nSTG_ID_TABLE P_BASE.tnSTG_ID;
+    nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
+  --
+    nSTC_ID P_BASE.tnSTC_ID;
+    nSTC_VERSION_NBR P_BASE.tnSTC_VERSION_NBR;
+  begin
+    P_UTILITY.START_MODULE
+     (sVersion || '-' || sComponent || '.UPDATE_ASR_OOC',
+      to_char(pnASR_YEAR) || '~' || to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' ||
+        to_char(pnLOC_ID_ORIGIN_COUNTRY) || '~' || psSOURCE || '~' || psBASIS || '~' ||
+        to_char(pnOOCPOP_START_VALUE) || '~' || to_char(pnOOCPOP_AH_START_VALUE) || '~' ||
+        to_char(pnOOCARR_VALUE) || '~' || to_char(pnOOCOTHINC_VALUE) || '~' ||
+        to_char(pnOOCRTN_VALUE) || '~' || to_char(pnOOCOTHDEC_VALUE) || '~' ||
+        to_char(pnOOCPOP_END_VALUE) || '~' || to_char(pnOOCPOP_AH_END_VALUE) || '~' ||
+        to_char(pnSTG_ID_PRIMARY) || '~' || to_char(pnSTG_VERSION_NBR) || '~' ||
+        to_char(pnSTGA_VERSION_NBR_SOURCE) || '~' || to_char(pnSTGA_VERSION_NBR_BASIS) || '~' ||
+        to_char(pnOOCPOP_START_STC_ID) || '~' || to_char(pnOOCPOP_START_VERSION_NBR) || '~' ||
+        to_char(pnOOCPOP_AH_START_STC_ID) || '~' || to_char(pnOOCPOP_AH_START_VERSION_NBR) || '~' ||
+        to_char(pnOOCARR_STC_ID) || '~' || to_char(pnOOCARR_VERSION_NBR) || '~' ||
+        to_char(pnOOCOTHINC_STC_ID) || '~' || to_char(pnOOCOTHINC_VERSION_NBR) || '~' ||
+        to_char(pnOOCRTN_STC_ID) || '~' || to_char(pnOOCRTN_VERSION_NBR) || '~' ||
+        to_char(pnOOCOTHDEC_STC_ID) || '~' || to_char(pnOOCOTHDEC_VERSION_NBR) || '~' ||
+        to_char(pnOOCPOP_END_STC_ID) || '~' || to_char(pnOOCPOP_END_VERSION_NBR) || '~' ||
+        to_char(pnOOCPOP_AH_END_STC_ID) || '~' || to_char(pnOOCPOP_AH_END_VERSION_NBR) || '~' ||
+        psLANG_CODE || '~' || to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME);
+  --
+  -- Check that UNHCR-assisted values are not greater than total values.
+  --
+    if pnOOCPOP_AH_START_VALUE > pnOOCPOP_START_VALUE
+      or pnOOCPOP_AH_END_VALUE > pnOOCPOP_END_VALUE
+    then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'UNHCR-assisted value may not be greater than total value');
+    end if;
+  --
+  -- Get identifier and version number of statistic group representing the whole others of concern
+  --  table for this year and country.
+  --
+    GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnASR_YEAR, 'OOC',
+                              pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY);
+  --
+  -- Insert, update or delete statistic group attributes for the source and basis.
+  --
+    SET_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'SOURCE', nSTGA_VERSION_NBR_SOURCE, psSOURCE);
+    SET_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'BASIS', nSTGA_VERSION_NBR_BASIS, psBASIS);
+  --
+  -- Insert, update or delete statistics for each of the others of concern statistic types.
+  -- 
+    nSTC_ID := pnOOCPOP_START_STC_ID;
+    nSTC_VERSION_NBR := pnOOCPOP_START_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'OOCPOP', dSTART_DATE_START, dEND_DATE_START,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnOOCPOP_START_VALUE);
+  -- 
+    nSTC_ID := pnOOCPOP_AH_START_STC_ID;
+    nSTC_VERSION_NBR := pnOOCPOP_AH_START_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'OOCPOP-AH', dSTART_DATE_START, dEND_DATE_START,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnOOCPOP_AH_START_VALUE);
+  -- 
+    nSTC_ID := pnOOCARR_STC_ID;
+    nSTC_VERSION_NBR := pnOOCARR_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'OOCARR', dSTART_DATE_START, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnOOCARR_VALUE);
+  -- 
+    nSTC_ID := pnOOCOTHINC_STC_ID;
+    nSTC_VERSION_NBR := pnOOCOTHINC_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'OOCARR', dSTART_DATE_START, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnOOCOTHINC_VALUE);
+  -- 
+    nSTC_ID := pnOOCRTN_STC_ID;
+    nSTC_VERSION_NBR := pnOOCRTN_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'OOCARR', dSTART_DATE_START, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnOOCRTN_VALUE);
+  -- 
+    nSTC_ID := pnOOCOTHDEC_STC_ID;
+    nSTC_VERSION_NBR := pnOOCOTHDEC_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'OOCARR', dSTART_DATE_START, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnOOCOTHDEC_VALUE);
+  -- 
+    nSTC_ID := pnOOCPOP_END_STC_ID;
+    nSTC_VERSION_NBR := pnOOCPOP_END_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'OOCPOP', dSTART_DATE_END, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnOOCPOP_END_VALUE);
+  -- 
+    nSTC_ID := pnOOCPOP_AH_END_STC_ID;
+    nSTC_VERSION_NBR := pnOOCPOP_AH_END_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'OOCPOP-AH', dSTART_DATE_END, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnOOCPOP_AH_END_VALUE);
+  --
+  -- Update primary statistic group and statistic group representing the whole others of concern
+  --  table to record latest update time and user.
+  --
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(pnSTG_ID_PRIMARY, nSTG_VERSION_NBR,
+                                             psLANG_CODE, psSUBGROUP_NAME);
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+  --
+    P_UTILITY.END_MODULE;
+  exception
+    when others
+    then P_UTILITY.TRACE_EXCEPTION;
+  end UPDATE_ASR_OOC;
+--
+-- ----------------------------------------
+-- DELETE_ASR_OOC
+-- ----------------------------------------
+--
+  procedure DELETE_ASR_OOC
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
+    pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
+    pnOOCPOP_START_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCPOP_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCPOP_AH_START_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCPOP_AH_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCARR_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCARR_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCOTHINC_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCOTHINC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCRTN_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCRTN_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCOTHDEC_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCOTHDEC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCPOP_END_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCPOP_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnOOCPOP_AH_END_STC_ID in P_BASE.tnSTC_ID,
+    pnOOCPOP_AH_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR)
+  is
+    nSTG_VERSION_NBR P_BASE.tnSTG_VERSION_NBR := pnSTG_VERSION_NBR;
+    nSTGA_VERSION_NBR_SOURCE P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_SOURCE;
+    nSTGA_VERSION_NBR_BASIS P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_BASIS;
+  --
+    nSTG_ID_TABLE P_BASE.tnSTG_ID;
+    nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
+  begin
+    P_UTILITY.START_MODULE
+     (sVersion || '-' || sComponent || '.DELETE_ASR_OOC',
+      to_char(pnSTG_ID_PRIMARY) || '~' || to_char(pnSTG_VERSION_NBR) || '~' ||
+        to_char(pnSTGA_VERSION_NBR_SOURCE) || '~' || to_char(pnSTGA_VERSION_NBR_BASIS) || '~' ||
+        to_char(pnOOCPOP_START_STC_ID) || '~' || to_char(pnOOCPOP_START_VERSION_NBR) || '~' ||
+        to_char(pnOOCPOP_AH_START_STC_ID) || '~' || to_char(pnOOCPOP_AH_START_VERSION_NBR) || '~' ||
+        to_char(pnOOCARR_STC_ID) || '~' || to_char(pnOOCARR_VERSION_NBR) || '~' ||
+        to_char(pnOOCOTHINC_STC_ID) || '~' || to_char(pnOOCOTHINC_VERSION_NBR) || '~' ||
+        to_char(pnOOCRTN_STC_ID) || '~' || to_char(pnOOCRTN_VERSION_NBR) || '~' ||
+        to_char(pnOOCOTHDEC_STC_ID) || '~' || to_char(pnOOCOTHDEC_VERSION_NBR) || '~' ||
+        to_char(pnOOCPOP_END_STC_ID) || '~' || to_char(pnOOCPOP_END_VERSION_NBR) || '~' ||
+        to_char(pnOOCPOP_AH_END_STC_ID) || '~' || to_char(pnOOCPOP_AH_END_VERSION_NBR));
+  --
+  -- Get identifier and version number of statistic group representing the whole others of concern
+  --  table for this year and country.
+  --
+    GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
+  --
+  -- Delete the statistics for each of the others of concern statistic types.
+  --
+    if pnOOCPOP_START_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnOOCPOP_START_STC_ID, pnOOCPOP_START_VERSION_NBR);
+    end if;
+  --
+    if pnOOCPOP_AH_START_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnOOCPOP_AH_START_STC_ID, pnOOCPOP_AH_START_VERSION_NBR);
+    end if;
+  --
+    if pnOOCARR_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnOOCARR_STC_ID, pnOOCARR_VERSION_NBR);
+    end if;
+  --
+    if pnOOCOTHINC_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnOOCOTHINC_STC_ID, pnOOCOTHINC_VERSION_NBR);
+    end if;
+  --
+    if pnOOCRTN_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnOOCRTN_STC_ID, pnOOCRTN_VERSION_NBR);
+    end if;
+  --
+    if pnOOCOTHDEC_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnOOCOTHDEC_STC_ID, pnOOCOTHDEC_VERSION_NBR);
+    end if;
+  --
+    if pnOOCPOP_END_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnOOCPOP_END_STC_ID, pnOOCPOP_END_VERSION_NBR);
+    end if;
+  --
+    if pnOOCPOP_AH_END_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnOOCPOP_AH_END_STC_ID, pnOOCPOP_AH_END_VERSION_NBR);
+    end if;
+  --
+  -- Delete the source and basis statistic group attributes and the primary statistic group.
+  --
+    if nSTGA_VERSION_NBR_SOURCE is not null
+    then
+      P_STATISTIC_GROUP.DELETE_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'SOURCE', nSTGA_VERSION_NBR_SOURCE);
+    end if;
+  --
+    if nSTGA_VERSION_NBR_BASIS is not null
+    then
+      P_STATISTIC_GROUP.DELETE_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'BASIS', nSTGA_VERSION_NBR_BASIS);
+    end if;
+  --
+    P_STATISTIC_GROUP.DELETE_STATISTIC_GROUP(pnSTG_ID_PRIMARY, nSTG_VERSION_NBR);
+  --
+  -- Update the statistic group for the whole others of concern table to record latest update time
+  --  and user.
+  --
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+  --
+    P_UTILITY.END_MODULE;
+  exception
+    when others
+    then P_UTILITY.TRACE_EXCEPTION;
+  end DELETE_ASR_OOC;
 --
 -- =====================================
 -- Initialisation

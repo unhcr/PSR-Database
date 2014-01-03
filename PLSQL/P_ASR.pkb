@@ -1,6 +1,14 @@
 create or replace package body P_ASR is
 --
 -- ========================================
+-- Private global variables
+-- ========================================
+--
+-- Location identifier for "Stateless" origin.
+--
+  gnLOC_ID_STATELESS P_BASE.tnLOC_ID;
+--
+-- ========================================
 -- Private program units
 -- ========================================
 --
@@ -361,13 +369,12 @@ create or replace package body P_ASR is
     nSTG_VERSION_NBR P_BASE.tnSTG_VERSION_NBR := pnSTG_VERSION_NBR;
     nSTGA_VERSION_NBR_SOURCE P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_SOURCE;
     nSTGA_VERSION_NBR_BASIS P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_BASIS;
-    nREFRTN_STC_ID P_BASE.tnSTC_ID := pnREFRTN_STC_ID;
-    nREFRTN_VERSION_NBR P_BASE.tnSTC_VERSION_NBR := pnREFRTN_VERSION_NBR;
-    nREFRTN_AH_STC_ID P_BASE.tnSTC_ID := pnREFRTN_AH_STC_ID;
-    nREFRTN_AH_VERSION_NBR P_BASE.tnSTC_VERSION_NBR := pnREFRTN_AH_VERSION_NBR;
   --
     nSTG_ID_TABLE P_BASE.tnSTG_ID;
     nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
+  --
+    nSTC_ID P_BASE.tnSTC_ID;
+    nSTC_VERSION_NBR P_BASE.tnSTC_VERSION_NBR;
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.UPDATE_ASR_RETURNEES',
@@ -398,9 +405,11 @@ create or replace package body P_ASR is
     SET_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'BASIS', nSTGA_VERSION_NBR_BASIS, psBASIS);
   --
   -- Insert, update or delete statistics for the REFRTN and REFRTN-AH statistic types.
-  -- 
+  --
+    nSTC_ID := pnREFRTN_STC_ID;
+    nSTC_VERSION_NBR := pnREFRTN_VERSION_NBR;
     SET_STATISTIC
-     (nREFRTN_STC_ID, nREFRTN_VERSION_NBR, nSTG_ID_TABLE,
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
       'REFRTN', dSTART_DATE, dEND_DATE,
       pnDST_ID => pnDST_ID,
       pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
@@ -408,8 +417,10 @@ create or replace package body P_ASR is
       pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY, 
       pnVALUE => pnREFRTN_VALUE);
   -- 
+    nSTC_ID := pnREFRTN_AH_STC_ID;
+    nSTC_VERSION_NBR := pnREFRTN_AH_VERSION_NBR;
     SET_STATISTIC
-     (nREFRTN_AH_STC_ID, nREFRTN_AH_VERSION_NBR, nSTG_ID_TABLE,
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
       'REFRTN-AH', dSTART_DATE, dEND_DATE,
       pnDST_ID => pnDST_ID,
       pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
@@ -501,6 +512,504 @@ create or replace package body P_ASR is
     then P_UTILITY.TRACE_EXCEPTION;
   end DELETE_ASR_RETURNEES;
 --
+-- ----------------------------------------
+-- INSERT_ASR_STATELESS
+-- ----------------------------------------
+--
+  procedure INSERT_ASR_STATELESS
+   (pnASR_YEAR in P_BASE.tmnYear,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnDIM_ID_SPOPTYPE in P_BASE.tmnDIM_ID,
+    psLANG_CODE in P_BASE.tsLANG_CODE,
+    psSUBGROUP_NAME in P_BASE.tsText,
+    psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
+    psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
+    pnSTAPOP_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_AH_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnNATLOSS_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAOTHINC_VALUE in P_BASE.tnSTC_VALUE,
+    pnNATACQ_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAOTHDEC_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_AH_END_VALUE in P_BASE.tnSTC_VALUE)
+  is
+    dSTART_DATE_START P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-01-01', 'YYYY-MM-DD');
+    dEND_DATE_START P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-01-02', 'YYYY-MM-DD');
+    dSTART_DATE_END P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-12-31', 'YYYY-MM-DD');
+    dEND_DATE_END P_BASE.tdDate := to_date(to_char(pnASR_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
+  --
+    nSTG_ID_TABLE P_BASE.tnSTG_ID;
+    nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
+    nSTG_ID_PRIMARY P_BASE.tnSTG_ID;
+    nSTG_VERSION_NBR_PRIMARY P_BASE.tnSTG_VERSION_NBR;
+    nTXT_SEQ_NBR_PRIMARY P_BASE.tnTXT_SEQ_NBR;
+    nSTC_ID P_BASE.tnSTC_ID;
+  begin
+    P_UTILITY.START_MODULE
+     (sVersion || '-' || sComponent || '.INSERT_ASR_STATELESS',
+      to_char(pnASR_YEAR)  || '~' || to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' ||
+        to_char(pnDIM_ID_SPOPTYPE) || '~' || psSOURCE || '~' || psBASIS || '~' ||
+        to_char(pnSTAPOP_START_VALUE) || '~' || to_char(pnSTAPOP_AH_START_VALUE) || '~' ||
+        to_char(pnNATLOSS_VALUE) || '~' || to_char(pnSTAOTHINC_VALUE) || '~' ||
+        to_char(pnNATACQ_VALUE) || '~' || to_char(pnSTAOTHDEC_VALUE) || '~' ||
+        to_char(pnSTAPOP_END_VALUE) || '~' || to_char(pnSTAPOP_AH_END_VALUE) || '~' ||
+        psLANG_CODE || '~' || to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME);
+  --
+  -- Check that UNHCR-assisted values are not greater than total values.
+  --
+    if pnSTAPOP_AH_START_VALUE > pnSTAPOP_START_VALUE
+      or pnSTAPOP_AH_END_VALUE > pnSTAPOP_END_VALUE
+    then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'UNHCR-assisted value may not be greater than total value');
+    end if;
+  --
+  -- Get identifier and version number of statistic group representing the whole stateless table for
+  --  this year and country, creating a new statistic group for this purpose if necessary.
+  --
+    GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnASR_YEAR, 'STATELESS',
+                              pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY);
+  --
+  -- Create new statistic group representing this stateless table row.
+  --
+    P_STATISTIC_GROUP.INSERT_STATISTIC_GROUP
+     (nSTG_ID_PRIMARY, dSTART_DATE_START, dEND_DATE_END, 'STATELESS',
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      psLANG_CODE => psLANG_CODE,
+      psSUBGROUP_NAME => psSUBGROUP_NAME);
+  --
+  -- Create statistic group attributes for the source and basis.
+  --
+    if psSOURCE is not null
+    then P_STATISTIC_GROUP.INSERT_STG_ATTRIBUTE(nSTG_ID_PRIMARY, 'SOURCE', psSOURCE);
+    end if;
+  --
+    if psBASIS is not null
+    then P_STATISTIC_GROUP.INSERT_STG_ATTRIBUTE(nSTG_ID_PRIMARY, 'BASIS', psBASIS);
+    end if;
+  --
+  -- Create statistics for each of the stateless statistic types and link them to the statistic
+  --  group for the table.
+  --
+    if pnSTAPOP_START_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'STAPOP', dSTART_DATE_START, dEND_DATE_START,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+        pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnSTAPOP_START_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnSTAPOP_AH_START_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'STAPOP-AH', dSTART_DATE_START, dEND_DATE_START,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+        pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnSTAPOP_AH_START_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnNATLOSS_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'NATLOSS', dSTART_DATE_START, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+        pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnNATLOSS_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnSTAOTHINC_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'STAOTHINC', dSTART_DATE_START, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+        pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnSTAOTHINC_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnNATACQ_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'NATACQ', dSTART_DATE_START, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+        pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnNATACQ_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnSTAOTHDEC_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'STAOTHDEC', dSTART_DATE_START, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+        pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnSTAOTHDEC_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnSTAPOP_END_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'STAPOP', dSTART_DATE_END, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+        pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnSTAPOP_END_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+    if pnSTAPOP_AH_END_VALUE is not null
+    then
+      P_STATISTIC.INSERT_STATISTIC
+       (nSTC_ID, 'STAPOP-AH', dSTART_DATE_END, dEND_DATE_END,
+        pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+        pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+        pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+        pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
+        pnVALUE => pnSTAPOP_AH_END_VALUE);
+    --
+      P_STATISTIC.INSERT_STATISTIC_IN_GROUP(nSTC_ID, nSTG_ID_TABLE);
+    end if;
+  --
+  -- Update the statistic group for the whole returnee table to record latest update time and user.
+  --
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+  --
+    P_UTILITY.END_MODULE;
+  exception
+    when others
+    then P_UTILITY.TRACE_EXCEPTION;
+  end INSERT_ASR_STATELESS;
+--
+-- ----------------------------------------
+-- UPDATE_ASR_STATELESS
+-- ----------------------------------------
+--
+  procedure UPDATE_ASR_STATELESS
+   (pnASR_YEAR in P_BASE.tmnYear,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnDIM_ID_SPOPTYPE in P_BASE.tmnDIM_ID,
+    psLANG_CODE in P_BASE.tsLANG_CODE,
+    psSUBGROUP_NAME in P_BASE.tsText,
+    psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
+    psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
+    pnSTAPOP_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_AH_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnNATLOSS_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAOTHINC_VALUE in P_BASE.tnSTC_VALUE,
+    pnNATACQ_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAOTHDEC_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_AH_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
+    pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTAPOP_START_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_AH_START_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_AH_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnNATLOSS_STC_ID in P_BASE.tnSTC_ID,
+    pnNATLOSS_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAOTHINC_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAOTHINC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnNATACQ_STC_ID in P_BASE.tnSTC_ID,
+    pnNATACQ_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAOTHDEC_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAOTHDEC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_END_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_AH_END_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_AH_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR)
+  is
+    dSTART_DATE_START P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-01-01', 'YYYY-MM-DD');
+    dEND_DATE_START P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-01-02', 'YYYY-MM-DD');
+    dSTART_DATE_END P_BASE.tdDate := to_date(to_char(pnASR_YEAR) || '-12-31', 'YYYY-MM-DD');
+    dEND_DATE_END P_BASE.tdDate := to_date(to_char(pnASR_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
+    nSTG_VERSION_NBR P_BASE.tnSTG_VERSION_NBR := pnSTG_VERSION_NBR;
+    nSTGA_VERSION_NBR_SOURCE P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_SOURCE;
+    nSTGA_VERSION_NBR_BASIS P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_BASIS;
+  --
+    nSTG_ID_TABLE P_BASE.tnSTG_ID;
+    nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
+  --
+    nSTC_ID P_BASE.tnSTC_ID;
+    nSTC_VERSION_NBR P_BASE.tnSTC_VERSION_NBR;
+  begin
+    P_UTILITY.START_MODULE
+     (sVersion || '-' || sComponent || '.UPDATE_ASR_STATELESS',
+      to_char(pnASR_YEAR) || '~' || to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' ||
+        to_char(pnDIM_ID_SPOPTYPE) || '~' || psSUBGROUP_NAME || '~' ||
+        psSOURCE || '~' || psBASIS || '~' ||
+        to_char(pnSTAPOP_START_VALUE) || '~' || to_char(pnSTAPOP_AH_START_VALUE) || '~' ||
+        to_char(pnNATLOSS_VALUE) || '~' || to_char(pnSTAOTHINC_VALUE) || '~' ||
+        to_char(pnNATACQ_VALUE) || '~' || to_char(pnSTAOTHDEC_VALUE) || '~' ||
+        to_char(pnSTAPOP_END_VALUE) || '~' || to_char(pnSTAPOP_AH_END_VALUE) || '~' ||
+        to_char(pnSTG_ID_PRIMARY) || '~' || to_char(pnSTG_VERSION_NBR) || '~' ||
+        to_char(pnSTGA_VERSION_NBR_SOURCE) || '~' || to_char(pnSTGA_VERSION_NBR_BASIS) || '~' ||
+        to_char(pnSTAPOP_START_STC_ID) || '~' || to_char(pnSTAPOP_START_VERSION_NBR) || '~' ||
+        to_char(pnSTAPOP_AH_START_STC_ID) || '~' || to_char(pnSTAPOP_AH_START_VERSION_NBR) || '~' ||
+        to_char(pnNATLOSS_STC_ID) || '~' || to_char(pnNATLOSS_VERSION_NBR) || '~' ||
+        to_char(pnSTAOTHINC_STC_ID) || '~' || to_char(pnSTAOTHINC_VERSION_NBR) || '~' ||
+        to_char(pnNATACQ_STC_ID) || '~' || to_char(pnNATACQ_VERSION_NBR) || '~' ||
+        to_char(pnSTAOTHDEC_STC_ID) || '~' || to_char(pnSTAOTHDEC_VERSION_NBR) || '~' ||
+        to_char(pnSTAPOP_END_STC_ID) || '~' || to_char(pnSTAPOP_END_VERSION_NBR) || '~' ||
+        to_char(pnSTAPOP_AH_END_STC_ID) || '~' || to_char(pnSTAPOP_AH_END_VERSION_NBR));
+  --
+  -- Check that UNHCR-assisted values are not greater than total values.
+  --
+    if pnSTAPOP_AH_START_VALUE > pnSTAPOP_START_VALUE
+      or pnSTAPOP_AH_END_VALUE > pnSTAPOP_END_VALUE
+    then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'UNHCR-assisted value may not be greater than total value');
+    end if;
+  --
+  -- Get identifier and version number of statistic group representing the whole returnee table for
+  --  this year and country.
+  --
+    GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnASR_YEAR, 'STATELESS',
+                              pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY);
+  --
+  -- Insert, update or delete statistic group attributes for the source and basis.
+  --
+    SET_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'SOURCE', nSTGA_VERSION_NBR_SOURCE, psSOURCE);
+    SET_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'BASIS', nSTGA_VERSION_NBR_BASIS, psBASIS);
+  --
+  -- Insert, update or delete statistics for each of the stateless statistic types.
+  -- 
+    nSTC_ID := pnSTAPOP_START_STC_ID;
+    nSTC_VERSION_NBR := pnSTAPOP_START_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'STAPOP', dSTART_DATE_START, dEND_DATE_START,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnSTAPOP_START_VALUE);
+  -- 
+    nSTC_ID := pnSTAPOP_AH_START_STC_ID;
+    nSTC_VERSION_NBR := pnSTAPOP_AH_START_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'STAPOP-AH', dSTART_DATE_START, dEND_DATE_START,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnSTAPOP_AH_START_VALUE);
+  -- 
+    nSTC_ID := pnNATLOSS_STC_ID;
+    nSTC_VERSION_NBR := pnNATLOSS_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'NATLOSS', dSTART_DATE_START, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnNATLOSS_VALUE);
+  -- 
+    nSTC_ID := pnSTAOTHINC_STC_ID;
+    nSTC_VERSION_NBR := pnSTAOTHINC_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'NATLOSS', dSTART_DATE_START, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnSTAOTHINC_VALUE);
+  -- 
+    nSTC_ID := pnNATACQ_STC_ID;
+    nSTC_VERSION_NBR := pnNATACQ_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'NATLOSS', dSTART_DATE_START, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnNATACQ_VALUE);
+  -- 
+    nSTC_ID := pnSTAOTHDEC_STC_ID;
+    nSTC_VERSION_NBR := pnSTAOTHDEC_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'NATLOSS', dSTART_DATE_START, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnSTAOTHDEC_VALUE);
+  -- 
+    nSTC_ID := pnSTAPOP_END_STC_ID;
+    nSTC_VERSION_NBR := pnSTAPOP_END_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'STAPOP', dSTART_DATE_END, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnSTAPOP_END_VALUE);
+  -- 
+    nSTC_ID := pnSTAPOP_AH_END_STC_ID;
+    nSTC_VERSION_NBR := pnSTAPOP_AH_END_VERSION_NBR;
+    SET_STATISTIC
+     (nSTC_ID, nSTC_VERSION_NBR, nSTG_ID_TABLE,
+      'STAPOP-AH', dSTART_DATE_END, dEND_DATE_END,
+      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY,
+      pnLOC_ID_ORIGIN_COUNTRY => gnLOC_ID_STATELESS,
+      pnDIM_ID1 => pnDIM_ID_SPOPTYPE,
+      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
+      pnVALUE => pnSTAPOP_AH_END_VALUE);
+  --
+  -- Update primary statistic group and statistic group representing the whole stateless table to
+  --  record latest update time and user.
+  --
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(pnSTG_ID_PRIMARY, nSTG_VERSION_NBR,
+                                             psLANG_CODE, psSUBGROUP_NAME);
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+  --
+    P_UTILITY.END_MODULE;
+  exception
+    when others
+    then P_UTILITY.TRACE_EXCEPTION;
+  end UPDATE_ASR_STATELESS;
+--
+-- ----------------------------------------
+-- DELETE_ASR_STATELESS
+-- ----------------------------------------
+--
+  procedure DELETE_ASR_STATELESS
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
+    pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTAPOP_START_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_AH_START_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_AH_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnNATLOSS_STC_ID in P_BASE.tnSTC_ID,
+    pnNATLOSS_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAOTHINC_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAOTHINC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnNATACQ_STC_ID in P_BASE.tnSTC_ID,
+    pnNATACQ_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAOTHDEC_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAOTHDEC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_END_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_AH_END_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_AH_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR)
+  is
+    nSTG_VERSION_NBR P_BASE.tnSTG_VERSION_NBR := pnSTG_VERSION_NBR;
+    nSTGA_VERSION_NBR_SOURCE P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_SOURCE;
+    nSTGA_VERSION_NBR_BASIS P_BASE.tnSTGA_VERSION_NBR := pnSTGA_VERSION_NBR_BASIS;
+  --
+    nSTG_ID_TABLE P_BASE.tnSTG_ID;
+    nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
+  begin
+    P_UTILITY.START_MODULE
+     (sVersion || '-' || sComponent || '.DELETE_ASR_STATELESS',
+      to_char(pnSTG_ID_PRIMARY) || '~' || to_char(pnSTG_VERSION_NBR) || '~' ||
+        to_char(pnSTGA_VERSION_NBR_SOURCE) || '~' || to_char(pnSTGA_VERSION_NBR_BASIS) || '~' ||
+        to_char(pnSTAPOP_START_STC_ID) || '~' || to_char(pnSTAPOP_START_VERSION_NBR) || '~' ||
+        to_char(pnSTAPOP_AH_START_STC_ID) || '~' || to_char(pnSTAPOP_AH_START_VERSION_NBR) || '~' ||
+        to_char(pnNATLOSS_STC_ID) || '~' || to_char(pnNATLOSS_VERSION_NBR) || '~' ||
+        to_char(pnSTAOTHINC_STC_ID) || '~' || to_char(pnSTAOTHINC_VERSION_NBR) || '~' ||
+        to_char(pnNATACQ_STC_ID) || '~' || to_char(pnNATACQ_VERSION_NBR) || '~' ||
+        to_char(pnSTAOTHDEC_STC_ID) || '~' || to_char(pnSTAOTHDEC_VERSION_NBR) || '~' ||
+        to_char(pnSTAPOP_END_STC_ID) || '~' || to_char(pnSTAPOP_END_VERSION_NBR) || '~' ||
+        to_char(pnSTAPOP_AH_END_STC_ID) || '~' || to_char(pnSTAPOP_AH_END_VERSION_NBR));
+  --
+  -- Get identifier and version number of statistic group representing the whole returnee table for
+  --  this year and country.
+  --
+    GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
+  --
+  -- Delete the statistics for each of the stateless statistic types.
+  --
+    if pnSTAPOP_START_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnSTAPOP_START_STC_ID, pnSTAPOP_START_VERSION_NBR);
+    end if;
+  --
+    if pnSTAPOP_AH_START_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnSTAPOP_AH_START_STC_ID, pnSTAPOP_AH_START_VERSION_NBR);
+    end if;
+  --
+    if pnNATLOSS_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnNATLOSS_STC_ID, pnNATLOSS_VERSION_NBR);
+    end if;
+  --
+    if pnSTAOTHINC_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnSTAOTHINC_STC_ID, pnSTAOTHINC_VERSION_NBR);
+    end if;
+  --
+    if pnNATACQ_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnNATACQ_STC_ID, pnNATACQ_VERSION_NBR);
+    end if;
+  --
+    if pnSTAOTHDEC_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnSTAOTHDEC_STC_ID, pnSTAOTHDEC_VERSION_NBR);
+    end if;
+  --
+    if pnSTAPOP_END_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnSTAPOP_END_STC_ID, pnSTAPOP_END_VERSION_NBR);
+    end if;
+  --
+    if pnSTAPOP_AH_END_STC_ID is not null
+    then P_STATISTIC.DELETE_STATISTIC(pnSTAPOP_AH_END_STC_ID, pnSTAPOP_AH_END_VERSION_NBR);
+    end if;
+  --
+  -- Delete the source and basis statistic group attributes and the primary statistic group.
+  --
+    if nSTGA_VERSION_NBR_SOURCE is not null
+    then
+      P_STATISTIC_GROUP.DELETE_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'SOURCE', nSTGA_VERSION_NBR_SOURCE);
+    end if;
+  --
+    if nSTGA_VERSION_NBR_BASIS is not null
+    then
+      P_STATISTIC_GROUP.DELETE_STG_ATTRIBUTE(pnSTG_ID_PRIMARY, 'BASIS', nSTGA_VERSION_NBR_BASIS);
+    end if;
+  --
+    P_STATISTIC_GROUP.DELETE_STATISTIC_GROUP(pnSTG_ID_PRIMARY, nSTG_VERSION_NBR);
+  --
+  -- Update the statistic group for the whole returnee table to record latest update time and user.
+  --
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+  --
+    P_UTILITY.END_MODULE;
+  exception
+    when others
+    then P_UTILITY.TRACE_EXCEPTION;
+  end DELETE_ASR_STATELESS;
+--
 -- =====================================
 -- Initialisation
 -- =====================================
@@ -513,6 +1022,12 @@ begin
   if sVersion != 'D1.0'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
   end if;
+--
+  select LOC_ID
+  into gnLOC_ID_STATELESS
+  from T_LOCATION_ATTRIBUTES
+  where LOCAT_CODE = 'ISO3166A3'
+  and CHAR_VALUE = 'XXA';
 --
 end P_ASR;
 /

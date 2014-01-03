@@ -6,7 +6,7 @@ create or replace package P_ASR is
 --  Procedures for maintenance of statistics.
 --
 --  Change History:
---  13-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D1.0)
+--  02-Jan-2014 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
@@ -63,17 +63,17 @@ create or replace package P_ASR is
 --  pnSTG_ID_PRIMARY - Primary statistics group identifier.
 --  pnSTG_VERSION_NBR - Primary statistics group version number.
 --  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
---    source code previously existed).
+--    source code exists).
 --  pnSTGA_VERSION_NBR_BASIS - Version number of code for basis of data (can only be null if no
---    basis code previously existed).
+--    basis code exists).
 --  pnREFRTN_STC_ID - Statistic identifier for total returns during year statistic (can only be null
---    if no total returns statistic previously existed).
+--    if no such statistic exists).
 --  pnREFRTN_VERSION_NBR - Version number for total returns during year statistic (can only be null
---    if no total returns statistic previously existed).
+--    if no such statistic exists).
 --  pnREFRTN_AH_STC_ID - Statistic identifier for UNHCR-assisted returns during year statistic
---    (can only be null if no UNHCR-assisted returns statistic previously existed).
+--    (can only be null if no such statistic exists).
 --  pnREFRTN_AH_VERSION_NBR - Version number for UNHCR-assisted returns during year statistic (can
---    only be null if no UNHCR-assisted returns statistic previously existed).
+--    only be null if no such statistic exists).
 --
 -- All parameters must be passed. Null value parameters are only allowed where indicated.
 --
@@ -105,17 +105,17 @@ create or replace package P_ASR is
 --  pnSTG_ID_PRIMARY - Primary statistics group identifier.
 --  pnSTG_VERSION_NBR - Primary statistics group version number.
 --  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
---    source code previously existed).
+--    source code exists).
 --  pnSTGA_VERSION_NBR_BASIS - Version number of code for basis of data (can only be null if no
---    basis code previously existed).
+--    basis code exists).
 --  pnREFRTN_STC_ID - Statistic identifier for total returns during year statistic (can only be null
---    if no total returns statistic exists).
+--    if no such statistic exists).
 --  pnREFRTN_VERSION_NBR - Version number for total returns during year statistic (can only be null
---    if no total returns statistic exists).
+--    if no such statistic exists).
 --  pnREFRTN_AH_STC_ID - Statistic identifier for UNHCR-assisted returns during year statistic
---    (can only be null if no UNHCR-assisted returns statistic exists).
+--    (can only be null if no such statistic exists).
 --  pnREFRTN_AH_VERSION_NBR - Version number for UNHCR-assisted returns during year statistic (can
---    only be null if no UNHCR-assisted returns statistic exists).
+--    only be null if no such statistic exists).
 --
 -- All parameters must be specified. Null value parameters are only allowed where indicated.
 --
@@ -128,6 +128,228 @@ create or replace package P_ASR is
     pnREFRTN_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
     pnREFRTN_AH_STC_ID in P_BASE.tnSTC_ID,
     pnREFRTN_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR);
+--
+-- ----------------------------------------
+-- INSERT_ASR_STATELESS
+-- ----------------------------------------
+--
+-- Create a new row in ASR stateless table.
+--
+-- Parameters:
+--  pnASR_YEAR - Year of ASR statistics.
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum.
+--  pnDIM_ID_SPOPTYPE - Dimension value identifier for type of stateless population.
+--  psLANG_CODE - Language code of the description of stateless population (can be null, but must be
+--    specified if psSUBGROUP_NAME is specified).
+--  psSUBGROUP_NAME - Textual description of stateless population (can be null).
+--  psSOURCE - Code(s) for source of data (can be null).
+--  psBASIS - Code(s) for basis of data (can be null).
+--  pnSTAPOP_START_VALUE - Statistic value for total population at start of year (can be null).
+--  pnSTAPOP_AH_START_VALUE - Statistic value for UNHCR-assisted population at start of year (can
+--    be null).
+--  pnNATLOSS_VALUE - Statistic value for increases due to to loss or deprivation of nationality
+--    (can be null).
+--  pnSTAOTHINC_VALUE - Statistic value for other increases (can be null).
+--  pnNATACQ_VALUE - Statistic value for decreases due to acquisition or confirmation of nationality
+--   (can be null).
+--  pnSTAOTHDEC_VALUE - Statistic value for other decreases (can be null).
+--  pnSTAPOP_END_VALUE - Statistic value for total population at end of year (can be null).
+--  pnSTAPOP_AH_END_VALUE - Statistic value for UNHCR-assisted population at end of year (can be
+--    null).
+--
+-- All parameters must be specified. Null value parameters are only allowed where indicated.
+--
+  procedure INSERT_ASR_STATELESS
+   (pnASR_YEAR in P_BASE.tmnYear,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnDIM_ID_SPOPTYPE in P_BASE.tmnDIM_ID,
+    psLANG_CODE in P_BASE.tsLANG_CODE,
+    psSUBGROUP_NAME in P_BASE.tsText,
+    psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
+    psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
+    pnSTAPOP_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_AH_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnNATLOSS_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAOTHINC_VALUE in P_BASE.tnSTC_VALUE,
+    pnNATACQ_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAOTHDEC_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_AH_END_VALUE in P_BASE.tnSTC_VALUE);
+--
+-- ----------------------------------------
+-- UPDATE_ASR_STATELESS
+-- ----------------------------------------
+--
+-- Update an existing row in ASR stateless table.
+--
+-- Parameters:
+--  pnASR_YEAR - Year of ASR statistics.
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum.
+--  pnDIM_ID_SPOPTYPE - Dimension value identifier for type of stateless population.
+--  psLANG_CODE - Language code of the description of stateless population (can be null, but must be
+--    specified if psSUBGROUP_NAME is specified).
+--  psSUBGROUP_NAME - Textual description of stateless population (can be null).
+--  psSOURCE - Code(s) for source of data (can be null).
+--  psBASIS - Code(s) for basis of data (can be null).
+--  pnSTAPOP_START_VALUE - Statistic value for total population at start of year (can be null).
+--  pnSTAPOP_AH_START_VALUE - Statistic value for UNHCR-assisted population at start of year (can
+--    be null).
+--  pnNATLOSS_VALUE - Statistic value for increases due to to loss or deprivation of nationality
+--    (can be null).
+--  pnSTAOTHINC_VALUE - Statistic value for other increases (can be null).
+--  pnNATACQ_VALUE - Statistic value for decreases due to acquisition or confirmation of nationality
+--   (can be null).
+--  pnSTAOTHDEC_VALUE - Statistic value for other decreases (can be null).
+--  pnSTAPOP_END_VALUE - Statistic value for total population at end of year (can be null).
+--  pnSTAPOP_AH_END_VALUE - Statistic value for UNHCR-assisted population at end of year (can be
+--    null).
+--  pnSTG_ID_PRIMARY - Primary statistics group identifier.
+--  pnSTG_VERSION_NBR - Primary statistics group version number.
+--  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
+--    source code exists).
+--  pnSTGA_VERSION_NBR_BASIS - Version number of code for basis of data (can only be null if no
+--    basis code exists).
+--  pnSTAPOP_START_STC_ID - Statistic identifier for total population at start of year (can only be
+--    null if no such statistic exists).
+--  pnSTAPOP_START_VERSION_NBR - Version number for total population at start of year (can only be
+--    null if no such statistic exists).
+--  pnSTAPOP_AH_START_STC_ID - Statistic identifier for UNHCR-assisted population at start of year
+--    (can only be null if no such statistic exists).
+--  pnSTAPOP_AH_START_VERSION_NBR - Version number for UNHCR-assisted population at start of year
+--    (can only be null if no such statistic exists).
+--  pnNATLOSS_STC_ID - Statistic identifier for increases due to to loss or deprivation of
+--    nationality (can only be null if no such statistic exists).
+--  pnNATLOSS_VERSION_NBR - Version number for increases due to to loss or deprivation of
+--    nationality (can only be null if no such statistic exists).
+--  pnSTAOTHINC_STC_ID - Statistic identifier for other increases (can only be null if no such
+--    statistic exists).
+--  pnSTAOTHINC_VERSION_NBR - Version number for other increases (can only be null if no such
+--    statistic exists).
+--  pnNATACQ_STC_ID - Statistic identifier for decreases due to acquisition or confirmation of
+--   nationality (can only be null if no such statistic exists).
+--  pnNATACQ_VERSION_NBR - Version number for decreases due to acquisition or confirmation of
+--   nationality (can only be null if no such statistic exists).
+--  pnSTAOTHDEC_STC_ID - Statistic identifier for other decreases (can only be null if no such
+--    statistic exists).
+--  pnSTAOTHDEC_VERSION_NBR - Version number for other decreases (can only be null if no such
+--    statistic exists).
+--  pnSTAPOP_END_STC_ID - Statistic identifier for total population at end of year (can only be null
+--    if no such statistic exists).
+--  pnSTAPOP_END_VERSION_NBR - Version number for total population at end of year (can only be null
+--    if no such statistic exists).
+--  pnSTAPOP_AH_END_STC_ID - Statistic identifier for UNHCR-assisted population at end of year (can
+--    only be null if no such statistic exists).
+--  pnSTAPOP_AH_END_VERSION_NBR - Version number for UNHCR-assisted population at end of year (can
+--    only be null if no such statistic exists).
+--
+-- All parameters must be passed. Null value parameters are only allowed where indicated.
+--
+  procedure UPDATE_ASR_STATELESS
+   (pnASR_YEAR in P_BASE.tmnYear,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+    pnDIM_ID_SPOPTYPE in P_BASE.tmnDIM_ID,
+    psLANG_CODE in P_BASE.tsLANG_CODE,
+    psSUBGROUP_NAME in P_BASE.tsText,
+    psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
+    psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
+    pnSTAPOP_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_AH_START_VALUE in P_BASE.tnSTC_VALUE,
+    pnNATLOSS_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAOTHINC_VALUE in P_BASE.tnSTC_VALUE,
+    pnNATACQ_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAOTHDEC_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTAPOP_AH_END_VALUE in P_BASE.tnSTC_VALUE,
+    pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
+    pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTAPOP_START_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_AH_START_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_AH_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnNATLOSS_STC_ID in P_BASE.tnSTC_ID,
+    pnNATLOSS_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAOTHINC_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAOTHINC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnNATACQ_STC_ID in P_BASE.tnSTC_ID,
+    pnNATACQ_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAOTHDEC_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAOTHDEC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_END_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_AH_END_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_AH_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR);
+--
+-- ----------------------------------------
+-- DELETE_ASR_STATELESS
+-- ----------------------------------------
+--
+-- Delete a row in ASR stateless table.
+--
+-- Parameters:
+--  pnSTG_ID_PRIMARY - Primary statistics group identifier.
+--  pnSTG_VERSION_NBR - Primary statistics group version number.
+--  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
+--    source code previously existed).
+--  pnSTGA_VERSION_NBR_BASIS - Version number of code for basis of data (can only be null if no
+--    basis code previously existed).
+--  pnSTAPOP_START_STC_ID - Statistic identifier for total population at start of year (can only be
+--    null if no such statistic exists).
+--  pnSTAPOP_START_VERSION_NBR - Version number for total population at start of year (can only be
+--    null if no such statistic exists).
+--  pnSTAPOP_AH_START_STC_ID - Statistic identifier for UNHCR-assisted population at start of year
+--    (can only be null if no such statistic exists).
+--  pnSTAPOP_AH_START_VERSION_NBR - Version number for UNHCR-assisted population at start of year
+--    (can only be null if no such statistic exists).
+--  pnNATLOSS_STC_ID - Statistic identifier for increases due to to loss or deprivation of
+--    nationality (can only be null if no such statistic exists).
+--  pnNATLOSS_VERSION_NBR - Version number for increases due to to loss or deprivation of
+--    nationality (can only be null if no such statistic exists).
+--  pnSTAOTHINC_STC_ID - Statistic identifier for other increases (can only be null if no such
+--    statistic exists).
+--  pnSTAOTHINC_VERSION_NBR - Version number for other increases (can only be null if no such
+--    statistic exists).
+--  pnNATACQ_STC_ID - Statistic identifier for decreases due to acquisition or confirmation of
+--   nationality (can only be null if no such statistic exists).
+--  pnNATACQ_VERSION_NBR - Version number for decreases due to acquisition or confirmation of
+--   nationality (can only be null if no such statistic exists).
+--  pnSTAOTHDEC_STC_ID - Statistic identifier for other decreases (can only be null if no such
+--    statistic exists).
+--  pnSTAOTHDEC_VERSION_NBR - Version number for other decreases (can only be null if no such
+--    statistic exists).
+--  pnSTAPOP_END_STC_ID - Statistic identifier for total population at end of year (can only be null
+--    if no such statistic exists).
+--  pnSTAPOP_END_VERSION_NBR - Version number for total population at end of year (can only be null
+--    if no such statistic exists).
+--  pnSTAPOP_AH_END_STC_ID - Statistic identifier for UNHCR-assisted population at end of year (can
+--    only be null if no such statistic exists).
+--  pnSTAPOP_AH_END_VERSION_NBR - Version number for UNHCR-assisted population at end of year (can
+--    only be null if no such statistic exists).
+--
+-- All parameters must be specified. Null value parameters are only allowed where indicated.
+--
+  procedure DELETE_ASR_STATELESS
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
+    pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
+    pnSTAPOP_START_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_AH_START_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_AH_START_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnNATLOSS_STC_ID in P_BASE.tnSTC_ID,
+    pnNATLOSS_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAOTHINC_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAOTHINC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnNATACQ_STC_ID in P_BASE.tnSTC_ID,
+    pnNATACQ_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAOTHDEC_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAOTHDEC_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_END_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR,
+    pnSTAPOP_AH_END_STC_ID in P_BASE.tnSTC_ID,
+    pnSTAPOP_AH_END_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR);
 --
 end P_ASR;
 /

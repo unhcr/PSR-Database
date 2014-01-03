@@ -687,7 +687,7 @@ create or replace package body P_MESSAGE is
   --
     raise_application_error(-20000,
                             psCOMP_CODE || '-' || sSEVERITY || ltrim(to_char(pnSEQ_NBR, '0999')) ||
-                              ': ' || sPREFIX_MESSAGE || sMESSAGE);
+                              ': ' || sPREFIX_MESSAGE || nvl(sMESSAGE, psEnglishMessage));
   exception
     when others
     then P_UTILITY.END_MODULE;
@@ -703,7 +703,7 @@ begin
   then DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
   end if;
 --
-  if sVersion != 'D0.1'
+  if sVersion != 'D1.0'
   then DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
   end if;
 --

@@ -62,3 +62,39 @@ begin
   dbms_output.put_line(to_char(iCount) || ' CODES records inserted');
 end;
 /
+
+declare
+  nVERSION_NBR P_BASE.tnCDE_VERSION_NBR;
+  nSEQ_NBR P_BASE.tnTXT_SEQ_NBR;
+  iCount pls_integer := 0;
+begin
+  for rCDE in
+   (select CDET_CODE, CODE, TXTT_CODE, TEXT_EN, TEXT_FR
+    from S_CODE_TEXT_ITEMS)
+  loop
+    select VERSION_NBR
+    into nVERSION_NBR
+    from T_CODES
+    where CDET_CODE = rCDE.CDET_CODE
+    and CODE = rCDE.CODE;
+  --
+    if rCDE.TEXT_EN is not null
+    then
+      nSEQ_NBR := null;
+      P_CODE.SET_CDE_TEXT
+       (rCDE.CDET_CODE, rCDE.CODE, nVERSION_NBR, rCDE.TXTT_CODE, nSEQ_NBR, 'en', rCDE.TEXT_EN);
+      iCount := iCount + 1;
+    end if;
+  --
+    if rCDE.TEXT_FR is not null
+    then
+      nSEQ_NBR := null;
+      P_CODE.SET_CDE_TEXT
+       (rCDE.CDET_CODE, rCDE.CODE, nVERSION_NBR, rCDE.TXTT_CODE, nSEQ_NBR, 'fr', rCDE.TEXT_FR);
+      iCount := iCount + 1;
+    end if;
+  end loop;
+--
+  dbms_output.put_line(to_char(iCount) || ' TEXT_ITEMS records inserted');
+end;
+/

@@ -1,43 +1,35 @@
 prompt LoadRefugeeStatistics
 prompt =====================
-@LoadRefugeeStatistics
+@@LoadASR/LoadRefugeeStatistics
 
 prompt LoadDemographicsStatistics
 prompt ==========================
-@LoadDemographicsStatistics
+@@LoadASR/LoadDemographicsStatistics
 
 prompt LoadRSDStatistics
 prompt =================
-@LoadRSDStatistics
+@@LoadASR/LoadRSDStatistics
 
 prompt LoadIDPStatistics
 prompt =================
-@LoadIDPStatistics
+@@LoadASR/LoadIDPStatistics
 
 prompt LoadReturnsStatistics
 prompt =====================
-@LoadReturnsStatistics
+@@LoadASR/LoadReturnsStatistics
 
 prompt LoadStatelessStatistics
 prompt =======================
-@LoadStatelessStatistics
+@@LoadASR/LoadStatelessStatistics
 
 prompt LoadOOCStatistics
 prompt =================
-@LoadOOCStatistics
+@@LoadASR/LoadOOCStatistics
 
 prompt CreateASRTableStatisticGroups
 prompt =============================
-@CreateASRTableStatisticGroups
+@@LoadASR/CreateASRTableStatisticGroups
 
 prompt InitRedactionLimit
 prompt ==================
-@InitRedactionLimit
-
-prompt DeactivateCodes
-prompt ===============
-@DeactivateCodes
-
-prompt RefreshMViews
-prompt =============
-@RefreshMViews.sql
+@@LoadASR/InitRedactionLimit

@@ -1,4 +1,4 @@
-@@PreserveLocationIds
+@@Build/PreserveLocationIds
 
 @dropall
 @drop
@@ -11,9 +11,7 @@ purge recyclebin;
 
 @@LoadData
 
---prompt InitTests
---prompt =========
---@InitTests
+@@FinaliseInfrastructure
 
 commit;
 

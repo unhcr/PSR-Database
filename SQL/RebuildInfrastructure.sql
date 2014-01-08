@@ -1,11 +1,13 @@
 @dropall
 @drop
 
-spool Rebuild.log
+spool RebuildInfrastructure.log
 
 purge recyclebin;
 
 @@BuildInfrastructure
+
+@@FinaliseInfrastructure
 
 commit;
 

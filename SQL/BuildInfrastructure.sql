@@ -1,123 +1,123 @@
 prompt StageSynonyms
 prompt =============
-@StageSynonyms
+@@Build/StageSynonyms
 
 prompt Schema
 prompt ======
-@Schema
+@@Build/Schema
 
 prompt Packages
 prompt ========
-@Packages
+@@Build/PLSQL/Packages
 
 prompt Triggers
 prompt ========
-@Triggers
+@@Build/PLSQL/Triggers
 
 prompt Context
 prompt =======
-@Context
+@@Build/Context
 
 prompt ASRSchema
 prompt =========
-@ASRSchema
+@@Build/ASR/ASRSchema
 
 prompt PSQSchema
 prompt =========
-@PSQSchema
+@@Build/PSQ/PSQSchema
 
 prompt ResetLOC_SEQ
 prompt ============
-@ResetLOC_SEQ
+@@Build/ResetLOC_SEQ
 
 prompt InitBase
 prompt ========
-@InitBase
+@@Build/InitBase
 
 prompt LoadLanguages
 prompt =============
-@LoadLanguages
+@@Build/LoadLanguages
 
 prompt LoadTextTypes
 prompt =============
-@LoadTextTypes
+@@Build/LoadTextTypes
 
 prompt LoadMessages
 prompt ============
-@LoadMessages
+@@Build/LoadMessages
 
 prompt InitParameters
 prompt ==============
-@InitParameters
+@@Build/InitParameters
 
 prompt LoadGenericCodes
 prompt ================
-@LoadGenericCodes
+@@Build/LoadGenericCodes
 
 prompt LoadDisplacementStatuses
 prompt ========================
-@LoadDisplacementStatuses
+@@Build/LoadDisplacementStatuses
 
 prompt InitSexes
 prompt =========
-@InitSexes
+@@Build/InitSexes
 
 prompt InitAgeProfiles
 prompt ===============
-@InitAgeProfiles
+@@Build/InitAgeProfiles
 
 prompt LoadDimensionTypes
 prompt ==================
-@LoadDimensionTypes
+@@Build/LoadDimensionTypes
 
 prompt LoadStatisticTypes
 prompt ==================
-@LoadStatisticTypes
+@@Build/LoadStatisticTypes
 
 prompt LoadStatisticGroupAttributeTypes
 prompt =================================
-@LoadStatisticGroupAttributeTypes
+@@Build/LoadStatisticGroupAttributeTypes
 
 prompt LoadLocationTypes
 prompt =================
-@LoadLocationTypes
+@@Build/LoadLocationTypes
 
 prompt LoadLocationAttributeTypes
 prompt ==========================
-@LoadLocationAttributeTypes
+@@Build/LoadLocationAttributeTypes
 
 prompt LoadLocationRelationshipTypes
 prompt =============================
-@LoadLocationRelationshipTypes
+@@Build/LoadLocationRelationshipTypes
 
 prompt LoadLocationsRegions
 prompt ====================
-@LoadLocationsRegions
+@@Build/LoadLocationsRegions
 
 prompt LoadLocationsCountries
 prompt ======================
-@LoadLocationsCountries
+@@Build/LoadLocationsCountries
 
 prompt LoadLocationTypeVariants
 prompt ========================
-@LoadLocationTypeVariants
+@@Build/LoadLocationTypeVariants
 
 prompt LoadLocationsSubdivisions
 prompt =========================
-@LoadLocationsSubdivisions
+@@Build/LoadLocationsSubdivisions
 
 prompt LoadLocationRelationships
 prompt =========================
-@LoadLocationRelationships
+@@Build/LoadLocationRelationships
 
 prompt LoadPPGs
 prompt ========
-@@LoadPPGs
+@@Build/LoadPPGs
 
 prompt LoadRoles
 prompt =========
-@@LoadRoles
+@@Build/LoadRoles
 
 prompt InitUsers
 prompt =========
-@InitUsers
+@@Build/InitUsers

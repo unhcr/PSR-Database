@@ -5,6 +5,6 @@ spool RebuildPSQ.log
 
 purge recyclebin;
 
-@@PSQSynonyms &1
+@@Build/PSQ/PSQSynonyms &1
 
 spool off

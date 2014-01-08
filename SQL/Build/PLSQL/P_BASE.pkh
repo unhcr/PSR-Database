@@ -6,7 +6,7 @@ create or replace package P_BASE is
 --  Type definitions and data values used throughout the PSR system.
 --
 --  Change History:
---  13-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D1.0)
+--  08-Jan-2014 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
@@ -305,37 +305,6 @@ create or replace package P_BASE is
 --
   subtype tsTAB_ALIAS is T_TABLE_ALIASES.ALIAS%type;
   subtype tmsTAB_ALIAS is tsTAB_ALIAS not null;
---
--- T_TESTS
---
-  subtype tsTST_CODE is T_TESTS.CODE%type;
-  subtype tsTST_DESCRIPTION is T_TESTS.DESCRIPTION%type;
---
--- T_TEST_CASES
---
-  subtype tsTCS_PACKAGE_NAME is T_TEST_CASES.PACKAGE_NAME%type;
-  subtype tsTCS_PROGRAM_UNIT_NAME is T_TEST_CASES.PROGRAM_UNIT_NAME%type;
-  subtype tnTCS_EXCEPTION_NBR is T_TEST_CASES.EXCEPTION_NBR%type;
-  subtype tsTCS_VARIABLE_NAME is T_TEST_CASES.VARIABLE_NAME%type;
-  subtype tsTCS_CHAR_VALUE is T_TEST_CASES.CHAR_VALUE%type;
-  subtype tnTCS_NUM_VALUE is T_TEST_CASES.NUM_VALUE%type;
-  subtype tdTCS_DATE_VALUE is T_TEST_CASES.DATE_VALUE%type;
---
--- T_TEST_CASE_ARGUMENTS
---
-  subtype tsTCA_PARAMETER_NAME is T_TEST_CASE_ARGUMENTS.PARAMETER_NAME%type;
-  subtype tsTCA_VARIABLE_NAME is T_TEST_CASE_ARGUMENTS.VARIABLE_NAME%type;
-  subtype tsTCA_CHAR_VALUE_IN is T_TEST_CASE_ARGUMENTS.CHAR_VALUE_IN%type;
-  subtype tsTCA_CHAR_VALUE_OUT is T_TEST_CASE_ARGUMENTS.CHAR_VALUE_OUT%type;
-  subtype tnTCA_NUM_VALUE_IN is T_TEST_CASE_ARGUMENTS.NUM_VALUE_IN%type;
-  subtype tnTCA_NUM_VALUE_OUT is T_TEST_CASE_ARGUMENTS.NUM_VALUE_OUT%type;
-  subtype tdTCA_DATE_VALUE_IN is T_TEST_CASE_ARGUMENTS.DATE_VALUE_IN%type;
-  subtype tdTCA_DATE_VALUE_OUT is T_TEST_CASE_ARGUMENTS.DATE_VALUE_OUT%type;
---
--- T_TEST_STEPS
---
-  subtype tsSTP_SEQ_NBR is T_TEST_STEPS.SEQ_NBR%type;
-  subtype tsSTP_DESCRIPTION is T_TEST_STEPS.DESCRIPTION%type;
 --
 -- T_TEXT_ITEMS
 --

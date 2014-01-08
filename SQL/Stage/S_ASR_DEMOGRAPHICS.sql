@@ -29,7 +29,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2000.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2000.log'
@@ -102,7 +102,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2001.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2001.log'
@@ -173,7 +173,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2002.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2002.log'
@@ -249,7 +249,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2003.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2003.log'
@@ -323,7 +323,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2004.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2004.log'
@@ -397,7 +397,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2005.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2005.log'
@@ -471,7 +471,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2006.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2006.log'
@@ -545,7 +545,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2007.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2007.log'
@@ -619,7 +619,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2008.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2008.log'
@@ -693,7 +693,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2009.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2009.log'
@@ -767,7 +767,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2010.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2010.log'
@@ -841,7 +841,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2011.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2011.log'
@@ -915,7 +915,7 @@ organization external
   default directory PSRDATA
   access parameters
    (records delimited by '\r\n'
-    characterset we8mswin1252
+    characterset WE8MSWIN1252
     badfile 'ASR_DEMOGRAPHICS_2012.bad'
     nodiscardfile
     logfile PSRLOG:'ASR_DEMOGRAPHICS_2012.log'

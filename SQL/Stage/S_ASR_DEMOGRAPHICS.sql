@@ -958,6 +958,80 @@ organization external
   location ('ASR_DEMOGRAPHICS_2012.csv'))
 reject limit unlimited;
 
+create table S_ASR_DEMOGRAPHICS_2013
+ (STATSYEAR varchar2(4),
+  COU_CODE_ASYLUM varchar2(3),
+  LOCATION_NAME varchar2(1000),
+  NEW_LOCATION_NAME varchar2(1000),
+  URBAN_RURAL_STATUS varchar2(5),
+  ACCOMMODATION_TYPE varchar2(100),
+  DISPLACEMENT_STATUS varchar2(3),
+  COU_CODE_ORIGIN varchar2(3),
+  PPG_NAME varchar2(1000),
+  F0 varchar2(40),
+  F5 varchar2(40),
+  F12 varchar2(40),
+  F18 varchar2(40),
+  F60 varchar2(40),
+  FOTHER varchar2(40),
+  FTOTAL varchar2(40),
+  M0 varchar2(40),
+  M5 varchar2(40),
+  M12 varchar2(40),
+  M18 varchar2(40),
+  M60 varchar2(40),
+  MOTHER varchar2(40),
+  MTOTAL varchar2(40),
+  TOTAL varchar2(40),
+  BASIS varchar2(2))
+organization external
+ (type oracle_loader
+  default directory PSRDATA
+  access parameters
+   (records delimited by '\r\n'
+    characterset WE8MSWIN1252
+    badfile 'ASR_DEMOGRAPHICS_2013.bad'
+    nodiscardfile
+    logfile PSRLOG:'ASR_DEMOGRAPHICS_2013.log'
+    skip 0
+    fields terminated by ','
+    optionally enclosed by '"' and '"'
+    lrtrim
+    missing field values are null
+     (FILLER1 char(4000),
+      FILLER2 char(4000),
+      FILLER3 char(4000),
+      FILLER4 char(4000),
+      FILLER5 char(4000),
+      COU_CODE_ASYLUM char(4000),
+      LOCATION_NAME char(4000),
+      NEW_LOCATION_NAME char(4000),
+      URBAN_RURAL_STATUS char(4000),
+      ACCOMMODATION_TYPE char(4000),
+      DISPLACEMENT_STATUS char(4000),
+      COU_CODE_ORIGIN char(4000),
+      PPG_NAME char(4000),
+      F0 char(4000),
+      F5 char(4000),
+      F12 char(4000),
+      F18 char(4000),
+      F60 char(4000),
+      FOTHER char(4000),
+      FTOTAL char(4000),
+      M0 char(4000),
+      M5 char(4000),
+      M12 char(4000),
+      M18 char(4000),
+      M60 char(4000),
+      MOTHER char(4000),
+      MTOTAL char(4000),
+      TOTAL char(4000),
+      BASIS char(4000))
+    column transforms
+     (STATSYEAR from constant '2013'))
+  location ('ASR_DEMOGRAPHICS_2013.csv'))
+reject limit unlimited;
+
 
 create materialized view S_ASR_DEMOGRAPHICS_CLEANED build deferred as
 select STATSYEAR, DST_CODE, COU_CODE_ASYLUM,
@@ -1170,7 +1244,16 @@ from
       F0, F5, F12, F18, F60, FOTHER, FTOTAL,
       M0, M5, M12, M18, M60, MOTHER, MTOTAL,
       TOTAL
-    from S_ASR_DEMOGRAPHICS_2012) ASR
+    from S_ASR_DEMOGRAPHICS_2012
+    union all
+    select STATSYEAR, DISPLACEMENT_STATUS,
+      COU_CODE_ASYLUM, LOCATION_NAME, NEW_LOCATION_NAME, COU_CODE_ORIGIN,
+      decode(URBAN_RURAL_STATUS, 'Urban', 'U', URBAN_RURAL_STATUS) as URBAN_RURAL_STATUS,
+      ACCOMMODATION_TYPE, PPG_NAME, BASIS,
+      F0, F5, F12, F18, F60, FOTHER, FTOTAL,
+      M0, M5, M12, M18, M60, MOTHER, MTOTAL,
+      TOTAL
+    from S_ASR_DEMOGRAPHICS_2013) ASR
   left outer join S_DST_CODE_CORRECTIONS DSC
     on DSC.DISPLACEMENT_STATUS = ASR.DISPLACEMENT_STATUS
   left outer join S_LOCATION_NAME_CORRECTIONS LCOR

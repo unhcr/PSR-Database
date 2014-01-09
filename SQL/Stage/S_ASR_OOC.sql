@@ -1,4 +1,4 @@
-create table S_ASR_OOC_2006_2012
+create table S_ASR_OOC_2006_2013
  (STATSYEAR varchar2(4),
   DST_CODE varchar2(3),
   COU_CODE_ASYLUM varchar2(3),
@@ -20,9 +20,9 @@ organization external
   access parameters 
    (records delimited by '\r\n'
     characterset WE8MSWIN1252
-    badfile 'ASR_OOC_2006_2012.bad'
+    badfile 'ASR_OOC_2006_2013.bad'
     nodiscardfile
-    logfile PSRLOG:'ASR_OOC_2006_2012.log'
+    logfile PSRLOG:'ASR_OOC_2006_2013.log'
     skip 0 
     fields terminated by ','
     optionally enclosed by '"' and '"'
@@ -46,7 +46,7 @@ organization external
       BASIS char(4000))
     column transforms
      (DST_CODE from constant 'OOC'))
-  location ('ASR_OOC_2006_2012.csv'))
+  location ('ASR_OOC_2006_2013.csv'))
 reject limit unlimited;
 
 
@@ -77,7 +77,7 @@ from
  (select STATSYEAR, DST_CODE, COU_CODE_ASYLUM, COU_CODE_ORIGIN, DESCRIPTION,
     POP_START, POP_AH_START, OOCARR, OOCOTHINC, OOCRTN, OOCOTHDEC, POP_END, POP_AH_END,
     SOURCE, BASIS
-  from S_ASR_OOC_2006_2012) ASR
+  from S_ASR_OOC_2006_2013) ASR
 left outer join S_SOURCE_CORRECTIONS SRC
   on SRC.SOURCE = ASR.SOURCE
 left outer join S_BASIS_CORRECTIONS BSC

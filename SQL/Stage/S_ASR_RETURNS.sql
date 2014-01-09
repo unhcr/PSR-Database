@@ -687,6 +687,78 @@ organization external
   location ('ASR_RETURNS_REF_LIKE_2012.csv'))
 reject limit unlimited;
 
+create table S_ASR_RETURNS_REFUGEES_2013
+ (STATSYEAR varchar2(4),
+  COU_CODE_ORIGIN varchar2(3),
+  COU_CODE_ASYLUM varchar2(3),
+  DST_CODE varchar2(3),
+  RETURN varchar2(40),
+  RETURN_AH varchar2(40),
+  SOURCE varchar2(5),
+  BASIS varchar2(5))
+organization external
+ (type oracle_loader
+  default directory PSRDATA
+  access parameters
+   (records delimited by '\r\n'
+    characterset WE8MSWIN1252
+    badfile 'ASR_RETURNS_REFUGEES_2013.bad'
+    nodiscardfile
+    logfile PSRLOG:'ASR_RETURNS_REFUGEES_2013.log'
+    skip 0
+    fields terminated by ','
+    optionally enclosed by '"' and '"'
+    lrtrim
+    missing field values are null
+     (FILLER1 char(4000),
+      COU_CODE_ORIGIN char(4000),
+      COU_CODE_ASYLUM char(4000),
+      RETURN char(4000),
+      RETURN_AH char(4000),
+      SOURCE char(4000),
+      BASIS char(4000))
+    column transforms
+     (STATSYEAR from constant '2013',
+      DST_CODE from constant 'REF'))
+  location ('ASR_RETURNS_REFUGEES_2013.csv'))
+reject limit unlimited;
+
+create table S_ASR_RETURNS_REF_LIKE_2013
+ (STATSYEAR varchar2(4),
+  COU_CODE_ASYLUM varchar2(3),
+  COU_CODE_ORIGIN varchar2(3),
+  DST_CODE varchar2(3),
+  RETURN varchar2(40),
+  RETURN_AH varchar2(40),
+  SOURCE varchar2(5),
+  BASIS varchar2(5))
+organization external
+ (type oracle_loader
+  default directory PSRDATA
+  access parameters
+   (records delimited by '\r\n'
+    characterset WE8MSWIN1252
+    badfile 'ASR_RETURNS_REF_LIKE_2013.bad'
+    nodiscardfile
+    logfile PSRLOG:'ASR_RETURNS_REF_LIKE_2013.log'
+    skip 0
+    fields terminated by ','
+    optionally enclosed by '"' and '"'
+    lrtrim
+    missing field values are null
+     (FILLER1 char(4000),
+      COU_CODE_ORIGIN char(4000),
+      COU_CODE_ASYLUM char(4000),
+      RETURN char(4000),
+      RETURN_AH char(4000),
+      SOURCE char(4000),
+      BASIS char(4000))
+    column transforms
+     (STATSYEAR from constant '2013',
+      DST_CODE from constant 'ROC'))
+  location ('ASR_RETURNS_REF_LIKE_2013.csv'))
+reject limit unlimited;
+
 
 create or replace view S_ASR_RETURNS_CLEANED as
 select ASR.STATSYEAR, ASR.DST_CODE,
@@ -763,7 +835,13 @@ from
   from S_ASR_RETURNS_REFUGEES_2012
   union all
   select STATSYEAR, COU_CODE_ORIGIN, COU_CODE_ASYLUM, DST_CODE, RETURN, RETURN_AH, SOURCE, BASIS
-  from S_ASR_RETURNS_REF_LIKE_2012) ASR
+  from S_ASR_RETURNS_REF_LIKE_2012
+  union all
+  select STATSYEAR, COU_CODE_ORIGIN, COU_CODE_ASYLUM, DST_CODE, RETURN, RETURN_AH, SOURCE, BASIS
+  from S_ASR_RETURNS_REFUGEES_2013
+  union all
+  select STATSYEAR, COU_CODE_ORIGIN, COU_CODE_ASYLUM, DST_CODE, RETURN, RETURN_AH, SOURCE, BASIS
+  from S_ASR_RETURNS_REF_LIKE_2013) ASR
 left outer join S_SOURCE_CORRECTIONS SRC
   on SRC.SOURCE = ASR.SOURCE
 left outer join S_BASIS_CORRECTIONS BSC

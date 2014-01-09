@@ -1,4 +1,4 @@
-create table S_ASR_IDP_HCR_2006_2012 
+create table S_ASR_IDP_HCR_2006_2013 
  (STTG_CODE varchar2(10),
   STATSYEAR varchar2(4),
   OFFICIAL varchar2(3),
@@ -23,9 +23,9 @@ organization external
   access parameters 
    (records delimited by '\r\n'
     characterset WE8MSWIN1252
-    badfile 'ASR_IDP_HCR_2006_2012.bad'
+    badfile 'ASR_IDP_HCR_2006_2013.bad'
     nodiscardfile
-    logfile PSRLOG:'ASR_IDP_HCR_2006_2012.log'
+    logfile PSRLOG:'ASR_IDP_HCR_2006_2013.log'
     skip 0 
     fields terminated by ','
     optionally enclosed by '"' and '"'
@@ -52,10 +52,10 @@ organization external
     column transforms
      (STTG_CODE from constant 'IDP',
       DST_CODE from constant 'IDP'))
-  location ('ASR_IDP_HCR_2006_2012.csv'))
+  location ('ASR_IDP_HCR_2006_2013.csv'))
 reject limit unlimited;
 
-create table S_ASR_IDP_LIKE_HCR_2007_2012 
+create table S_ASR_IDP_LIKE_HCR_2007_2013 
  (STTG_CODE varchar2(10),
   STATSYEAR varchar2(4),
   OFFICIAL varchar2(10),
@@ -80,9 +80,9 @@ organization external
   access parameters 
    (records delimited by '\r\n'
     characterset WE8MSWIN1252
-    badfile 'ASR_IDP_LIKE_HCR_2007_2012.bad'
+    badfile 'ASR_IDP_LIKE_HCR_2007_2013.bad'
     nodiscardfile
-    logfile PSRLOG:'ASR_IDP_LIKE_HCR_2007_2012.log'
+    logfile PSRLOG:'ASR_IDP_LIKE_HCR_2007_2013.log'
     skip 0 
     fields terminated by ','
     optionally enclosed by '"' and '"'
@@ -109,10 +109,10 @@ organization external
     column transforms
      (STTG_CODE from constant 'IDP',
       DST_CODE from constant 'IOC'))
-  location ('ASR_IDP_LIKE_HCR_2007_2012.csv'))
+  location ('ASR_IDP_LIKE_HCR_2007_2013.csv'))
 reject limit unlimited;
 
-create table S_ASR_IDP_CONFLICT_2006_2012
+create table S_ASR_IDP_CONFLICT_2006_2013
  (STTG_CODE varchar2(10),
   STATSYEAR varchar2(4),
   OFFICIAL varchar2(10),
@@ -137,9 +137,9 @@ organization external
   access parameters
    (records delimited by '\r\n'
     characterset WE8MSWIN1252
-    badfile 'ASR_IDP_CONFLICT_2006_2012.bad'
+    badfile 'ASR_IDP_CONFLICT_2006_2013.bad'
     nodiscardfile
-    logfile PSRLOG:'ASR_IDP_CONFLICT_2006_2012.log'
+    logfile PSRLOG:'ASR_IDP_CONFLICT_2006_2013.log'
     skip 0
     fields terminated by ','
     optionally enclosed by '"' and '"'
@@ -166,10 +166,10 @@ organization external
     column transforms
      (STTG_CODE from constant 'IDPCNFLCT',
       DST_CODE from constant 'IDP'))
-  location ('ASR_IDP_CONFLICT_2006_2012.csv'))
+  location ('ASR_IDP_CONFLICT_2006_2013.csv'))
 reject limit unlimited;
 
-create table S_ASR_IDP_DISASTER_2011_2012
+create table S_ASR_IDP_DISASTER_2011_2013
  (STTG_CODE varchar2(10),
   STATSYEAR varchar2(4),
   OFFICIAL varchar2(10),
@@ -194,9 +194,9 @@ organization external
   access parameters 
    (records delimited by '\r\n'
     characterset WE8MSWIN1252
-    badfile 'ASR_IDP_DISASTER_2011_2012.bad'
+    badfile 'ASR_IDP_DISASTER_2011_2013.bad'
     nodiscardfile
-    logfile PSRLOG:'ASR_IDP_DISASTER_2011_2012.log'
+    logfile PSRLOG:'ASR_IDP_DISASTER_2011_2013.log'
     skip 0 
     fields terminated by ','
     optionally enclosed by '"' and '"'
@@ -223,7 +223,7 @@ organization external
     column transforms
      (STTG_CODE from constant 'IDPNTRLDIS',
       DST_CODE from constant 'IDP'))
-  location ('ASR_IDP_DISASTER_2011_2012.csv'))
+  location ('ASR_IDP_DISASTER_2011_2013.csv'))
 reject limit unlimited;
 
 create table S_ASR_IDP_HCR_1993_2005 
@@ -587,7 +587,7 @@ from
       POP_END, POP_AH_END,
       SOURCE,
       translate(BASIS, 'A, ', 'A') as BASIS
-    from S_ASR_IDP_HCR_2006_2012
+    from S_ASR_IDP_HCR_2006_2013
     union all
     select STTG_CODE, STATSYEAR, DST_CODE,
       COU_CODE_ASYLUM, LOCATION_NAME,
@@ -596,7 +596,7 @@ from
       IDPNEW, IDPOTHINC, RETURN, RETURN_AH, IDPRELOC, IDPOTHDEC,
       POP_END, POP_AH_END,
       SOURCE, BASIS
-    from S_ASR_IDP_LIKE_HCR_2007_2012
+    from S_ASR_IDP_LIKE_HCR_2007_2013
     union all
     select STTG_CODE, STATSYEAR, DST_CODE,
       COU_CODE_ASYLUM, LOCATION_NAME,
@@ -605,7 +605,7 @@ from
       IDPNEW, IDPOTHINC, RETURN, RETURN_AH, IDPRELOC, IDPOTHDEC,
       POP_END, POP_AH_END,
       SOURCE, BASIS
-    from S_ASR_IDP_CONFLICT_2006_2012
+    from S_ASR_IDP_CONFLICT_2006_2013
     union all
     select STTG_CODE, STATSYEAR, DST_CODE,
       COU_CODE_ASYLUM, LOCATION_NAME,
@@ -614,7 +614,7 @@ from
       IDPNEW, IDPOTHINC, RETURN, RETURN_AH, IDPRELOC, IDPOTHDEC,
       POP_END, POP_AH_END,
       SOURCE, BASIS
-    from S_ASR_IDP_DISASTER_2011_2012) ASR
+    from S_ASR_IDP_DISASTER_2011_2013) ASR
   left outer join S_LOCATION_NAME_CORRECTIONS LCOR
     on LCOR.COU_CODE = upper(ASR.COU_CODE_ASYLUM)
     and LCOR.LOCATION_NAME = replace(ASR.LOCATION_NAME, chr(10), '')

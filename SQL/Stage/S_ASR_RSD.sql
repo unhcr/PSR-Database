@@ -859,6 +859,72 @@ organization external
   location ('ASR_RSD_2012.csv'))
 reject limit unlimited;
 
+create table S_ASR_RSD_2013
+ (STATSYEAR varchar2(4),
+  DISPLACEMENT_STATUS varchar2(3),
+  COU_CODE_ASYLUM varchar2(3),
+  RSD_TYPE varchar2(1),
+  PROCEDURE_LEVEL varchar2(3),
+  APPLICATION_IND_GROUP varchar2(1),
+  APPLICATION_GROUP_SIZE varchar2(40),
+  RSD_LEVEL varchar2(2),
+  DECISION_IND_GROUP varchar2(1),
+  DECISION_GROUP_SIZE varchar2(40),
+  COU_CODE_ORIGIN varchar2(3),
+  ASY_START varchar2(40),
+  ASY_AH_START varchar2(40),
+  ASYAPP varchar2(40),
+  ASYREC_CV varchar2(40),
+  ASYREC_CP varchar2(40),
+  ASYREJ varchar2(40),
+  ASYOTHCL varchar2(40),
+  TOTAL_DECISIONS varchar2(40),
+  ASY_END varchar2(40),
+  ASY_AH_END varchar2(40))
+organization external
+ (type oracle_loader
+  default directory PSRDATA
+  access parameters
+   (records delimited by '\r\n'
+    characterset WE8MSWIN1252
+    badfile 'ASR_RSD_2013.bad'
+    nodiscardfile
+    logfile PSRLOG:'ASR_RSD_2013.log'
+    skip 0
+    fields terminated by ','
+    optionally enclosed by '"' and '"'
+    lrtrim
+    missing field values are null
+     (FILLER1 char(4000),
+      FILLER2 char(4000),
+      FILLER3 char(4000),
+      FILLER4 char(4000),
+      FILLER5 char(4000),
+      COU_CODE_ASYLUM char(4000),
+      RSD_TYPE char(4000),
+      PROCEDURE_LEVEL char(4000),
+      APPLICATION_IND_GROUP char(4000),
+      APPLICATION_GROUP_SIZE char(4000),
+      RSD_LEVEL char(4000),
+      DECISION_IND_GROUP char(4000),
+      DECISION_GROUP_SIZE char(4000),
+      COU_CODE_ORIGIN char(4000),
+      ASY_START char(4000),
+      ASY_AH_START char(4000),
+      ASYAPP char(4000),
+      ASYREC_CV char(4000),
+      ASYREC_CP char(4000),
+      ASYREJ char(4000),
+      ASYOTHCL char(4000),
+      TOTAL_DECISIONS char(4000),
+      ASY_END char(4000),
+      ASY_AH_END char(4000))
+    column transforms
+     (STATSYEAR from constant '2013',
+      DISPLACEMENT_STATUS from constant 'ASY'))
+  location ('ASR_RSD_2013.csv'))
+reject limit unlimited;
+
 
 create or replace view S_ASR_RSD_CLEANED as
 select ASR.STATSYEAR, ASR.DISPLACEMENT_STATUS as DST_CODE,
@@ -1009,7 +1075,16 @@ from
     ASY_START, ASY_AH_START,
     ASYAPP, ASYREC_CV, ASYREC_CP, ASYREJ, ASYOTHCL, TOTAL_DECISIONS,
     ASY_END, ASY_AH_END
-  from S_ASR_RSD_2012) ASR;
+  from S_ASR_RSD_2012
+  union all
+  select STATSYEAR, DISPLACEMENT_STATUS, COU_CODE_ASYLUM,
+    RSD_TYPE, PROCEDURE_LEVEL, APPLICATION_IND_GROUP, APPLICATION_GROUP_SIZE,
+    RSD_LEVEL, DECISION_IND_GROUP, DECISION_GROUP_SIZE,
+    COU_CODE_ORIGIN,
+    ASY_START, ASY_AH_START,
+    ASYAPP, ASYREC_CV, ASYREC_CP, ASYREJ, ASYOTHCL, TOTAL_DECISIONS,
+    ASY_END, ASY_AH_END
+  from S_ASR_RSD_2013) ASR;
 
 
 create materialized view S_ASR_RSD build deferred as

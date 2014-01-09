@@ -33,7 +33,7 @@ organization external
       NAME_AR char(4000),
       NAME_ZH char(4000),
       NOTES char(4000)))
-  location ('LANGUAGES.csv'))
+  location ('LANGUAGES_UTF8.csv'))
 reject limit unlimited;
 
 grant select on S_LANGUAGES to PSR_STAGE;

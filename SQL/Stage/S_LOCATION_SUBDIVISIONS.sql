@@ -43,7 +43,7 @@ organization external
       LOCR_END_DATE date "YYYY-MM-DD",
       COU_CODE_PREV char(4000),
       COU_START_DATE_PREV date "YYYY-MM-DD"))
-  location ('LOCATION_SUBDIVISIONS.csv'))
+  location ('LOCATION_SUBDIVISIONS_UTF8.csv'))
 reject limit unlimited;
 
 grant select on S_LOCATION_SUBDIVISIONS to PSR_STAGE;

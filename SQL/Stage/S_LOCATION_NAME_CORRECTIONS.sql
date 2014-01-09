@@ -21,7 +21,7 @@ organization external
       LOCATION_NAME char(4000),
       NEW_LOCATION_NAME char(4000),
       CORRECTED_LOCATION_NAME char(4000)))
-  location ('LOCATION_NAME_CORRECTIONS.csv'))
+  location ('LOCATION_NAME_CORRECTIONS_UTF8.csv'))
 reject limit unlimited;
 
 grant select on S_LOCATION_NAME_CORRECTIONS to PSR_STAGE;

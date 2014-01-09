@@ -31,7 +31,7 @@ organization external
       DESCRIPTION_AR char(4000),
       DESCRIPTION_ZH char(4000),
       NOTES char(4000)))
-  location ('TEXT_TYPES.csv'))
+  location ('TEXT_TYPES_UTF8.csv'))
 reject limit unlimited;
 
 grant select on S_TEXT_TYPES to PSR_STAGE;

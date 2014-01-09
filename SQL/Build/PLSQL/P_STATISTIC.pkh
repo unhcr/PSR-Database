@@ -76,11 +76,15 @@ create or replace package P_STATISTIC is
 --  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
 --    returned).
 --  pnVALUE - The value of the statistic (mandatory).
+--  psForceUpdateFlag - Flag (Y/N) indicating if the statistic is to be updated even if the value
+--    has not changed, e.g. to force an update of the last updated date (optional - defaults
+--    to N).
 --
   procedure UPDATE_STATISTIC
    (pnSTC_ID in P_BASE.tmnSTC_ID,
     pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
-    pnVALUE in P_BASE.tnSTC_VALUE);
+    pnVALUE in P_BASE.tmnSTC_VALUE,
+    psForceUpdateFlag in P_BASE.tmsFlag := 'N');
 --
 -- ----------------------------------------
 -- SET_STATISTIC

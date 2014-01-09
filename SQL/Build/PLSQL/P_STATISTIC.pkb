@@ -193,28 +193,35 @@ create or replace package body P_STATISTIC is
   procedure UPDATE_STATISTIC
    (pnSTC_ID in P_BASE.tmnSTC_ID,
     pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
-    pnVALUE in P_BASE.tnSTC_VALUE)
+    pnVALUE in P_BASE.tmnSTC_VALUE,
+    psForceUpdateFlag in P_BASE.tmsFlag := 'N')
   is
+    nVALUE P_BASE.tnSTC_VALUE;
     nVERSION_NBR P_BASE.tnSTC_VERSION_NBR;
     xSTC_ROWID rowid;
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.UPDATE_STATISTIC',
-      to_char(pnSTC_ID) || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnVALUE));
+      to_char(pnSTC_ID) || '~' || to_char(pnVERSION_NBR) || '~' || to_char(pnVALUE) || '~' ||
+      psForceUpdateFlag);
   --
-    select VERSION_NBR, rowid
-    into nVERSION_NBR, xSTC_ROWID
+    select VALUE, VERSION_NBR, rowid
+    into nVALUE, nVERSION_NBR, xSTC_ROWID
     from T_STATISTICS
     where ID = pnSTC_ID
     for update;
   --
     if pnVERSION_NBR = nVERSION_NBR
     then
-      update T_STATISTICS
-      set VALUE = pnVALUE,
-        VERSION_NBR = VERSION_NBR + 1
-      where rowid = xSTC_ROWID
-      returning VERSION_NBR into pnVERSION_NBR;
+      if pnVALUE != nVALUE
+        or psForceUpdateFlag = 'Y'
+      then
+        update T_STATISTICS
+        set VALUE = pnVALUE,
+          VERSION_NBR = VERSION_NBR + 1
+        where rowid = xSTC_ROWID
+        returning VERSION_NBR into pnVERSION_NBR;
+      end if;
     else
       P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'Statistic has been updated by another user');
     end if;

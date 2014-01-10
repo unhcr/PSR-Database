@@ -1,0 +1,313 @@
+--
+-- ASR_DEMOGRAPHICS - Demographic characteristics and location of populations of concern
+--
+create or replace view ASR_DEMOGRAPHICS as
+with Q_ASR_DEMOGRAPHICS as
+ (select ASR_YEAR, DST_ID,
+    LOC_ID_ASYLUM_COUNTRY, LOC_ID_ASYLUM, LOC_ID_ORIGIN_COUNTRY,
+    DIM_ID1, DIM_ID2, DIM_ID3, STG_ID_PRIMARY, PPG_ID,
+    F0_4_VALUE, F0_4_STC_ID, F0_4_VERSION_NBR, F0_4_ITM_ID,
+    F5_11_VALUE, F5_11_STC_ID, F5_11_VERSION_NBR, F5_11_ITM_ID,
+    F12_17_VALUE, F12_17_STC_ID, F12_17_VERSION_NBR, F12_17_ITM_ID,
+    F18_59_VALUE, F18_59_STC_ID, F18_59_VERSION_NBR, F18_59_ITM_ID,
+    F60_VALUE, F60_STC_ID, F60_VERSION_NBR, F60_ITM_ID,
+    FOTHER_VALUE, FOTHER_STC_ID, FOTHER_VERSION_NBR, FOTHER_ITM_ID,
+    M0_4_VALUE, M0_4_STC_ID, M0_4_VERSION_NBR, M0_4_ITM_ID,
+    M5_11_VALUE, M5_11_STC_ID, M5_11_VERSION_NBR, M5_11_ITM_ID,
+    M12_17_VALUE, M12_17_STC_ID, M12_17_VERSION_NBR, M12_17_ITM_ID,
+    M18_59_VALUE, M18_59_STC_ID, M18_59_VERSION_NBR, M18_59_ITM_ID,
+    M60_VALUE, M60_STC_ID, M60_VERSION_NBR, M60_ITM_ID,
+    MOTHER_VALUE, MOTHER_STC_ID, MOTHER_VERSION_NBR, MOTHER_ITM_ID,
+    TOTAL_VALUE, TOTAL_STC_ID, TOTAL_VERSION_NBR, TOTAL_ITM_ID
+  from
+   (select extract(year from STC.START_DATE) as ASR_YEAR, STC.DST_ID,
+      STC.LOC_ID_ASYLUM_COUNTRY, STC.LOC_ID_ASYLUM, STC.LOC_ID_ORIGIN_COUNTRY,
+      STC.DIM_ID1, STC.DIM_ID2, STC.DIM_ID3, STC.STG_ID_PRIMARY, STC.PPG_ID,
+      STC.SEX_CODE || nvl(to_char(AGR.AGE_FROM), 'X') ||
+        case when AGR.AGE_TO != 999 then '_' || to_char(AGR.AGE_TO) end as COLUMN_NAME,
+      STC.VALUE,
+      STC.ID as STC_ID,
+      STC.VERSION_NBR,
+      STC.ITM_ID
+    from T_STATISTIC_TYPES_IN_GROUPS STTIG
+    inner join T_STATISTICS STC
+      on STC.STCT_CODE = STTIG.STCT_CODE
+    left outer join T_AGE_RANGES AGR
+      on AGR.ID = STC.AGR_ID
+    where STTIG.STTG_CODE = 'DEMOGR')
+  pivot
+   (sum(VALUE) as VALUE, max(STC_ID) as STC_ID, max(VERSION_NBR) as VERSION_NBR,
+      max(ITM_ID) as ITM_ID
+    for COLUMN_NAME
+    in ('F0_4' as F0_4,
+        'F5_11' as F5_11,
+        'F12_17' as F12_17,
+        'F18_59' as F18_59,
+        'F60' as F60,
+        'FX' as FOTHER,
+        'M0_4' as M0_4,
+        'M5_11' as M5_11,
+        'M12_17' as M12_17,
+        'M18_59' as M18_59,
+        'M60' as M60,
+        'MX' as MOTHER,
+        'X' as TOTAL))),
+--
+Q_LOCATIONS as
+ (select ID, NAME, LOCT_CODE, LOCTV_ID
+  from
+   (select LOC.ID, TXT.TEXT as NAME, LOC.LOCT_CODE, LOC.LOCTV_ID,
+      row_number() over
+       (partition by LOC.ID
+        order by LANG.ACTIVE_FLAG desc, nvl(ULP.PREF_SEQ, LANG.DISPLAY_SEQ + 1e5)) as RANK
+    from T_LOCATIONS LOC
+    inner join T_TEXT_ITEMS TXT
+      on TXT.ITM_ID = LOC.ITM_ID
+      and TXT.TXTT_CODE = 'NAME'
+      and TXT.SEQ_NBR = 1
+    inner join T_LANGUAGES LANG
+      on LANG.CODE = TXT.LANG_CODE
+    left outer join T_USER_LANGUAGE_PREFERENCES ULP
+      on ULP.LANG_CODE = TXT.LANG_CODE
+      and ULP.USERID = sys_context('PSR', 'USERID'))
+  where RANK = 1),
+--
+Q_LOCATION_TYPES as
+ (select CODE, DESCRIPTION
+  from
+   (select LOCT.CODE, TXT.TEXT DESCRIPTION,
+      row_number() over
+       (partition by LOCT.CODE
+        order by LANG.ACTIVE_FLAG desc, nvl(ULP.PREF_SEQ, LANG.DISPLAY_SEQ + 1e5)) as RANK
+    from T_LOCATION_TYPES LOCT
+    inner join T_TEXT_ITEMS TXT
+      on TXT.ITM_ID = LOCT.ITM_ID
+      and TXT.TXTT_CODE = 'DESCR'
+      and TXT.SEQ_NBR = 1
+    inner join T_LANGUAGES LANG
+      on LANG.CODE = TXT.LANG_CODE
+    left outer join T_USER_LANGUAGE_PREFERENCES ULP
+      on ULP.LANG_CODE = TXT.LANG_CODE
+      and ULP.USERID = sys_context('PSR', 'USERID'))
+  where RANK = 1),
+--
+Q_LOCATION_TYPE_VARIANTS as
+ (select ID, DESCRIPTION
+  from
+    (select LOCTV.ID, TXT.TEXT DESCRIPTION,
+      row_number() over
+       (partition by LOCTV.ID
+        order by LANG.ACTIVE_FLAG desc, nvl(ULP.PREF_SEQ, LANG.DISPLAY_SEQ + 1e5)) as RANK
+    from T_LOCATION_TYPE_VARIANTS LOCTV
+    inner join T_TEXT_ITEMS TXT
+      on TXT.ITM_ID = LOCTV.ITM_ID
+      and TXT.TXTT_CODE = 'DESCR'
+      and TXT.SEQ_NBR = 1
+    inner join T_LANGUAGES LANG
+      on LANG.CODE = TXT.LANG_CODE
+    left outer join T_USER_LANGUAGE_PREFERENCES ULP
+      on ULP.LANG_CODE = TXT.LANG_CODE
+      and ULP.USERID = sys_context('PSR', 'USERID'))
+  where RANK = 1),
+--
+Q_DIMENSION_VALUES as
+ (select ID, DESCRIPTION, CODE
+  from
+   (select DIM.ID, TXT.TEXT DESCRIPTION, DIM.CODE,
+      row_number() over
+       (partition by DIM.ID
+        order by LANG.ACTIVE_FLAG desc, nvl(ULP.PREF_SEQ, LANG.DISPLAY_SEQ + 1e5)) as RANK
+    from T_DIMENSION_VALUES DIM
+    inner join T_TEXT_ITEMS TXT
+      on TXT.ITM_ID = DIM.ITM_ID
+      and TXT.TXTT_CODE = 'DESCR'
+      and TXT.SEQ_NBR = 1
+    inner join T_LANGUAGES LANG
+      on LANG.CODE = TXT.LANG_CODE
+    left outer join T_USER_LANGUAGE_PREFERENCES ULP
+      on ULP.LANG_CODE = TXT.LANG_CODE
+      and ULP.USERID = sys_context('PSR', 'USERID'))
+  where RANK = 1),
+--
+Q_DISPLACEMENT_STATUSES as
+ (select ID, DESCRIPTION, CODE
+  from
+   (select DST.ID, TXT.TEXT DESCRIPTION, DST.CODE,
+      row_number() over
+       (partition by DST.ID
+        order by LANG.ACTIVE_FLAG desc, nvl(ULP.PREF_SEQ, LANG.DISPLAY_SEQ + 1e5)) as RANK
+    from T_DISPLACEMENT_STATUSES DST
+    inner join T_TEXT_ITEMS TXT
+      on TXT.ITM_ID = DST.ITM_ID
+      and TXT.TXTT_CODE = 'DESCR'
+      and TXT.SEQ_NBR = 1
+    inner join T_LANGUAGES LANG
+      on LANG.CODE = TXT.LANG_CODE
+    left outer join T_USER_LANGUAGE_PREFERENCES ULP
+      on ULP.LANG_CODE = TXT.LANG_CODE
+      and ULP.USERID = sys_context('PSR', 'USERID'))
+  where RANK = 1),
+--
+Q_POPULATION_PLANNING_GROUPS as
+ (select ID, DESCRIPTION, PPG_CODE
+  from
+   (select PPG.ID, TXT.TEXT as DESCRIPTION, PPG.PPG_CODE,
+      row_number() over
+       (partition by PPG.ID
+        order by LANG.ACTIVE_FLAG desc, nvl(ULP.PREF_SEQ, LANG.DISPLAY_SEQ + 1e5)) as RANK
+    from T_POPULATION_PLANNING_GROUPS PPG
+    inner join T_TEXT_ITEMS TXT
+    on TXT.ITM_ID = PPG.ITM_ID
+    and TXT.TXTT_CODE = 'DESCR'
+    and TXT.SEQ_NBR = 1
+    inner join T_LANGUAGES LANG
+    on LANG.CODE = TXT.LANG_CODE
+    left outer join T_USER_LANGUAGE_PREFERENCES ULP
+    on ULP.LANG_CODE = TXT.LANG_CODE
+    and ULP.USERID = sys_context('PSR', 'USERID'))
+  where RANK = 1)
+--
+select cast(DEM.ASR_YEAR as number(4)) as ASR_YEAR, DEM.LOC_ID_ASYLUM_COUNTRY,
+  DEM.LOC_ID_ASYLUM, LOC1.NAME as LOC_NAME_ASYLUM,
+  nvl(LOCTV.DESCRIPTION, LOCT.DESCRIPTION) as LOC_TYPE_DESCRIPTION,
+  DEM.DIM_ID1 as DIM_ID_UR, DIM1.CODE as UR_CODE, DIM1.DESCRIPTION as UR_DESCRIPTION,
+  DEM.DIM_ID2 as DIM_ID_ACMT, DIM2.CODE as ACMT_CODE, DIM2.DESCRIPTION as ACMT_DESCRIPTION,
+  DEM.DIM_ID3 as DIM_ID_REG, DIM3.CODE as REG_CODE, DIM3.DESCRIPTION as REG_DESCRIPTION,
+  DEM.DST_ID, DST.DESCRIPTION as DST_DESCRIPTION, DST.CODE as DST_CODE,
+  DEM.LOC_ID_ORIGIN_COUNTRY,
+  cast(LOCA1.CHAR_VALUE as varchar2(3)) as ISO_ORIGIN_CODE,
+  cast(LOCA2.CHAR_VALUE as varchar2(3)) as UNHCR_ORIGIN_CODE,
+  LOC2.NAME as LOC_NAME_ORIGIN_COUNTRY,
+  DEM.PPG_ID, PPG.PPG_CODE, PPG.DESCRIPTION as PPG_DESCRIPTION,
+  DEM.STG_ID_PRIMARY, STG.VERSION_NBR as STG_VERSION_NBR, STG.ITM_ID as STG_ITM_ID,
+  STGA.CHAR_VALUE as BASIS, STGA.VERSION_NBR as STGA_VERSION_NBR_BASIS,
+  STGA.ITM_ID as STGA_ITM_ID_BASIS,
+  DEM.F0_4_VALUE, DEM.F0_4_STC_ID, DEM.F0_4_VERSION_NBR, DEM.F0_4_ITM_ID,
+  DEM.F5_11_VALUE, DEM.F5_11_STC_ID, DEM.F5_11_VERSION_NBR, DEM.F5_11_ITM_ID,
+  DEM.F12_17_VALUE, DEM.F12_17_STC_ID, DEM.F12_17_VERSION_NBR, DEM.F12_17_ITM_ID,
+  DEM.F18_59_VALUE, DEM.F18_59_STC_ID, DEM.F18_59_VERSION_NBR, DEM.F18_59_ITM_ID,
+  DEM.F60_VALUE, DEM.F60_STC_ID, DEM.F60_VERSION_NBR, DEM.F60_ITM_ID,
+  case
+    when coalesce(DEM.F0_4_VALUE, DEM.F5_11_VALUE, DEM.F12_17_VALUE,
+                  DEM.F18_59_VALUE, DEM.F60_VALUE) is not null
+    then DEM.FOTHER_VALUE
+  end as FOTHER_VALUE,
+  case
+    when coalesce(DEM.F0_4_STC_ID, DEM.F5_11_STC_ID, DEM.F12_17_STC_ID,
+                  DEM.F18_59_STC_ID, DEM.F60_STC_ID) is not null
+    then DEM.FOTHER_STC_ID
+  end as FOTHER_STC_ID,
+  case
+    when coalesce(DEM.F0_4_STC_ID, DEM.F5_11_STC_ID, DEM.F12_17_STC_ID,
+                  DEM.F18_59_STC_ID, DEM.F60_STC_ID) is not null
+    then DEM.FOTHER_VERSION_NBR
+  end as FOTHER_VERSION_NBR,
+  case
+    when coalesce(DEM.F0_4_STC_ID, DEM.F5_11_STC_ID, DEM.F12_17_STC_ID,
+                  DEM.F18_59_STC_ID, DEM.F60_STC_ID) is not null
+    then DEM.FOTHER_ITM_ID
+  end as FOTHER_ITM_ID,
+  case
+    when coalesce(DEM.F0_4_STC_ID, DEM.F5_11_STC_ID, DEM.F12_17_STC_ID,
+                  DEM.F18_59_STC_ID, DEM.F60_STC_ID, DEM.FOTHER_VALUE) is not null
+    then nvl(DEM.F0_4_VALUE, 0) + nvl(DEM.F5_11_VALUE, 0) + nvl(DEM.F12_17_VALUE, 0) +
+      nvl(DEM.F18_59_VALUE, 0) + nvl(DEM.F60_VALUE, 0) + nvl(DEM.FOTHER_VALUE, 0)
+  end as FTOTAL_VALUE,
+  case
+    when coalesce(DEM.F0_4_STC_ID, DEM.F5_11_STC_ID, DEM.F12_17_STC_ID,
+                  DEM.F18_59_STC_ID, DEM.F60_STC_ID) is null
+    then DEM.FOTHER_STC_ID
+  end as FTOTAL_STC_ID,
+  case
+    when coalesce(DEM.F0_4_STC_ID, DEM.F5_11_STC_ID, DEM.F12_17_STC_ID,
+                  DEM.F18_59_STC_ID, DEM.F60_STC_ID) is null
+    then DEM.FOTHER_VERSION_NBR
+  end as FTOTAL_VERSION_NBR,
+  case
+    when coalesce(DEM.F0_4_STC_ID, DEM.F5_11_STC_ID, DEM.F12_17_STC_ID,
+                  DEM.F18_59_STC_ID, DEM.F60_STC_ID) is null
+    then DEM.FOTHER_ITM_ID
+  end as FTOTAL_ITM_ID,
+  DEM.M0_4_VALUE, DEM.M0_4_STC_ID, DEM.M0_4_VERSION_NBR, DEM.M0_4_ITM_ID,
+  DEM.M5_11_VALUE, DEM.M5_11_STC_ID, DEM.M5_11_VERSION_NBR, DEM.M5_11_ITM_ID,
+  DEM.M12_17_VALUE, DEM.M12_17_STC_ID, DEM.M12_17_VERSION_NBR, DEM.M12_17_ITM_ID,
+  DEM.M18_59_VALUE, DEM.M18_59_STC_ID, DEM.M18_59_VERSION_NBR, DEM.M18_59_ITM_ID,
+  DEM.M60_VALUE, DEM.M60_STC_ID, DEM.M60_VERSION_NBR, DEM.M60_ITM_ID,
+  case
+    when coalesce(DEM.M0_4_VALUE, DEM.M5_11_VALUE, DEM.M12_17_VALUE,
+                  DEM.M18_59_VALUE, DEM.M60_VALUE) is not null
+    then DEM.MOTHER_VALUE
+  end as MOTHER_VALUE,
+  case
+    when coalesce(DEM.M0_4_STC_ID, DEM.M5_11_STC_ID, DEM.M12_17_STC_ID,
+                  DEM.M18_59_STC_ID, DEM.M60_STC_ID) is not null
+    then DEM.MOTHER_STC_ID
+  end as MOTHER_STC_ID,
+  case
+    when coalesce(DEM.M0_4_STC_ID, DEM.M5_11_STC_ID, DEM.M12_17_STC_ID,
+                  DEM.M18_59_STC_ID, DEM.M60_STC_ID) is not null
+    then DEM.MOTHER_VERSION_NBR
+  end as MOTHER_VERSION_NBR,
+  case
+    when coalesce(DEM.M0_4_STC_ID, DEM.M5_11_STC_ID, DEM.M12_17_STC_ID,
+                  DEM.M18_59_STC_ID, DEM.M60_STC_ID) is not null
+    then DEM.MOTHER_ITM_ID
+  end as MOTHER_ITM_ID,
+  case
+    when coalesce(DEM.M0_4_STC_ID, DEM.M5_11_STC_ID, DEM.M12_17_STC_ID,
+                  DEM.M18_59_STC_ID, DEM.M60_STC_ID, DEM.MOTHER_VALUE) is not null
+    then nvl(DEM.M0_4_VALUE, 0) + nvl(DEM.M5_11_VALUE, 0) + nvl(DEM.M12_17_VALUE, 0) +
+      nvl(DEM.M18_59_VALUE, 0) + nvl(DEM.M60_VALUE, 0) + nvl(DEM.MOTHER_VALUE, 0)
+  end as MTOTAL_VALUE,
+  case
+    when coalesce(DEM.M0_4_STC_ID, DEM.M5_11_STC_ID, DEM.M12_17_STC_ID,
+                  DEM.M18_59_STC_ID, DEM.M60_STC_ID) is null
+    then DEM.MOTHER_VERSION_NBR
+  end as MTOTAL_VERSION_NBR,
+  case
+    when coalesce(DEM.M0_4_STC_ID, DEM.M5_11_STC_ID, DEM.M12_17_STC_ID,
+                  DEM.M18_59_STC_ID, DEM.M60_STC_ID) is null
+    then DEM.MOTHER_STC_ID
+  end as MTOTAL_STC_ID,
+  case
+    when coalesce(DEM.M0_4_STC_ID, DEM.M5_11_STC_ID, DEM.M12_17_STC_ID,
+                  DEM.M18_59_STC_ID, DEM.M60_STC_ID) is null
+    then DEM.MOTHER_ITM_ID
+  end as MTOTAL_ITM_ID,
+  nvl(DEM.TOTAL_VALUE,
+      nvl(DEM.F0_4_VALUE, 0) + nvl(DEM.F5_11_VALUE, 0) + nvl(DEM.F12_17_VALUE, 0) +
+      nvl(DEM.F18_59_VALUE, 0) + nvl(DEM.F60_VALUE, 0) + nvl(DEM.FOTHER_VALUE, 0) +
+      nvl(DEM.M0_4_VALUE, 0) + nvl(DEM.M5_11_VALUE, 0) + nvl(DEM.M12_17_VALUE, 0) +
+      nvl(DEM.M18_59_VALUE, 0) + nvl(DEM.M60_VALUE, 0) + nvl(DEM.MOTHER_VALUE, 0)) as TOTAL_VALUE,
+  DEM.TOTAL_STC_ID, DEM.TOTAL_VERSION_NBR, DEM.TOTAL_ITM_ID,
+  STG.UPDATE_TIMESTAMP, STG.UPDATE_USERID
+from Q_ASR_DEMOGRAPHICS DEM
+inner join Q_LOCATIONS LOC1
+  on LOC1.ID = DEM.LOC_ID_ASYLUM
+inner join Q_LOCATION_TYPES LOCT
+  on LOCT.CODE = LOC1.LOCT_CODE
+left outer join Q_LOCATION_TYPE_VARIANTS LOCTV
+  on LOCTV.ID = LOC1.LOCTV_ID
+inner join Q_DIMENSION_VALUES DIM1
+  on DIM1.ID = DEM.DIM_ID1
+left outer join Q_DIMENSION_VALUES DIM2
+  on DIM2.ID = DEM.DIM_ID2
+left outer join Q_DIMENSION_VALUES DIM3
+  on DIM3.ID = DEM.DIM_ID3
+inner join Q_DISPLACEMENT_STATUSES DST
+  on DST.ID = DEM.DST_ID
+left outer join Q_LOCATIONS LOC2
+  on LOC2.ID = DEM.LOC_ID_ORIGIN_COUNTRY
+left outer join T_LOCATION_ATTRIBUTES LOCA1
+  on LOCA1.LOC_ID = LOC2.ID
+  and LOCA1.LOCAT_CODE = 'IS03166A3'
+left outer join T_LOCATION_ATTRIBUTES LOCA2
+  on LOCA2.LOC_ID = LOC2.ID
+  and LOCA2.LOCAT_CODE = 'HCRCC'
+left outer join Q_POPULATION_PLANNING_GROUPS PPG
+  on PPG.ID = DEM.PPG_ID
+left outer join T_STATISTIC_GROUPS STG
+  on STG.ID = DEM.STG_ID_PRIMARY
+left outer join T_STC_GROUP_ATTRIBUTES STGA
+  on STGA.STG_ID = STG.ID
+  and STGA.STGAT_CODE = 'BASIS';

@@ -1,3 +1,9 @@
+grant select on ASR_REFUGEES to PSR_ASR_DATA_ENTRY;
+grant select on ASR_DEMOGRAPHICS to PSR_ASR_DATA_ENTRY;
+grant select on ASR_RSD to PSR_ASR_DATA_ENTRY;
+grant select on ASR_IDP_HCR to PSR_ASR_DATA_ENTRY;
+grant select on ASR_IDP_CONFLICT to PSR_ASR_DATA_ENTRY;
+grant select on ASR_IDP_DISASTER to PSR_ASR_DATA_ENTRY;
 grant select on ASR_RETURNEES to PSR_ASR_DATA_ENTRY;
 grant select on ASR_STATELESS to PSR_ASR_DATA_ENTRY;
 grant select on ASR_OTHERS_OF_CONCERN to PSR_ASR_DATA_ENTRY;
@@ -5,3 +11,4 @@ grant select on ASR_SUMMARY_FRAMEWORK to PSR_ASR_DATA_ENTRY;
 grant select on ASR_SUMMARY_STATISTICS to PSR_ASR_DATA_ENTRY;
 
 grant execute on P_ASR to PSR_ASR_DATA_ENTRY;
+grant execute on P_CONTEXT to PSR_ASR_DATA_ENTRY;

@@ -12,5 +12,8 @@ grant STANDARD_USER to PSR2;
 grant PSR_STAGE to PSR2;
 grant create any context to PSR2;
 
-create user PSQ identified by PSQ quota unlimited on USERS;
+create user PSQ identified by PSQ;
 grant PSR_PUBLIC_QUERY to PSQ;
+
+create user ASR identified by ASR;
+grant PSR_ASR_DATA_ENTRY to ASR;

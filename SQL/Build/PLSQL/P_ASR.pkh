@@ -6,7 +6,7 @@ create or replace package P_ASR is
 --  Procedures for maintenance of statistics.
 --
 --  Change History:
---  03-Jan-2014 - Peter Scott (UNHCR) - Initial revision. (D1.0)
+--  14-Jan-2014 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
@@ -16,6 +16,21 @@ create or replace package P_ASR is
 -- ========================================
 -- Program unit definitions
 -- ========================================
+--
+-- ----------------------------------------
+-- DELETE_ASR_ROW
+-- ----------------------------------------
+--
+-- Delete a row in an ASR table, including the primary statistic groups and all the statistics
+--  included in it.
+--
+-- Parameters:
+--  pnSTG_ID_PRIMARY - Primary statistics group identifier (mandatory).
+--  pnSTG_VERSION_NBR - Primary statistics group version number (mandatory).
+--
+  procedure DELETE_ASR_ROW
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR);
 --
 -- ----------------------------------------
 -- INSERT_ASR_RETURNEES
@@ -52,15 +67,13 @@ create or replace package P_ASR is
 -- Update an existing row in ASR returnees table.
 --
 -- Parameters:
---  pnASR_YEAR - Year of ASR statistics.
---  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of country of return.
+--  pnSTG_ID_PRIMARY - Primary statistics group identifier.
 --  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of previous country of asylum (can be null).
 --  pnDST_ID - Displacement status identifier.
 --  psSOURCE - Code(s) for source of data (can be null).
 --  psBASIS - Code(s) for basis of data (can be null).
 --  pnREFRTN_VALUE - Total returns during year statistic value (can be null).
 --  pnREFRTN_AH_VALUE - UNHCR-assisted returns during year statistic value (can be null).
---  pnSTG_ID_PRIMARY - Primary statistics group identifier.
 --  pnSTG_VERSION_NBR - Primary statistics group version number.
 --  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
 --    source code exists).
@@ -78,15 +91,13 @@ create or replace package P_ASR is
 -- All parameters must be passed. Null value parameters are only allowed where indicated.
 --
   procedure UPDATE_ASR_RETURNEES
-   (pnASR_YEAR in P_BASE.tmnYear,
-    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID,
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
     pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID,
     pnDST_ID in P_BASE.tmnDST_ID,
     psSOURCE in P_BASE.tsSTGA_CHAR_VALUE,
     psBASIS in P_BASE.tsSTGA_CHAR_VALUE,
     pnREFRTN_VALUE in P_BASE.tnSTC_VALUE,
     pnREFRTN_AH_VALUE in P_BASE.tnSTC_VALUE,
-    pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
     pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
     pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
     pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
@@ -183,8 +194,7 @@ create or replace package P_ASR is
 -- Update an existing row in ASR stateless table.
 --
 -- Parameters:
---  pnASR_YEAR - Year of ASR statistics.
---  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum.
+--  pnSTG_ID_PRIMARY - Primary statistics group identifier.
 --  pnDIM_ID_SPOPTYPE - Dimension value identifier for type of stateless population.
 --  psLANG_CODE - Language code of the description of stateless population (can be null, but must be
 --    specified if psSUBGROUP_NAME is specified).
@@ -203,7 +213,6 @@ create or replace package P_ASR is
 --  pnSTAPOP_END_VALUE - Statistic value for total population at end of year (can be null).
 --  pnSTAPOP_AH_END_VALUE - Statistic value for UNHCR-assisted population at end of year (can be
 --    null).
---  pnSTG_ID_PRIMARY - Primary statistics group identifier.
 --  pnSTG_VERSION_NBR - Primary statistics group version number.
 --  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
 --    source code exists).
@@ -245,8 +254,7 @@ create or replace package P_ASR is
 -- All parameters must be passed. Null value parameters are only allowed where indicated.
 --
   procedure UPDATE_ASR_STATELESS
-   (pnASR_YEAR in P_BASE.tmnYear,
-    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
     pnDIM_ID_SPOPTYPE in P_BASE.tmnDIM_ID,
     psLANG_CODE in P_BASE.tsLANG_CODE,
     psSUBGROUP_NAME in P_BASE.tsText,
@@ -260,7 +268,6 @@ create or replace package P_ASR is
     pnSTAOTHDEC_VALUE in P_BASE.tnSTC_VALUE,
     pnSTAPOP_END_VALUE in P_BASE.tnSTC_VALUE,
     pnSTAPOP_AH_END_VALUE in P_BASE.tnSTC_VALUE,
-    pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
     pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
     pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
     pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,
@@ -403,8 +410,7 @@ create or replace package P_ASR is
 -- Update an existing row in ASR others of concern table.
 --
 -- Parameters:
---  pnASR_YEAR - Year of ASR statistics.
---  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum.
+--  pnSTG_ID_PRIMARY - Primary statistics group identifier.
 --  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of country of origin (can be null).
 --  psLANG_CODE - Language code of the description of stateless population (can be null, but must be
 --    specified if psSUBGROUP_NAME is specified).
@@ -421,7 +427,6 @@ create or replace package P_ASR is
 --  pnOOCPOP_END_VALUE - Statistic value for total population at end of year (can be null).
 --  pnOOCPOP_AH_END_VALUE - Statistic value for UNHCR-assisted population at end of year (can be
 --    null).
---  pnSTG_ID_PRIMARY - Primary statistics group identifier.
 --  pnSTG_VERSION_NBR - Primary statistics group version number.
 --  pnSTGA_VERSION_NBR_SOURCE - Version number of code for source of data (can only be null if no
 --    source code exists).
@@ -463,8 +468,7 @@ create or replace package P_ASR is
 -- All parameters must be passed. Null value parameters are only allowed where indicated.
 --
   procedure UPDATE_ASR_OOC
-   (pnASR_YEAR in P_BASE.tmnYear,
-    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID,
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
     pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID,
     psLANG_CODE in P_BASE.tsLANG_CODE,
     psSUBGROUP_NAME in P_BASE.tsText,
@@ -478,7 +482,6 @@ create or replace package P_ASR is
     pnOOCOTHDEC_VALUE in P_BASE.tnSTC_VALUE,
     pnOOCPOP_END_VALUE in P_BASE.tnSTC_VALUE,
     pnOOCPOP_AH_END_VALUE in P_BASE.tnSTC_VALUE,
-    pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
     pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR,
     pnSTGA_VERSION_NBR_SOURCE in P_BASE.tnSTGA_VERSION_NBR,
     pnSTGA_VERSION_NBR_BASIS in P_BASE.tnSTGA_VERSION_NBR,

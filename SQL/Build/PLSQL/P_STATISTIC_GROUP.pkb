@@ -35,7 +35,7 @@ create or replace package body P_STATISTIC_GROUP is
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.INSERT_STATISTIC_GROUP',
-      to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD')  || '~' ||
+      to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD') || '~' ||
         to_char(pnDST_ID) || '~' || psSTTG_CODE || '~' ||
         to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' || to_char(pnLOC_ID_ASYLUM) || '~' ||
         to_char(pnLOC_ID_ORIGIN_COUNTRY) || '~' || to_char(pnLOC_ID_ORIGIN) || '~' ||
@@ -93,6 +93,21 @@ create or replace package body P_STATISTIC_GROUP is
   procedure UPDATE_STATISTIC_GROUP
    (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
+    pdSTART_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    psSTTG_CODE in P_BASE.tsSTTG_CODE := 'xxxxxxxxxxx',
+    pnDST_ID in P_BASE.tnDST_ID := -1,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := -1,
+    pnDIM_ID1 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID2 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID3 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID4 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID5 in P_BASE.tnDIM_ID := -1,
+    psSEX_CODE in P_BASE.tsSEX_CODE := 'x',
+    pnAGR_ID in P_BASE.tnAGR_ID := -1,
     psLANG_CODE in P_BASE.tsLANG_CODE := null,
     psSUBGROUP_NAME in P_BASE.tsText := null,
     pnPPG_ID in P_BASE.tnPPG_ID := -1)
@@ -105,9 +120,15 @@ create or replace package body P_STATISTIC_GROUP is
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.UPDATE_STATISTIC_GROUP',
-      to_char(pnSTG_ID) || '~' || to_char(pnVERSION_NBR) || '~' || psLANG_CODE || '~' ||
-        to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME || '~' ||
-        to_char(pnPPG_ID));
+      to_char(pnSTG_ID) || '~' || to_char(pnVERSION_NBR) || '~' ||
+        to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD') || '~' ||
+        psSTTG_CODE || '~' || to_char(pnDST_ID) || '~' ||
+        to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' || to_char(pnLOC_ID_ASYLUM) || '~' ||
+        to_char(pnLOC_ID_ORIGIN_COUNTRY) || '~' || to_char(pnLOC_ID_ORIGIN) || '~' ||
+        to_char(pnDIM_ID1) || '~' || to_char(pnDIM_ID2) || '~' || to_char(pnDIM_ID3) || '~' ||
+        to_char(pnDIM_ID4) || '~' || to_char(pnDIM_ID5) || '~' ||
+        psSEX_CODE || '~' || to_char(pnAGR_ID) || '~' || to_char(pnPPG_ID) || '~' ||
+        psLANG_CODE || '~' || to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME);
   --
     select SEQ_NBR, ITM_ID, VERSION_NBR, rowid
     into nSTG_SEQ_NBR, nITM_ID, nVERSION_NBR, xSTG_ROWID
@@ -126,7 +147,30 @@ create or replace package body P_STATISTIC_GROUP is
       end if;
     --
       update T_STATISTIC_GROUPS
-      set PPG_ID = case when pnPPG_ID = -1 then PPG_ID else pnPPG_ID end,
+      set START_DATE =
+          case when pdSTART_DATE = P_BASE.gdFALSE_DATE then START_DATE else pdSTART_DATE end,
+        END_DATE = case when pdEND_DATE = P_BASE.gdFALSE_DATE then END_DATE else pdEND_DATE end,
+        STTG_CODE = case when psSTTG_CODE = 'xxxxxxxxxxx' then STTG_CODE else psSTTG_CODE end,
+        DST_ID = case when pnDST_ID = -1 then DST_ID else pnDST_ID end,
+        LOC_ID_ASYLUM_COUNTRY =
+          case
+            when pnLOC_ID_ASYLUM_COUNTRY = -1 then LOC_ID_ASYLUM_COUNTRY
+            else pnLOC_ID_ASYLUM_COUNTRY
+          end,
+        LOC_ID_ASYLUM = case when pnLOC_ID_ASYLUM = -1 then LOC_ID_ASYLUM else pnLOC_ID_ASYLUM end,
+        LOC_ID_ORIGIN_COUNTRY =
+          case
+            when pnLOC_ID_ORIGIN_COUNTRY = -1 then LOC_ID_ORIGIN_COUNTRY
+            else pnLOC_ID_ORIGIN_COUNTRY
+          end,
+        LOC_ID_ORIGIN = case when pnLOC_ID_ORIGIN = -1 then LOC_ID_ORIGIN else pnLOC_ID_ORIGIN end,
+        DIM_ID1 = case when pnDIM_ID1 = -1 then DIM_ID1 else pnDIM_ID1 end,
+        DIM_ID2 = case when pnDIM_ID2 = -1 then DIM_ID2 else pnDIM_ID2 end,
+        DIM_ID3 = case when pnDIM_ID3 = -1 then DIM_ID3 else pnDIM_ID3 end,
+        DIM_ID4 = case when pnDIM_ID4 = -1 then DIM_ID4 else pnDIM_ID4 end,
+        DIM_ID5 = case when pnDIM_ID5 = -1 then DIM_ID5 else pnDIM_ID5 end,
+        SEX_CODE = case when psSEX_CODE = 'x' then SEX_CODE else psSEX_CODE end,
+        AGR_ID = case when pnAGR_ID = -1 then AGR_ID else pnAGR_ID end,
         VERSION_NBR = VERSION_NBR + 1
       where rowid = xSTG_ROWID
       returning VERSION_NBR into pnVERSION_NBR;
@@ -171,12 +215,12 @@ create or replace package body P_STATISTIC_GROUP is
      (sVersion || '-' || sComponent || '.SET_STATISTIC_GROUP',
       to_char(pnSTG_ID) || '~' || to_char(pnVERSION_NBR) || '~' ||
         to_char(pdSTART_DATE, 'YYYY-MM-DD')  || '~' || to_char(pdEND_DATE, 'YYYY-MM-DD')  || '~' ||
-        to_char(pnDST_ID) || '~' || psSTTG_CODE || '~' ||
+        psSTTG_CODE || '~' || to_char(pnDST_ID) || '~' ||
         to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' || to_char(pnLOC_ID_ASYLUM) || '~' ||
         to_char(pnLOC_ID_ORIGIN_COUNTRY) || '~' || to_char(pnLOC_ID_ORIGIN) || '~' ||
         to_char(pnDIM_ID1) || '~' || to_char(pnDIM_ID2) || '~' || to_char(pnDIM_ID3) || '~' ||
-        to_char(pnDIM_ID4) || '~' || to_char(pnDIM_ID5) || '~' || psSEX_CODE || '~' ||
-        to_char(pnAGR_ID) || '~' || to_char(pnPPG_ID) || '~' ||
+        to_char(pnDIM_ID4) || '~' || to_char(pnDIM_ID5) || '~' ||
+        psSEX_CODE || '~' || to_char(pnAGR_ID) || '~' || to_char(pnPPG_ID) || '~' ||
         psLANG_CODE || '~' || to_char(length(psSUBGROUP_NAME)) || ':' || psSUBGROUP_NAME);
   --
     if pnVERSION_NBR is null
@@ -189,7 +233,16 @@ create or replace package body P_STATISTIC_GROUP is
     --
       pnVERSION_NBR := 1;
     else
-      UPDATE_STATISTIC_GROUP(pnSTG_ID, pnVERSION_NBR, psLANG_CODE, psSUBGROUP_NAME, pnPPG_ID);
+      UPDATE_STATISTIC_GROUP
+       (pnSTG_ID, pnVERSION_NBR,
+        nvl(pdSTART_DATE, P_BASE.gdFALSE_DATE), nvl(pdEND_DATE, P_BASE.gdFALSE_DATE),
+        nvl(psSTTG_CODE, 'xxxxxxxxxxx'), nvl(pnDST_ID, -1),
+        nvl(pnLOC_ID_ASYLUM_COUNTRY, -1), nvl(pnLOC_ID_ASYLUM, -1),
+        nvl(pnLOC_ID_ORIGIN_COUNTRY, -1), nvl(pnLOC_ID_ORIGIN, -1),
+        nvl(pnDIM_ID1, -1), nvl(pnDIM_ID2, -1), nvl(pnDIM_ID3, -1),
+        nvl(pnDIM_ID4, -1), nvl(pnDIM_ID5, -1),
+        nvl(psSEX_CODE, 'x'), nvl(pnAGR_ID, -1),
+        psLANG_CODE, psSUBGROUP_NAME, pnPPG_ID);
     end if;
   --
     P_UTILITY.END_MODULE;
@@ -702,7 +755,6 @@ create or replace package body P_STATISTIC_GROUP is
     pnNUM_VALUE in P_BASE.tnSTGA_NUM_VALUE := null,
     pdDATE_VALUE in P_BASE.tdSTGA_DATE_VALUE := null)
   is
-    sCHAR_VALUE P_BASE.tsSTGA_CHAR_VALUE;
     nVERSION_NBR P_BASE.tnSTGA_VERSION_NBR;
     xSTGA_ROWID rowid;
   begin
@@ -712,8 +764,8 @@ create or replace package body P_STATISTIC_GROUP is
         psCHAR_VALUE || '~' || to_char(pnNUM_VALUE) || '~' ||
         to_char(pdDATE_VALUE, 'YYYY-MM-DD HH24:MI:SS'));
   --
-    select CHAR_VALUE, VERSION_NBR, rowid
-    into sCHAR_VALUE, nVERSION_NBR, xSTGA_ROWID
+    select VERSION_NBR, rowid
+    into nVERSION_NBR, xSTGA_ROWID
     from T_STC_GROUP_ATTRIBUTES
     where STG_ID = pnSTG_ID
     and STGAT_CODE = psSTGAT_CODE

@@ -204,14 +204,12 @@ begin
       end if;
     --
       P_STATISTIC.INSERT_STATISTIC
-       (nSTC_ID, rSTC.STCT_CODE, rSTC.START_DATE, rSTC.END_DATE,
-        pnDST_ID => rSTC.DST_ID,
+       (nSTC_ID, rSTC.VALUE, rSTC.START_DATE, rSTC.END_DATE, rSTC.STCT_CODE, rSTC.DST_ID,
         pnLOC_ID_ASYLUM_COUNTRY => rSTC.LOC_ID_ASYLUM_COUNTRY,
         pnLOC_ID_ASYLUM => nvl(rSTC.LOC_ID_ASYLUM1, rSTC.LOC_ID_ASYLUM2),
         pnLOC_ID_ORIGIN_COUNTRY => rSTC.LOC_ID_ASYLUM_COUNTRY,
         pnDIM_ID1 => case when rSTC.STTG_CODE = 'IDP' then rSTC.DIM_ID1 end,
-        pnSTG_ID_PRIMARY => nSTG_ID,
-        pnVALUE => rSTC.VALUE);
+        pnSTG_ID_PRIMARY => nSTG_ID);
       iCount2 := iCount2 + 1;
     end if;
   end loop;

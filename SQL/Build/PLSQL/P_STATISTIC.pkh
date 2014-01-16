@@ -6,7 +6,7 @@ create or replace package P_STATISTIC is
 --  Procedures for maintenance of statistics.
 --
 --  Change History:
---  11-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  15-Jan-2014 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
@@ -25,10 +25,11 @@ create or replace package P_STATISTIC is
 --
 -- Parameters:
 --  pnSTC_ID - New statistic identifier (returned).
---  psSTCT_CODE - Statistic type code (mandatory).
+--  pnVALUE - The value of the statistic (mandatory).
 --  pdSTART_DATE - Statistic start date (mandatory).
 --  pdEND_DATE - Statistic end date (mandatory).
---  psDST_ID - Displacement status identifier (optional).
+--  psSTCT_CODE - Statistic type code (mandatory).
+--  psDST_ID - Displacement status identifier (mandatory).
 --  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum (optional).
 --  pnLOC_ID_ASYLUM - Identifier of asylum location (optional).
 --  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of (country of) origin (optional).
@@ -40,15 +41,15 @@ create or replace package P_STATISTIC is
 --  pnDIM_ID5 - Dimension value identifier 5 (optional).
 --  psSEX_CODE - Sex code (optional).
 --  pnAGR_ID - Age range identifier (optional).
---  pnSTG_ID_PRIMARY - Identifier of primary statistic group (optional).
 --  pnPPG_ID - PPG identifier (optional).
---  pnVALUE - The value of the statistic (mandatory).
+--  pnSTG_ID_PRIMARY - Identifier of primary statistic group (optional).
 --
   procedure INSERT_STATISTIC
    (pnSTC_ID out P_BASE.tnSTC_ID,
-    psSTCT_CODE in P_BASE.tmsSTCT_CODE,
+    pnVALUE in P_BASE.tmnSTC_VALUE,
     pdSTART_DATE in P_BASE.tmdDate,
     pdEND_DATE in P_BASE.tmdDate,
+    psSTCT_CODE in P_BASE.tmsSTCT_CODE,
     pnDST_ID in P_BASE.tnDST_ID := null,
     pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := null,
     pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := null,
@@ -61,9 +62,8 @@ create or replace package P_STATISTIC is
     pnDIM_ID5 in P_BASE.tnDIM_ID := null,
     psSEX_CODE in P_BASE.tsSEX_CODE := null,
     pnAGR_ID in P_BASE.tnAGR_ID := null,
-    pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID := null,
     pnPPG_ID in P_BASE.tnPPG_ID := null,
-    pnVALUE in P_BASE.tmnSTC_VALUE);
+    pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID := null);
 --
 -- ----------------------------------------
 -- UPDATE_STATISTIC
@@ -76,6 +76,40 @@ create or replace package P_STATISTIC is
 --  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
 --    returned).
 --  pnVALUE - The value of the statistic (mandatory).
+--  pdSTART_DATE - Statistic start date (optional: if not specified or null, the existing start date
+--    is left unchanged).
+--  pdEND_DATE - Statistic end date (optional: if not specified or null, the existing end date is
+--    left unchanged).
+--  psSTCT_CODE - Statistic type code (optional: if not specified or null, the existing value is
+--    left unchanged).
+--  pnDST_ID - Displacement status identifier (optional: if not specified or null, the existing
+--    value is left unchanged).
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum (optional: if not specified,
+--    the existing value is left unchanged; if null is specified, the location identifier is set to
+--    null).
+--  pnLOC_ID_ASYLUM - Identifier of asylum location (optional: if not specified, the existing value
+--    is left unchanged; if null is specified, the location identifier is set to null).
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of (country of) origin (optional: if not
+--    specified, the existing value is left unchanged; if null is specified, the location identifier
+--    is set to null).
+--  pnLOC_ID_ORIGIN - Identifier of location of origin (optional: if not specified, the existing
+--    value is left unchanged; if null is specified, the location identifier is set to null).
+--  pnDIM_ID1 - Dimension value identifier 1 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  pnDIM_ID2 - Dimension value identifier 2 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  pnDIM_ID3 - Dimension value identifier 3 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  pnDIM_ID4 - Dimension value identifier 4 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  pnDIM_ID5 - Dimension value identifier 5 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  psSEX_CODE - Sex code (optional: if not specified, the existing value is left unchanged; if null
+--    is specified, the sex code is set to null).
+--  pnAGR_ID - Age range identifier (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the age range identifier is set to null).
+--  pnPPG_ID - PPG identifier (optional: if not specified, the existing PPG linkage is left
+--    unchanged; if null is specified, the linkage to a PPG is removed).
 --  psForceUpdateFlag - Flag (Y/N) indicating if the statistic is to be updated even if the value
 --    has not changed, e.g. to force an update of the last updated date (optional - defaults
 --    to N).
@@ -84,6 +118,22 @@ create or replace package P_STATISTIC is
    (pnSTC_ID in P_BASE.tmnSTC_ID,
     pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
     pnVALUE in P_BASE.tmnSTC_VALUE,
+    pdSTART_DATE in P_BASE.tdDate := null,
+    pdEND_DATE in P_BASE.tdDate := null,
+    psSTCT_CODE in P_BASE.tsSTCT_CODE := null,
+    pnDST_ID in P_BASE.tnDST_ID := null,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := -1,
+    pnDIM_ID1 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID2 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID3 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID4 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID5 in P_BASE.tnDIM_ID := -1,
+    psSEX_CODE in P_BASE.tsSEX_CODE := 'x',
+    pnAGR_ID in P_BASE.tnAGR_ID := -1,
+    pnPPG_ID in P_BASE.tnPPG_ID := -1,
     psForceUpdateFlag in P_BASE.tmsFlag := 'N');
 --
 -- ----------------------------------------
@@ -97,66 +147,76 @@ create or replace package P_STATISTIC is
 --  pnSTC_ID - Statistic identifier (optional: if null, a new one is generated and returned).
 --  pnVERSION_NBR - Update version number of statistic record (mandatory: new version number is
 --    returned; for a new statistic, null must be specified and 1 will be returned).
---  psSTCT_CODE - Statistic type code (mandatory when creating a new statistic; ignored when
---    updating an existing statistic, since the statistic type may not be changed).
---  pdSTART_DATE - Statistic start date (mandatory when creating a new statistic; ignored when
---    updating an existing statistic, since the statistic date range may not be changed).
---  pdEND_DATE - Statistic end date (mandatory when creating a new statistic; ignored when updating
---    an existing statistic, since the statistic date range may not be changed).
---  psDST_ID - Displacement status identifier (optional when creating a new statistic; ignored when
+--  pnVALUE - The value of the statistic (mandatory).
+--  pdSTART_DATE - Statistic start date (mandatory when creating a new statistic; if not specified
+--    or null when updating an existing statistic, the existing start date is left unchanged).
+--  pdEND_DATE - Statistic end date (mandatory when creating a new statistic; if not specified
+--    or null when updating an existing statistic, the existing end date is left unchanged).
+--  psSTCT_CODE - Statistic type code (mandatory when creating a new statistic; if not specified or
+--    null when updating an existing statistic, the existing value is left unchanged).
+--  psDST_ID - Displacement status identifier (mandatory when creating a new statistic; ignored when
 --    updating an existing statistic, since the displacement status may not be changed).
 --  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum (optional when creating a new
---    statistic; ignored when updating an existing statistic, since the country of asylum may not be
---    changed).
---  pnLOC_ID_ASYLUM - Identifier of asylum location (optional when creating a new statistic; ignored
---    when updating an existing statistic, since the asylum location may not be changed).
+--    statistic; if not specified when updating an existing statistic, the existing value is left
+--    unchanged; if null is specified, the location identifier is set to null).
+--  pnLOC_ID_ASYLUM - Identifier of asylum location (optional when creating a new statistic; if not
+--    specified when updating an existing statistic, the existing value is left unchanged; if null
+--    is specified, the location identifier is set to null).
 --  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of (country of) origin (optional when creating a
---    new statistic; ignored when updating an existing statistic, since the origin country may not
---    be changed).
---  pnLOC_ID_ORIGIN - Identifier of location of origin (optional when creating a new statistic;
---    ignored when updating an existing statistic, since the origin location may not be changed).
---  pnDIM_ID1 - Dimension value identifier 1 (optional when creating a new statistic; ignored when
---    updating an existing statistic, since dimensions may not be changed).
---  pnDIM_ID2 - Dimension value identifier 2 (optional when creating a new statistic; ignored when
---    updating an existing statistic, since dimensions may not be changed).
---  pnDIM_ID3 - Dimension value identifier 3 (optional when creating a new statistic; ignored when
---    updating an existing statistic, since dimensions may not be changed).
---  pnDIM_ID4 - Dimension value identifier 4 (optional when creating a new statistic; ignored when
---    updating an existing statistic, since dimensions may not be changed).
---  pnDIM_ID5 - Dimension value identifier 5 (optional when creating a new statistic; ignored when
---    updating an existing statistic, since dimensions may not be changed).
---  psSEX_CODE - Sex code (optional when creating a new statistic; ignored when updating an existing
---    statistic, since the sex may not be changed).
---  pnAGR_ID - Age range identifier (optional when creating a new statistic; ignored when updating
---    an existing statistic, since the age range may not be changed).
+--    new statistic; if not specified when updating an existing statistic, the existing value is
+--    left unchanged; if null is specified, the location identifier is set to null).
+--  pnLOC_ID_ORIGIN - Identifier of location of origin (optional when creating a new statistic; if
+--    not specified when updating an existing statistic, the existing value is left unchanged; if
+--    null is specified, the location identifier is set to null).
+--  pnDIM_ID1 - Dimension value identifier 1 (optional when creating a new statistic; if not
+--    specified when updating an existing statistic, the existing value is left unchanged; if null
+--    is specified, the dimension value identifier is set to null).
+--  pnDIM_ID2 - Dimension value identifier 2 (optional when creating a new statistic; if not
+--    specified when updating an existing statistic, the existing value is left unchanged; if null
+--    is specified, the dimension value identifier is set to null).
+--  pnDIM_ID3 - Dimension value identifier 3 (optional when creating a new statistic; if not
+--    specified when updating an existing statistic, the existing value is left unchanged; if null
+--    is specified, the dimension value identifier is set to null).
+--  pnDIM_ID4 - Dimension value identifier 4 (optional when creating a new statistic; if not
+--    specified when updating an existing statistic, the existing value is left unchanged; if null
+--    is specified, the dimension value identifier is set to null).
+--  pnDIM_ID5 - Dimension value identifier 5 (optional when creating a new statistic; if not
+--    specified when updating an existing statistic, the existing value is left unchanged; if null
+--    is specified, the dimension value identifier is set to null).
+--  psSEX_CODE - Sex code (optional when creating a new statistic; if not specified when updating an
+--    existing statistic, the existing value is left unchanged; if null is specified, the sex code
+--    is set to null).
+--  pnAGR_ID - Age range identifier (optional when creating a new statistic; if not specified when
+--    updating an existing statistic, the existing value is left unchanged; if null is specified,
+--    the age range identifier is set to null).
+--  pnPPG_ID - PPG identifier (optional when creating a new statistic; if not specified when
+--    updating an existing statistic, the existing PPG linkage is left unchanged; if null is
+--    specified, the linkage to a PPG is removed).
 --  pnSTG_ID_PRIMARY - Identifier of primary statistic group (optional when creating a new
---    statistic; ignored when updating an existing statistic, since the primary statistic group may
---    not be changed).
---  pnPPG_ID - PPG identifier (optional when creating a new statistic; ignored when updating an
---    existing statistic, since the PPG may not be changed).
---  pnVALUE - The value of the statistic (mandatory).
+--    statistic; ignored when updating an existing statistic, since the primary statistic group
+--    cannot be changed).
 --
   procedure SET_STATISTIC
    (pnSTC_ID in out P_BASE.tnSTC_ID,
     pnVERSION_NBR in out P_BASE.tnSTC_VERSION_NBR,
-    psSTCT_CODE in P_BASE.tsSTCT_CODE := null,
+    pnVALUE in P_BASE.tmnSTC_VALUE,
     pdSTART_DATE in P_BASE.tdDate := null,
     pdEND_DATE in P_BASE.tdDate := null,
+    psSTCT_CODE in P_BASE.tsSTCT_CODE := null,
     pnDST_ID in P_BASE.tnDST_ID := null,
-    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := null,
-    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := null,
-    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := null,
-    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := null,
-    pnDIM_ID1 in P_BASE.tnDIM_ID := null,
-    pnDIM_ID2 in P_BASE.tnDIM_ID := null,
-    pnDIM_ID3 in P_BASE.tnDIM_ID := null,
-    pnDIM_ID4 in P_BASE.tnDIM_ID := null,
-    pnDIM_ID5 in P_BASE.tnDIM_ID := null,
-    psSEX_CODE in P_BASE.tsSEX_CODE := null,
-    pnAGR_ID in P_BASE.tnAGR_ID := null,
-    pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID := null,
-    pnPPG_ID in P_BASE.tnPPG_ID := null,
-    pnVALUE in P_BASE.tmnSTC_VALUE);
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := -1,
+    pnDIM_ID1 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID2 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID3 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID4 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID5 in P_BASE.tnDIM_ID := -1,
+    psSEX_CODE in P_BASE.tsSEX_CODE := 'x',
+    pnAGR_ID in P_BASE.tnAGR_ID := -1,
+    pnPPG_ID in P_BASE.tnPPG_ID := -1,
+    pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID := null);
 --
 -- ----------------------------------------
 -- DELETE_STATISTIC

@@ -7,7 +7,7 @@ create or replace package P_STATISTIC_GROUP is
 --   types.
 --
 --  Change History:
---  12-Dec-2013 - Peter Scott (UNHCR) - Initial revision. (D1.0)
+--  15-Jan-2014 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
@@ -78,16 +78,65 @@ create or replace package P_STATISTIC_GROUP is
 --  pnSTG_ID - Statistic group identifier (mandatory).
 --  pnVERSION_NBR - Update version number of statistic group record (mandatory: new version number
 --    is returned).
+--  pdSTART_DATE - Statistic group start date (optional: if not specified, the existing start date
+--    is left unchanged; a null value indicates that the effectivity starts indefinitely far in the
+--    past).
+--  pdEND_DATE - Statistic group end date (optional: if not specified, the existing start date is
+--    left unchanged; a null value indicates that the effectivity ends indefinitely far in the
+--    future).
+--  psSTTG_CODE - Statistic type group code (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the statistic type group code is set to null).
+--  pnDST_ID - Displacement status identifier (optional: if not specified, the existing value
+--    is left unchanged; if null is specified, the displacement status identifier is set to null).
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of country of asylum (optional: if not specified,
+--    the existing value is left unchanged; if null is specified, the location identifier is set to
+--    null).
+--  pnLOC_ID_ASYLUM - Identifier of asylum location (optional: if not specified, the existing value
+--    is left unchanged; if null is specified, the location identifier is set to null).
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of (country of) origin (optional: if not
+--    specified, the existing value is left unchanged; if null is specified, the location identifier
+--    is set to null).
+--  pnLOC_ID_ORIGIN - Identifier of location of origin (optional: if not specified, the existing
+--    value is left unchanged; if null is specified, the location identifier is set to null).
+--  pnDIM_ID1 - Dimension value identifier 1 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  pnDIM_ID2 - Dimension value identifier 2 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  pnDIM_ID3 - Dimension value identifier 3 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  pnDIM_ID4 - Dimension value identifier 4 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  pnDIM_ID5 - Dimension value identifier 5 (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the dimension value identifier is set to null).
+--  psSEX_CODE - Sex code (optional: if not specified, the existing value is left unchanged; if null
+--    is specified, the sex code is set to null).
+--  pnAGR_ID - Age range identifier (optional: if not specified, the existing value is left
+--    unchanged; if null is specified, the age range identifier is set to null).
 --  psLANG_CODE - Language code of the population subgroup name (optional, must be specified when
 --    psSUBGROUP_NAME is specified).
 --  psSUBGROUP_NAME - Population subgroup name (optional, may only be specified if the statistic
 --    group has been created with population subgroups).
---  pnPPG_ID - PPG identifier (optional, if null the linkage to a PPG is removed, if absent, the PPG
---    linkage is left unchanged).
+--  pnPPG_ID - PPG identifier (optional: if not specified the PPG linkage is left unchanged; if null
+--    the linkage to a PPG is removed).
 --
   procedure UPDATE_STATISTIC_GROUP
    (pnSTG_ID in P_BASE.tmnSTG_ID,
     pnVERSION_NBR in out P_BASE.tnSTG_VERSION_NBR,
+    pdSTART_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    pdEND_DATE in P_BASE.tdDate := P_BASE.gdFALSE_DATE,
+    psSTTG_CODE in P_BASE.tsSTTG_CODE := 'xxxxxxxxxxx',
+    pnDST_ID in P_BASE.tnDST_ID := -1,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ASYLUM in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tnLOC_ID := -1,
+    pnLOC_ID_ORIGIN in P_BASE.tnLOC_ID := -1,
+    pnDIM_ID1 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID2 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID3 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID4 in P_BASE.tnDIM_ID := -1,
+    pnDIM_ID5 in P_BASE.tnDIM_ID := -1,
+    psSEX_CODE in P_BASE.tsSEX_CODE := 'x',
+    pnAGR_ID in P_BASE.tnAGR_ID := -1,
     psLANG_CODE in P_BASE.tsLANG_CODE := null,
     psSUBGROUP_NAME in P_BASE.tsText := null,
     pnPPG_ID in P_BASE.tnPPG_ID := -1);

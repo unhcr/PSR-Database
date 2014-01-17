@@ -6,11 +6,11 @@ create or replace package P_CONTEXT is
 --  Procedures for managing the PSR application context.
 --
 --  Change History:
---  14-Nov-2013 - Peter Scott (UNHCR) - Initial revision. (D0.1)
+--  17-Jan-2014 - Peter Scott (UNHCR) - Initial revision. (D1.0)
 --
 -- -------------------------------------------------------------------------------------------------
 --
-  sVersion varchar2(10) := 'D0.1';
+  sVersion varchar2(10) := 'D1.0';
   sComponent varchar2(30) := 'CTX';
 --
 -- ----------------------------------------

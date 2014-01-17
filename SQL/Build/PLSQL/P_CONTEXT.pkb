@@ -1,6 +1,12 @@
 create or replace package body P_CONTEXT is
 --
 -- ========================================
+-- Private global variables
+-- ========================================
+--
+  gsCONTEXT varchar2(30);
+--
+-- ========================================
 -- Public program units
 -- ========================================
 --
@@ -14,7 +20,7 @@ create or replace package body P_CONTEXT is
   begin
     P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.SET_USERID', psUSERID);
   --
-    dbms_session.set_context('PSR', 'USERID', psUSERID);
+    dbms_session.set_context(gsCONTEXT, 'USERID', psUSERID);
   --
     P_UTILITY.END_MODULE;
   exception
@@ -31,7 +37,7 @@ create or replace package body P_CONTEXT is
   begin
     P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.CLEAR_USERID');
   --
-    dbms_session.clear_context('PSR', attribute => 'USERID');
+    dbms_session.clear_context(gsCONTEXT, attribute => 'USERID');
   --
     P_UTILITY.END_MODULE;
   exception
@@ -50,7 +56,7 @@ create or replace package body P_CONTEXT is
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.SET_COUNTRY', to_char(pnLOC_ID_COUNTRY));
   --
-    dbms_session.set_context('PSR', 'COUNTRY', to_char(pnLOC_ID_COUNTRY));
+    dbms_session.set_context(gsCONTEXT, 'COUNTRY', to_char(pnLOC_ID_COUNTRY));
   --
     P_UTILITY.END_MODULE;
   exception
@@ -67,7 +73,7 @@ create or replace package body P_CONTEXT is
   begin
     P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.CLEAR_COUNTRY');
   --
-    dbms_session.clear_context('PSR', attribute => 'COUNTRY');
+    dbms_session.clear_context(gsCONTEXT, attribute => 'COUNTRY');
   --
     P_UTILITY.END_MODULE;
   exception
@@ -88,10 +94,10 @@ create or replace package body P_CONTEXT is
      (sVersion || '-' || sComponent || '.SET_CONTEXT',
       psUSERID || '~' || to_char(pnLOC_ID_COUNTRY));
   --
-    dbms_session.set_context('PSR', 'USERID', psUSERID);
+    dbms_session.set_context(gsCONTEXT, 'USERID', psUSERID);
   --
     if pnLOC_ID_COUNTRY is not null
-    then dbms_session.set_context('PSR', 'COUNTRY', to_char(pnLOC_ID_COUNTRY));
+    then dbms_session.set_context(gsCONTEXT, 'COUNTRY', to_char(pnLOC_ID_COUNTRY));
     end if;
   --
     P_UTILITY.END_MODULE;
@@ -109,7 +115,7 @@ create or replace package body P_CONTEXT is
   begin
     P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.CLEAR_CONTEXT');
   --
-    dbms_session.clear_context('PSR');
+    dbms_session.clear_context(gsCONTEXT);
   --
     P_UTILITY.END_MODULE;
   exception
@@ -126,9 +132,13 @@ begin
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 1, 'Component code mismatch');
   end if;
 --
-  if sVersion != 'D0.1'
+  if sVersion != 'D1.0'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
   end if;
+--
+  select user
+  into gsCONTEXT
+  from DUAL;
 --
 end P_CONTEXT;
 /

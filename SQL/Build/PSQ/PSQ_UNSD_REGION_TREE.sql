@@ -1,4 +1,7 @@
-create or replace view UNSD_REGION_TREE as
+--
+-- PSQ_UNSD_REGION_TREE
+--
+create or replace view PSQ_UNSD_REGION_TREE as
 with Q_LOC (ID, CODE, NAME, SORT_SEQ, SORT_NAME, LOCT_CODE, TREE_LEVEL) as
  (select LOC.ID,
     LOCA1.CHAR_VALUE as CODE,

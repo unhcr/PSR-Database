@@ -1,18 +1,18 @@
-prompt COUNTRY_SELECTION
-prompt =================
-@@COUNTRY_SELECTION
+prompt PSQ_COUNTRY_SELECTION
+prompt =====================
+@@PSQ_COUNTRY_SELECTION
 
-prompt ORIGIN_SELECTION
-prompt ================
-@@ORIGIN_SELECTION
+prompt PSQ_ORIGIN_SELECTION
+prompt ====================
+@@PSQ_ORIGIN_SELECTION
 
-prompt UNHCR_REGION_TREE
-prompt =================
-@@UNHCR_REGION_TREE
+prompt PSQ_UNHCR_REGION_TREE
+prompt =====================
+@@PSQ_UNHCR_REGION_TREE
 
-prompt UNSD_REGION_TREE
-prompt ================
-@@UNSD_REGION_TREE
+prompt PSQ_UNSD_REGION_TREE
+prompt ====================
+@@PSQ_UNSD_REGION_TREE
 
 prompt PSQ_POC_DETAILS
 prompt ===============

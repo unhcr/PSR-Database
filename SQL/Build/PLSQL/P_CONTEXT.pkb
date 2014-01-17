@@ -4,7 +4,7 @@ create or replace package body P_CONTEXT is
 -- Private global variables
 -- ========================================
 --
-  gsCONTEXT varchar2(30);
+  gsCONTEXT varchar2(30) := sys_context('userenv', 'current_schema');
 --
 -- ========================================
 -- Public program units
@@ -18,7 +18,8 @@ create or replace package body P_CONTEXT is
    (psUSERID in P_BASE.tmsUSR_USERID)
   is
   begin
-    P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.SET_USERID', psUSERID);
+    P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.SET_USERID',
+                           gsCONTEXT || '~' || psUSERID);
   --
     dbms_session.set_context(gsCONTEXT, 'USERID', psUSERID);
   --
@@ -53,8 +54,8 @@ create or replace package body P_CONTEXT is
    (pnLOC_ID_COUNTRY in P_BASE.tmnLOC_ID)
   is
   begin
-    P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_COUNTRY', to_char(pnLOC_ID_COUNTRY));
+    P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.SET_COUNTRY',
+                           gsCONTEXT || '~' || to_char(pnLOC_ID_COUNTRY));
   --
     dbms_session.set_context(gsCONTEXT, 'COUNTRY', to_char(pnLOC_ID_COUNTRY));
   --
@@ -90,9 +91,8 @@ create or replace package body P_CONTEXT is
     pnLOC_ID_COUNTRY in P_BASE.tnLOC_ID := null)
   is
   begin
-    P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.SET_CONTEXT',
-      psUSERID || '~' || to_char(pnLOC_ID_COUNTRY));
+    P_UTILITY.START_MODULE(sVersion || '-' || sComponent || '.SET_CONTEXT',
+                           gsCONTEXT || '~' || psUSERID || '~' || to_char(pnLOC_ID_COUNTRY));
   --
     dbms_session.set_context(gsCONTEXT, 'USERID', psUSERID);
   --
@@ -135,10 +135,6 @@ begin
   if sVersion != 'D1.0'
   then P_MESSAGE.DISPLAY_MESSAGE('GEN', 2, 'Module version mismatch');
   end if;
---
-  select user
-  into gsCONTEXT
-  from DUAL;
 --
 end P_CONTEXT;
 /

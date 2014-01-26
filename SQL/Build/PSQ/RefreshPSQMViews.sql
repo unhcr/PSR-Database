@@ -22,6 +22,10 @@ create index IX_POCS_YEAR on PSQ_POC_SUMMARY_DATA (ASR_YEAR);
 create index IX_POCS_COU_RES on PSQ_POC_SUMMARY_DATA (COU_CODE_RESIDENCE);
 create index IX_POCS_COU_OGN on PSQ_POC_SUMMARY_DATA (COU_CODE_ORIGIN);
 
+execute dbms_mview.refresh('PSQ_POC_SUMMARY_COUNTRIES');
+
+execute dbms_mview.refresh('PSQ_POC_SUMMARY_ORIGINS');
+
 drop index IX_DEM_YEAR;
 drop index IX_DEM_COU_RES;
 drop index IX_DEM_COU_OGN;

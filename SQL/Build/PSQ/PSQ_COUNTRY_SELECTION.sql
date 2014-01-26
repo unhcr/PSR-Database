@@ -56,6 +56,7 @@ with Q_LOC (ID, CODE, NAME, LOCT_CODE, SORT_NAME, LOC_ID_FROM) as
     on LOCR.LOC_ID_TO = LOC2.ID
     and LOCR.LOCRT_CODE = 'CCHANGE')
 --
-select ID, CODE, NAME, LOCT_CODE, nlssort(SORT_NAME, 'NLS_SORT=BINARY_AI') as SORT_NAME
+select ID, cast(CODE as varchar2(3)) as CODE, NAME, LOCT_CODE,
+  nlssort(SORT_NAME, 'NLS_SORT=BINARY_AI') as SORT_NAME
 from Q_LOC
 where LOC_ID_FROM is null;

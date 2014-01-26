@@ -6,6 +6,10 @@ prompt PSQ_ORIGIN_SELECTION
 prompt ====================
 @@PSQ_ORIGIN_SELECTION
 
+prompt PSQ_COUNTRY_REGIONS
+prompt ===================
+@@PSQ_COUNTRY_REGIONS
+
 prompt PSQ_UNHCR_REGION_TREE
 prompt =====================
 @@PSQ_UNHCR_REGION_TREE

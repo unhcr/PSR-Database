@@ -22,9 +22,9 @@ create index IX_POCS_YEAR on PSQ_POC_SUMMARY_DATA (ASR_YEAR);
 create index IX_POCS_COU_RES on PSQ_POC_SUMMARY_DATA (COU_CODE_RESIDENCE);
 create index IX_POCS_COU_OGN on PSQ_POC_SUMMARY_DATA (COU_CODE_ORIGIN);
 
-execute dbms_mview.refresh('PSQ_POC_SUMMARY_COUNTRIES');
+execute dbms_mview.refresh('PSQ_POC_COUNTRIES');
 
-execute dbms_mview.refresh('PSQ_POC_SUMMARY_ORIGINS');
+execute dbms_mview.refresh('PSQ_POC_ORIGINS');
 
 drop index IX_DEM_YEAR;
 drop index IX_DEM_COU_RES;
@@ -42,6 +42,10 @@ drop index IX_DEME_YEAR;
 drop index IX_DEME_COU_RES;
 drop index IX_DEME_COU_OGN;
 drop index IX_DEME_DST;
+
+execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_COUNTRIES');
+
+execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_ORIGINS');
 
 execute P_CONTEXT.SET_USERID('PUBLIC_ENGLISH');
 execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_EN');

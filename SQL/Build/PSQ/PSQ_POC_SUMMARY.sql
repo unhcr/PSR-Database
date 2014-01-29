@@ -67,20 +67,6 @@ create index IX_POCS_COU_RES on PSQ_POC_SUMMARY_DATA (COU_CODE_RESIDENCE);
 create index IX_POCS_COU_OGN on PSQ_POC_SUMMARY_DATA (COU_CODE_ORIGIN);
 
 --
--- PSQ_POC_SUMMARY_COUNTRIES
---
-create materialized view PSQ_POC_SUMMARY_COUNTRIES as
-select distinct nvl(COU_CODE_RESIDENCE, 'XXX') as COU_CODE
-from PSQ_POC_SUMMARY_DATA;
-
---
--- PSQ_POC_SUMMARY_ORIGINS
---
-create materialized view PSQ_POC_SUMMARY_ORIGINS as
-select distinct nvl(COU_CODE_ORIGIN, 'XXX') as COU_CODE
-from PSQ_POC_SUMMARY_DATA;
-
---
 -- PSQ_POC_SUMMARY
 --
 create or replace view PSQ_POC_SUMMARY as

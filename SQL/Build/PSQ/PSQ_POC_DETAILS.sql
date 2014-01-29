@@ -182,6 +182,20 @@ create index IX_POCD_COU_OGN on PSQ_POC_DETAILS_DATA (COU_CODE_ORIGIN);
 create index IX_POCD_PTC on PSQ_POC_DETAILS_DATA (POP_TYPE_CODE);
 
 --
+-- PSQ_POC_COUNTRIES
+--
+create materialized view PSQ_POC_COUNTRIES as
+select distinct nvl(COU_CODE_RESIDENCE, 'XXX') as COU_CODE
+from PSQ_POC_DETAILS_DATA;
+
+--
+-- PSQ_POC_ORIGINS
+--
+create materialized view PSQ_POC_ORIGINS as
+select distinct nvl(COU_CODE_ORIGIN, 'XXX') as COU_CODE
+from PSQ_POC_DETAILS_DATA;
+
+--
 -- PSQ_POC_DETAILS
 --
 create or replace view PSQ_POC_DETAILS as

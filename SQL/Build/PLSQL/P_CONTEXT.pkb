@@ -123,6 +123,16 @@ create or replace package body P_CONTEXT is
     then P_UTILITY.TRACE_EXCEPTION;
   end CLEAR_CONTEXT;
 --
+-- ----------------------------------------
+-- GET_CONTEXT_NAME
+-- ----------------------------------------
+--
+  function GET_CONTEXT_NAME return varchar2 is
+   begin
+        return gsCONTEXT;
+   end GET_CONTEXT_NAME;
+--
+
 -- =====================================
 -- Initialisation
 -- =====================================

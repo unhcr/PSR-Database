@@ -75,6 +75,17 @@ create or replace package P_CONTEXT is
 --
   procedure CLEAR_CONTEXT;
 --
+
+-- ----------------------------------------
+-- GET_CONTEXT_NAME
+-- ----------------------------------------
+--
+-- Get the Context name
+--
+  function  GET_CONTEXT_NAME return varchar2;
+--
+
+
 end P_CONTEXT;
 /
 

@@ -155,6 +155,27 @@ create index IX_RSD_COU_ASY on PSQ_RSD_DATA (COU_CODE_ASYLUM);
 create index IX_RSD_COU_OGN on PSQ_RSD_DATA (COU_CODE_ORIGIN);
 
 --
+-- PSQ_RSD_COUNTRIES
+--
+create materialized view PSQ_RSD_COUNTRIES as
+select distinct nvl(COU_CODE_ASYLUM, 'XXX') as COU_CODE
+from PSQ_RSD_DATA;
+
+--
+-- PSQ_RSD_ORIGINS
+--
+create materialized view PSQ_RSD_ORIGINS as
+select distinct nvl(COU_CODE_ORIGIN, 'XXX') as COU_CODE
+from PSQ_RSD_DATA;
+
+--
+-- PSQ_RSD_YEARS
+--
+create materialized view PSQ_RSD_YEARS as
+select distinct ASR_YEAR
+from PSQ_RSD_DATA;
+
+--
 -- PSQ_RSD
 --
 create or replace view PSQ_RSD as
@@ -238,6 +259,5 @@ from PSQ_RSD;
 create index IX_RSDF_YEAR on PSQ_RSD_FR (ASR_YEAR);
 create index IX_RSDF_COU_ASY on PSQ_RSD_FR (COU_CODE_ASYLUM);
 create index IX_RSDF_COU_OGN on PSQ_RSD_FR (COU_CODE_ORIGIN);
-
 
 execute P_CONTEXT.CLEAR_CONTEXT;

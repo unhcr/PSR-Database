@@ -196,6 +196,13 @@ select distinct nvl(COU_CODE_ORIGIN, 'XXX') as COU_CODE
 from PSQ_POC_DETAILS_DATA;
 
 --
+-- PSQ_POC_YEARS
+--
+create materialized view PSQ_POC_YEARS as
+select distinct ASR_YEAR
+from PSQ_POC_DETAILS_DATA;
+
+--
 -- PSQ_POC_DETAILS
 --
 create or replace view PSQ_POC_DETAILS as
@@ -231,10 +238,3 @@ left outer join
     on DSC.ITM_ID = CDE.ITM_ID
   where CDE.CDET_CODE = 'POPTYPE') CDE
   on CDE.CODE = POC.POP_TYPE_CODE;
-
---
--- PSQ_POC_YEARS
---
-create materialized view PSQ_POC_YEARS as
-select distinct ASR_YEAR
-from PSQ_POC_DETAILS_DATA;

@@ -1,0 +1,452 @@
+execute P_CONTEXT.SET_USERID('PUBLIC_FRENCH');
+
+--
+-- PSQ_DEMOGRAPHICS_FR
+--
+create materialized view PSQ_DEMOGRAPHICS_FR as
+select ASR_YEAR,
+  COU_CODE_RESIDENCE, ISO3166_ALPHA3_CODE_RESIDENCE, COU_NAME_RESIDENCE,
+  LOC_NAME_RESIDENCE,
+  COU_CODE_ORIGIN, ISO3166_ALPHA3_CODE_ORIGIN, COU_NAME_ORIGIN,
+  DST_CODE, DST_DESCRIPTION,
+  F0_VALUE, F0_REDACTED_FLAG, F5_VALUE, F5_REDACTED_FLAG, F12_VALUE, F12_REDACTED_FLAG,
+  F18_VALUE, F18_REDACTED_FLAG, F60_VALUE, F60_REDACTED_FLAG, FOTHER_VALUE, FOTHER_REDACTED_FLAG,
+  FTOTAL_VALUE, FTOTAL_REDACTED_FLAG,
+  M0_VALUE, M0_REDACTED_FLAG, M5_VALUE, M5_REDACTED_FLAG, M12_VALUE, M12_REDACTED_FLAG,
+  M18_VALUE, M18_REDACTED_FLAG, M60_VALUE, M60_REDACTED_FLAG, MOTHER_VALUE, MOTHER_REDACTED_FLAG,
+  MTOTAL_VALUE, MTOTAL_REDACTED_FLAG, TOTAL_VALUE, TOTAL_REDACTED_FLAG
+from PSQ_DEMOGRAPHICS;
+
+create index IX_DEMF_YEAR on PSQ_DEMOGRAPHICS_FR (ASR_YEAR);
+create index IX_DEMF_COU_RES on PSQ_DEMOGRAPHICS_FR (COU_CODE_RESIDENCE);
+create index IX_DEMF_COU_OGN on PSQ_DEMOGRAPHICS_FR (COU_CODE_ORIGIN);
+create index IX_DEMF_DST on PSQ_DEMOGRAPHICS_FR (DST_CODE);
+
+--
+-- PSQ_RSD_FR
+--
+create materialized view PSQ_RSD_FR as
+select ASR_YEAR,
+  COU_CODE_ASYLUM, ISO3166_ALPHA3_CODE_ASYLUM, COU_NAME_ASYLUM,
+  COU_CODE_ORIGIN, ISO3166_ALPHA3_CODE_ORIGIN, COU_NAME_ORIGIN,
+  RSD_PROC_TYPE_CODE, RSD_PROC_TYPE_DESCRIPTION,
+  RSD_PROC_LEVEL_CODE, RSD_PROC_LEVEL_DESCRIPTION,
+  ASYPOP_START_VALUE, ASYPOP_START_REDACTED_FLAG,
+  ASYPOP_AH_START_VALUE, ASYPOP_AH_START_REDACTED_FLAG,
+  ASYAPP_VALUE, ASYAPP_REDACTED_FLAG,
+  ASYREC_CV_VALUE, ASYREC_CV_REDACTED_FLAG,
+  ASYREC_CP_VALUE, ASYREC_CP_REDACTED_FLAG,
+  ASYREJ_VALUE, ASYREJ_REDACTED_FLAG,
+  ASYOTHCL_VALUE, ASYOTHCL_REDACTED_FLAG,
+  ASYPOP_END_VALUE, ASYPOP_END_REDACTED_FLAG,
+  ASYPOP_AH_END_VALUE, ASYPOP_AH_END_REDACTED_FLAG
+from PSQ_RSD;
+
+create index IX_RSDF_YEAR on PSQ_RSD_FR (ASR_YEAR);
+create index IX_RSDF_COU_ASY on PSQ_RSD_FR (COU_CODE_ASYLUM);
+create index IX_RSDF_COU_OGN on PSQ_RSD_FR (COU_CODE_ORIGIN);
+
+--
+-- PSQ_POC_COUNTRY_LIST_FR
+--
+create materialized view PSQ_POC_COUNTRY_LIST_FR as
+select CODE, NAME,
+  row_number() over (order by SORT_NAME) as ROW_NUMBER,
+  SORT_NAME
+from PSQ_COUNTRY_SELECTION
+where CODE in (select COU_CODE from PSQ_POC_COUNTRIES)
+union all
+select CODE, NAME, null as ROW_NUMBER, null as SORT_NAME
+from PSQ_ORIGIN_SELECTION
+where CODE = 'XXX';
+
+--
+-- PSQ_POC_COUNTRY_UNSD_TREE_FR
+--
+create materialized view PSQ_POC_COUNTRY_UNSD_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNSD_REGION_TREE
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    REG.ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNSD_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'UNSD'
+  inner join PSQ_COUNTRY_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+  where COU.CODE in (select COU_CODE from PSQ_POC_COUNTRIES)
+  union all
+  select OGN.ID, OGN.CODE, OGN.NAME, 'COUNTRY' as LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    null as ORDER_SEQ, OGN.SORT_NAME
+  from PSQ_ORIGIN_SELECTION OGN
+  cross join PSQ_UNSD_REGION_TREE REG
+  where OGN.CODE = 'XXX'
+  and REG.LOCT_CODE = 'WORLD');
+
+--
+-- PSQ_POC_COUNTRY_UNHCR_TREE_FR
+--
+create materialized view PSQ_POC_COUNTRY_UNHCR_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lead(LOCT_CODE) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_LOCT_CODE,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL, ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    REG.ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'HCRRESP'
+  inner join PSQ_COUNTRY_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+    and COU.CODE in (select COU_CODE from PSQ_POC_COUNTRIES)
+  union all
+  select OGN.ID, OGN.CODE, OGN.NAME, 'COUNTRY' as LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    null as ORDER_SEQ, OGN.SORT_NAME
+  from PSQ_ORIGIN_SELECTION OGN
+  cross join PSQ_UNHCR_REGION_TREE REG
+  where OGN.CODE = 'XXX'
+  and REG.LOCT_CODE = 'UNHCR');
+
+--
+-- PSQ_POC_ORIGIN_LIST_FR
+--
+create materialized view PSQ_POC_ORIGIN_LIST_FR as
+select CODE, NAME,
+  case when CODE = 'XXX' then null else row_number() over (order by SORT_NAME) end as ROW_NUMBER,
+  case when CODE = 'XXX' then null else SORT_NAME end as SORT_NAME
+from PSQ_ORIGIN_SELECTION
+where CODE in (select COU_CODE from PSQ_POC_ORIGINS);
+
+--
+-- PSQ_POC_ORIGIN_UNSD_TREE_FR
+--
+create materialized view PSQ_POC_ORIGIN_UNSD_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNSD_REGION_TREE
+  union all
+  select OGN.ID, OGN.CODE, OGN.NAME, OGN.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    case when REG.LOCT_CODE != 'WORLD' then REG.ORDER_SEQ end as ORDER_SEQ, OGN.SORT_NAME
+  from PSQ_UNSD_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'UNSD'
+  inner join PSQ_ORIGIN_SELECTION OGN
+    on OGN.ID = LOCR.LOC_ID_TO
+  where OGN.CODE in (select COU_CODE from PSQ_POC_ORIGINS));
+
+--
+-- PSQ_POC_ORIGIN_UNHCR_TREE_FR
+--
+create materialized view PSQ_POC_ORIGIN_UNHCR_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lead(LOCT_CODE) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_LOCT_CODE,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    case when REG.LOCT_CODE != 'UNHCR' then REG.ORDER_SEQ end as ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'HCRRESP'
+  inner join PSQ_ORIGIN_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+    and COU.CODE in (select COU_CODE from PSQ_POC_ORIGINS));
+
+--
+-- PSQ_DEM_COUNTRY_LIST_FR
+--
+create materialized view PSQ_DEM_COUNTRY_LIST_FR as
+select CODE, NAME,
+  row_number() over (order by SORT_NAME) as ROW_NUMBER,
+  SORT_NAME
+from PSQ_COUNTRY_SELECTION
+where CODE in (select COU_CODE from PSQ_DEMOGRAPHICS_COUNTRIES)
+union all
+select CODE, NAME, null as ROW_NUMBER, null as SORT_NAME
+from PSQ_ORIGIN_SELECTION
+where CODE = 'XXX';
+
+--
+-- PSQ_DEM_COUNTRY_UNSD_TREE_FR
+--
+create materialized view PSQ_DEM_COUNTRY_UNSD_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNSD_REGION_TREE
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    REG.ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNSD_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'UNSD'
+  inner join PSQ_COUNTRY_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+  where COU.CODE in (select COU_CODE from PSQ_DEMOGRAPHICS_COUNTRIES));
+
+--
+-- PSQ_DEM_COUNTRY_UNHCR_TREE_FR
+--
+create materialized view PSQ_DEM_COUNTRY_UNHCR_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lead(LOCT_CODE) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_LOCT_CODE,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL, ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    REG.ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'HCRRESP'
+  inner join PSQ_COUNTRY_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+    and COU.CODE in (select COU_CODE from PSQ_DEMOGRAPHICS_COUNTRIES));
+
+--
+-- PSQ_DEM_ORIGIN_LIST_FR
+--
+create materialized view PSQ_DEM_ORIGIN_LIST_FR as
+select CODE, NAME,
+  case when CODE = 'XXX' then null else row_number() over (order by SORT_NAME) end as ROW_NUMBER,
+  case when CODE = 'XXX' then null else SORT_NAME end as SORT_NAME
+from PSQ_ORIGIN_SELECTION
+where CODE in (select COU_CODE from PSQ_DEMOGRAPHICS_ORIGINS);
+
+--
+-- PSQ_DEM_ORIGIN_UNSD_TREE_FR
+--
+create materialized view PSQ_DEM_ORIGIN_UNSD_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNSD_REGION_TREE
+  union all
+  select OGN.ID, OGN.CODE, OGN.NAME, OGN.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    case when REG.LOCT_CODE != 'WORLD' then REG.ORDER_SEQ end as ORDER_SEQ, OGN.SORT_NAME
+  from PSQ_UNSD_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'UNSD'
+  inner join PSQ_ORIGIN_SELECTION OGN
+    on OGN.ID = LOCR.LOC_ID_TO
+  where OGN.CODE in (select COU_CODE from PSQ_DEMOGRAPHICS_ORIGINS));
+
+--
+-- PSQ_DEM_ORIGIN_UNHCR_TREE_FR
+--
+create materialized view PSQ_DEM_ORIGIN_UNHCR_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lead(LOCT_CODE) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_LOCT_CODE,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    case when REG.LOCT_CODE != 'UNHCR' then REG.ORDER_SEQ end as ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'HCRRESP'
+  inner join PSQ_ORIGIN_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+    and COU.CODE in (select COU_CODE from PSQ_DEMOGRAPHICS_ORIGINS));
+
+--
+-- PSQ_RSD_COUNTRY_LIST_FR
+--
+create materialized view PSQ_RSD_COUNTRY_LIST_FR as
+select CODE, NAME,
+  row_number() over (order by SORT_NAME) as ROW_NUMBER,
+  SORT_NAME
+from PSQ_COUNTRY_SELECTION
+where CODE in (select COU_CODE from PSQ_RSD_COUNTRIES)
+union all
+select CODE, NAME, null as ROW_NUMBER, null as SORT_NAME
+from PSQ_ORIGIN_SELECTION
+where CODE = 'XXX';
+
+--
+-- PSQ_RSD_COUNTRY_UNSD_TREE_FR
+--
+create materialized view PSQ_RSD_COUNTRY_UNSD_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNSD_REGION_TREE
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    REG.ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNSD_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'UNSD'
+  inner join PSQ_COUNTRY_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+  where COU.CODE in (select COU_CODE from PSQ_RSD_COUNTRIES)
+  union all
+  select OGN.ID, OGN.CODE, OGN.NAME, 'COUNTRY' as LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    null as ORDER_SEQ, OGN.SORT_NAME
+  from PSQ_ORIGIN_SELECTION OGN
+  cross join PSQ_UNSD_REGION_TREE REG
+  where OGN.CODE = 'XXX'
+  and REG.LOCT_CODE = 'WORLD');
+
+--
+-- PSQ_RSD_COUNTRY_UNHCR_TREE_FR
+--
+create materialized view PSQ_RSD_COUNTRY_UNHCR_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lead(LOCT_CODE) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_LOCT_CODE,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL, ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    REG.ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'HCRRESP'
+  inner join PSQ_COUNTRY_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+    and COU.CODE in (select COU_CODE from PSQ_RSD_COUNTRIES)
+  union all
+  select OGN.ID, OGN.CODE, OGN.NAME, 'COUNTRY' as LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    null as ORDER_SEQ, OGN.SORT_NAME
+  from PSQ_ORIGIN_SELECTION OGN
+  cross join PSQ_UNHCR_REGION_TREE REG
+  where OGN.CODE = 'XXX'
+  and REG.LOCT_CODE = 'UNHCR');
+
+--
+-- PSQ_RSD_ORIGIN_LIST_FR
+--
+create materialized view PSQ_RSD_ORIGIN_LIST_FR as
+select CODE, NAME,
+  case when CODE = 'XXX' then null else row_number() over (order by SORT_NAME) end as ROW_NUMBER,
+  case when CODE = 'XXX' then null else SORT_NAME end as SORT_NAME
+from PSQ_ORIGIN_SELECTION
+where CODE in (select COU_CODE from PSQ_RSD_ORIGINS);
+
+--
+-- PSQ_RSD_ORIGIN_UNSD_TREE_FR
+--
+create materialized view PSQ_RSD_ORIGIN_UNSD_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNSD_REGION_TREE
+  union all
+  select OGN.ID, OGN.CODE, OGN.NAME, OGN.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    case when REG.LOCT_CODE != 'WORLD' then REG.ORDER_SEQ end as ORDER_SEQ, OGN.SORT_NAME
+  from PSQ_UNSD_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'UNSD'
+  inner join PSQ_ORIGIN_SELECTION OGN
+    on OGN.ID = LOCR.LOC_ID_TO
+  where OGN.CODE in (select COU_CODE from PSQ_RSD_ORIGINS));
+
+--
+-- PSQ_RSD_ORIGIN_UNHCR_TREE_FR
+--
+create materialized view PSQ_RSD_ORIGIN_UNHCR_TREE_FR as
+select CODE, NAME, LOCT_CODE, TREE_LEVEL,
+  lead(LOCT_CODE) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_LOCT_CODE,
+  lag(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as PREV_TREE_LEVEL,
+  lead(TREE_LEVEL, 1, 0) over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as NEXT_TREE_LEVEL,
+  row_number() over (order by ORDER_SEQ, SORT_NAME nulls first, NAME) as ROW_NUMBER,
+  count(*) over () as ROW_COUNT,
+  ORDER_SEQ, SORT_NAME
+from
+ (select ID, CODE, NAME, LOCT_CODE, TREE_LEVEL,
+    ORDER_SEQ, null as SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  union all
+  select COU.ID, COU.CODE, COU.NAME, COU.LOCT_CODE, REG.TREE_LEVEL + 1 as TREE_LEVEL,
+    case when REG.LOCT_CODE != 'UNHCR' then REG.ORDER_SEQ end as ORDER_SEQ, COU.SORT_NAME
+  from PSQ_UNHCR_REGION_TREE REG
+  inner join LOCATION_RELATIONSHIPS LOCR
+    on LOCR.LOC_ID_FROM = REG.ID
+    and LOCR.LOCRT_CODE = 'HCRRESP'
+  inner join PSQ_ORIGIN_SELECTION COU
+    on COU.ID = LOCR.LOC_ID_TO
+    and COU.CODE in (select COU_CODE from PSQ_RSD_ORIGINS));
+
+execute P_CONTEXT.CLEAR_CONTEXT;

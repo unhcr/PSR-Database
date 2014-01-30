@@ -1,3 +1,5 @@
+execute dbms_mview.refresh('PSQ_COUNTRY_REGIONS');
+
 drop index IX_POCD_YEAR;
 drop index IX_POCD_COU_RES;
 drop index IX_POCD_COU_OGN;
@@ -38,37 +40,11 @@ create index IX_DEM_COU_RES on PSQ_DEMOGRAPHICS_DATA (COU_CODE_RESIDENCE);
 create index IX_DEM_COU_OGN on PSQ_DEMOGRAPHICS_DATA (COU_CODE_ORIGIN);
 create index IX_DEM_DST on PSQ_DEMOGRAPHICS_DATA (DST_CODE);
 
-drop index IX_DEME_YEAR;
-drop index IX_DEME_COU_RES;
-drop index IX_DEME_COU_OGN;
-drop index IX_DEME_DST;
-
 execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_COUNTRIES');
 
 execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_ORIGINS');
 
 execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_YEARS');
-
-execute P_CONTEXT.SET_USERID('PUBLIC_ENGLISH');
-execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_EN');
-
-create index IX_DEME_YEAR on PSQ_DEMOGRAPHICS_EN (ASR_YEAR);
-create index IX_DEME_COU_RES on PSQ_DEMOGRAPHICS_EN (COU_CODE_RESIDENCE);
-create index IX_DEME_COU_OGN on PSQ_DEMOGRAPHICS_EN (COU_CODE_ORIGIN);
-create index IX_DEME_DST on PSQ_DEMOGRAPHICS_EN (DST_CODE);
-
-drop index IX_DEMF_YEAR;
-drop index IX_DEMF_COU_RES;
-drop index IX_DEMF_COU_OGN;
-drop index IX_DEMF_DST;
-
-execute P_CONTEXT.SET_USERID('PUBLIC_FRENCH');
-execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_FR');
-
-create index IX_DEMF_YEAR on PSQ_DEMOGRAPHICS_FR (ASR_YEAR);
-create index IX_DEMF_COU_RES on PSQ_DEMOGRAPHICS_FR (COU_CODE_RESIDENCE);
-create index IX_DEMF_COU_OGN on PSQ_DEMOGRAPHICS_FR (COU_CODE_ORIGIN);
-create index IX_DEMF_DST on PSQ_DEMOGRAPHICS_FR (DST_CODE);
 
 drop index IX_RSD_YEAR;
 drop index IX_RSD_COU_ASY;
@@ -86,24 +62,92 @@ execute dbms_mview.refresh('PSQ_RSD_ORIGINS');
 
 execute dbms_mview.refresh('PSQ_RSD_YEARS');
 
+
+execute P_CONTEXT.SET_USERID('PUBLIC_ENGLISH');
+
+drop index IX_DEME_YEAR;
+drop index IX_DEME_COU_RES;
+drop index IX_DEME_COU_OGN;
+drop index IX_DEME_DST;
+
+execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_EN');
+
+create index IX_DEME_YEAR on PSQ_DEMOGRAPHICS_EN (ASR_YEAR);
+create index IX_DEME_COU_RES on PSQ_DEMOGRAPHICS_EN (COU_CODE_RESIDENCE);
+create index IX_DEME_COU_OGN on PSQ_DEMOGRAPHICS_EN (COU_CODE_ORIGIN);
+create index IX_DEME_DST on PSQ_DEMOGRAPHICS_EN (DST_CODE);
+
 drop index IX_RSDE_YEAR;
 drop index IX_RSDE_COU_ASY;
 drop index IX_RSDE_COU_OGN;
 
-execute P_CONTEXT.SET_USERID('PUBLIC_ENGLISH');
 execute dbms_mview.refresh('PSQ_RSD_EN');
 
 create index IX_RSDE_YEAR on PSQ_RSD_EN (ASR_YEAR);
 create index IX_RSDE_COU_ASY on PSQ_RSD_EN (COU_CODE_ASYLUM);
 create index IX_RSDE_COU_OGN on PSQ_RSD_EN (COU_CODE_ORIGIN);
 
+execute dbms_mview.refresh('PSQ_POC_COUNTRY_LIST_EN');
+execute dbms_mview.refresh('PSQ_POC_COUNTRY_UNSD_TREE_EN');
+execute dbms_mview.refresh('PSQ_POC_COUNTRY_UNHCR_TREE_EN');
+execute dbms_mview.refresh('PSQ_POC_ORIGIN_LIST_EN');
+execute dbms_mview.refresh('PSQ_POC_ORIGIN_UNSD_TREE_EN');
+execute dbms_mview.refresh('PSQ_POC_ORIGIN_UNHCR_TREE_EN');
+execute dbms_mview.refresh('PSQ_DEM_COUNTRY_LIST_EN');
+execute dbms_mview.refresh('PSQ_DEM_COUNTRY_UNSD_TREE_EN');
+execute dbms_mview.refresh('PSQ_DEM_COUNTRY_UNHCR_TREE_EN');
+execute dbms_mview.refresh('PSQ_DEM_ORIGIN_LIST_EN');
+execute dbms_mview.refresh('PSQ_DEM_ORIGIN_UNSD_TREE_EN');
+execute dbms_mview.refresh('PSQ_DEM_ORIGIN_UNHCR_TREE_EN');
+execute dbms_mview.refresh('PSQ_RSD_COUNTRY_LIST_EN');
+execute dbms_mview.refresh('PSQ_RSD_COUNTRY_UNSD_TREE_EN');
+execute dbms_mview.refresh('PSQ_RSD_COUNTRY_UNHCR_TREE_EN');
+execute dbms_mview.refresh('PSQ_RSD_ORIGIN_LIST_EN');
+execute dbms_mview.refresh('PSQ_RSD_ORIGIN_UNSD_TREE_EN');
+execute dbms_mview.refresh('PSQ_RSD_ORIGIN_UNHCR_TREE_EN');
+
+
+execute P_CONTEXT.SET_USERID('PUBLIC_FRENCH');
+
+drop index IX_DEMF_YEAR;
+drop index IX_DEMF_COU_RES;
+drop index IX_DEMF_COU_OGN;
+drop index IX_DEMF_DST;
+
+execute dbms_mview.refresh('PSQ_DEMOGRAPHICS_FR');
+
+create index IX_DEMF_YEAR on PSQ_DEMOGRAPHICS_FR (ASR_YEAR);
+create index IX_DEMF_COU_RES on PSQ_DEMOGRAPHICS_FR (COU_CODE_RESIDENCE);
+create index IX_DEMF_COU_OGN on PSQ_DEMOGRAPHICS_FR (COU_CODE_ORIGIN);
+create index IX_DEMF_DST on PSQ_DEMOGRAPHICS_FR (DST_CODE);
+
 drop index IX_RSDF_YEAR;
 drop index IX_RSDF_COU_ASY;
 drop index IX_RSDF_COU_OGN;
 
-execute P_CONTEXT.SET_USERID('PUBLIC_FRENCH');
 execute dbms_mview.refresh('PSQ_RSD_FR');
 
 create index IX_RSDF_YEAR on PSQ_RSD_FR (ASR_YEAR);
 create index IX_RSDF_COU_ASY on PSQ_RSD_FR (COU_CODE_ASYLUM);
 create index IX_RSDF_COU_OGN on PSQ_RSD_FR (COU_CODE_ORIGIN);
+
+execute dbms_mview.refresh('PSQ_POC_COUNTRY_LIST_FR');
+execute dbms_mview.refresh('PSQ_POC_COUNTRY_UNSD_TREE_FR');
+execute dbms_mview.refresh('PSQ_POC_COUNTRY_UNHCR_TREE_FR');
+execute dbms_mview.refresh('PSQ_POC_ORIGIN_LIST_FR');
+execute dbms_mview.refresh('PSQ_POC_ORIGIN_UNSD_TREE_FR');
+execute dbms_mview.refresh('PSQ_POC_ORIGIN_UNHCR_TREE_FR');
+execute dbms_mview.refresh('PSQ_DEM_COUNTRY_LIST_FR');
+execute dbms_mview.refresh('PSQ_DEM_COUNTRY_UNSD_TREE_FR');
+execute dbms_mview.refresh('PSQ_DEM_COUNTRY_UNHCR_TREE_FR');
+execute dbms_mview.refresh('PSQ_DEM_ORIGIN_LIST_FR');
+execute dbms_mview.refresh('PSQ_DEM_ORIGIN_UNSD_TREE_FR');
+execute dbms_mview.refresh('PSQ_DEM_ORIGIN_UNHCR_TREE_FR');
+execute dbms_mview.refresh('PSQ_RSD_COUNTRY_LIST_FR');
+execute dbms_mview.refresh('PSQ_RSD_COUNTRY_UNSD_TREE_FR');
+execute dbms_mview.refresh('PSQ_RSD_COUNTRY_UNHCR_TREE_FR');
+execute dbms_mview.refresh('PSQ_RSD_ORIGIN_LIST_FR');
+execute dbms_mview.refresh('PSQ_RSD_ORIGIN_UNSD_TREE_FR');
+execute dbms_mview.refresh('PSQ_RSD_ORIGIN_UNHCR_TREE_FR');
+
+execute P_CONTEXT.CLEAR_CONTEXT;

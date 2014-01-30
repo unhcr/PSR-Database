@@ -34,6 +34,14 @@ prompt PSQ_RSD
 prompt =======
 @@PSQ_RSD
 
+prompt PSQEnglish
+prompt ==========
+@@PSQEnglish
+
+prompt PSQFrench
+prompt =========
+@@PSQFrench
+
 prompt PSQGrants
 prompt =========
 @@PSQGrants

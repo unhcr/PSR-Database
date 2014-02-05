@@ -171,6 +171,7 @@ create or replace package body P_STATISTIC_GROUP is
         DIM_ID5 = case when pnDIM_ID5 = -1 then DIM_ID5 else pnDIM_ID5 end,
         SEX_CODE = case when psSEX_CODE = 'x' then SEX_CODE else psSEX_CODE end,
         AGR_ID = case when pnAGR_ID = -1 then AGR_ID else pnAGR_ID end,
+        PPG_ID = case when pnPPG_ID = -1 then PPG_ID else pnPPG_ID end,
         VERSION_NBR = VERSION_NBR + 1
       where rowid = xSTG_ROWID
       returning VERSION_NBR into pnVERSION_NBR;

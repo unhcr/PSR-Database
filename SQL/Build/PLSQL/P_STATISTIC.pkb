@@ -306,7 +306,7 @@ create or replace package body P_STATISTIC is
     --
       if pnVALUE != nVALUE
         or pdSTART_DATE != dSTART_DATE
-        or pdEND_DATE != dSTART_DATE
+        or pdEND_DATE != dEND_DATE
         or psSTCT_CODE != sSTCT_CODE
         or pnDST_ID != nDST_ID
         or (nvl(pnLOC_ID_ASYLUM_COUNTRY, 0) != -1

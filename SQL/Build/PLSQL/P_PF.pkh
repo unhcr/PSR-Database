@@ -1,0 +1,218 @@
+CREATE OR REPLACE PACKAGE "P_PF" is
+--
+-- -------------------------------------------------------------------------------------------------
+--
+--  Package P_PF
+--  Procedures for maintenance of Planning Figures 
+--
+--  Change History:
+--  16-Jan-2014 - Philippe Camus (UNHCR) - Initial revision. (D1.0)
+--
+-- -------------------------------------------------------------------------------------------------
+--
+  sComponent varchar2(30) := 'PF';
+  sVersion varchar2(10) := 'D1.0';
+--
+-- ========================================
+-- Program unit definitions
+-- ========================================
+--
+-- ----------------------------------------
+-- INSERT_PF_PFPOC
+-- ----------------------------------------
+--
+-- Create a new row in PF population of concern table.
+--
+-- Parameters:
+--  pnPF_YEAR - Year of Planning Figures.
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of country of origin.
+--  pnLOC_ID_ASYLUM_COUNTRY - Location identifier of of asylum.
+--  pnDST_ID - Displacement status identifier.
+--  pnPPG_ID - Population Planning Group id.
+--  pnPFPOCCY_VALUE Planned number of population of concern, end of current year.
+--  pnPFPOCCY_AH_VALUE Planned number of population of concern, assisted,  end of current year.
+--  pnPFPOCNY_VALUE Planned number of population of concern, end of next year.
+--  pnPFPOCNY_AH_VALUE Planned number of population of concern, assisted,  end of next year.
+
+--
+procedure INSERT_PF_PFPOC
+  (pnPF_YEAR in P_BASE.tmnYear
+ , pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID
+ , pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID
+ , pnDST_ID in P_BASE.tmnDST_ID
+ , pnPPG_ID in P_BASE.tnPPG_ID := null
+ , pnPFPOCPY_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCPY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCCY_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCCY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCNY_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCNY_AH_VALUE in P_BASE.tnSTC_VALUE
+ );
+
+
+procedure UPDATE_PF_PFPOC
+  (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID
+ , pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR
+ , pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID
+ , pnDST_ID in P_BASE.tmnDST_ID
+ , pnPPG_ID in P_BASE.tnPPG_ID := null
+ , pnPFPOCPY_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCPY_STC_ID in P_BASE.tnSTC_ID
+ , pnPFPOCPY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnPFPOCPY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCPY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnPFPOCPY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnPFPOCCY_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCCY_STC_ID in P_BASE.tnSTC_ID
+ , pnPFPOCCY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnPFPOCCY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCCY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnPFPOCCY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnPFPOCNY_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCNY_STC_ID in P_BASE.tnSTC_ID
+ , pnPFPOCNY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnPFPOCNY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnPFPOCNY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnPFPOCNY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ );
+ 
+ -- ----------------------------------------
+-- INSERT_PF_RETSTOCK
+-- ----------------------------------------
+-- 
+procedure INSERT_PF_RETSTOCK
+  (pnPF_YEAR in P_BASE.tmnYear
+ , pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID
+ , pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID
+ , pnDST_ID in P_BASE.tmnDST_ID
+ , pnRETSTOCKPY_VALUE in P_BASE.tnSTC_VALUE
+ , pnRETSTOCKCY_VALUE in P_BASE.tnSTC_VALUE
+ , pnRETSTOCKNY_VALUE in P_BASE.tnSTC_VALUE
+ );
+ 
+-- ----------------------------------------
+-- UPDATE_PF_RETSTOCK
+-- ----------------------------------------
+-- 
+procedure UPDATE_PF_RETSTOCK
+  (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID
+ , pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR
+ , pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID
+ , pnDST_ID in P_BASE.tmnDST_ID
+ , pnRETSTOCKPY_VALUE in P_BASE.tnSTC_VALUE
+ , pnRETSTOCKPY_STC_ID in P_BASE.tnSTC_ID
+ , pnRETSTOCKPY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnRETSTOCKCY_VALUE in P_BASE.tnSTC_VALUE
+ , pnRETSTOCKCY_STC_ID in P_BASE.tnSTC_ID
+ , pnRETSTOCKCY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnRETSTOCKNY_VALUE in P_BASE.tnSTC_VALUE
+ , pnRETSTOCKNY_STC_ID in P_BASE.tnSTC_ID
+ , pnRETSTOCKNY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ );
+--
+-- ----------------------------------------
+-- INSERT_PF_PFDEC
+-- ----------------------------------------
+-- 
+procedure INSERT_PF_PFDEC
+  (pnPF_YEAR in P_BASE.tmnYear
+ , pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID
+ , pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID
+ , pnDST_ID in P_BASE.tmnDST_ID
+ , pnDIM_ID_DURSLN in P_BASE.tmnDIM_ID
+ , pnDUSLNPY_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNPY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNCY_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNCY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNNY_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNNY_AH_VALUE in P_BASE.tnSTC_VALUE
+ );
+-- ----------------------------------------
+-- UPDATE_PF_PFDEC
+-- ----------------------------------------
+-- 
+procedure UPDATE_PF_PFDEC
+  (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID
+ , pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR
+ , pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID
+ , pnDST_ID in P_BASE.tmnDST_ID
+ , pnDIM_ID_DURSLN in P_BASE.tmnDIM_ID
+ , pnDUSLNPY_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNPY_STC_ID in P_BASE.tnSTC_ID
+ , pnDUSLNPY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnDUSLNPY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNPY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnDUSLNPY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnDUSLNCY_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNCY_STC_ID in P_BASE.tnSTC_ID
+ , pnDUSLNCY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnDUSLNCY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNCY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnDUSLNCY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnDUSLNNY_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNNY_STC_ID in P_BASE.tnSTC_ID
+ , pnDUSLNNY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnDUSLNNY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnDUSLNNY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnDUSLNNY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ );
+--
+-- ----------------------------------------
+-- INSERT_PF_PFINC
+-- ----------------------------------------
+-- 
+procedure INSERT_PF_PFINC
+  (pnPF_YEAR in P_BASE.tmnYear
+ , pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID
+ , pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID
+ , pnDST_ID in P_BASE.tmnDST_ID
+ , pnDIM_ID_ARVLTYPE in P_BASE.tmnDIM_ID
+ , pnARVLPY_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLPY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLCY_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLCY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLNY_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLNY_AH_VALUE in P_BASE.tnSTC_VALUE
+ );
+--
+-- ----------------------------------------
+-- UPDATE_PF_PFINC
+-- ----------------------------------------
+-- 
+procedure UPDATE_PF_PFINC
+  (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID
+ , pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR
+ , pnLOC_ID_ORIGIN_COUNTRY in P_BASE.tmnLOC_ID
+ , pnDST_ID in P_BASE.tmnDST_ID
+ , pnDIM_ID_ARVLTYPE in P_BASE.tmnDIM_ID
+ , pnARVLPY_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLPY_STC_ID in P_BASE.tnSTC_ID
+ , pnARVLPY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnARVLPY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLPY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnARVLPY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnARVLCY_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLCY_STC_ID in P_BASE.tnSTC_ID
+ , pnARVLCY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnARVLCY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLCY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnARVLCY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnARVLNY_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLNY_STC_ID in P_BASE.tnSTC_ID
+ , pnARVLNY_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ , pnARVLNY_AH_VALUE in P_BASE.tnSTC_VALUE
+ , pnARVLNY_AH_STC_ID in P_BASE.tnSTC_ID
+ , pnARVLNY_AH_VERSION_NBR in P_BASE.tnSTC_VERSION_NBR
+ );
+-- ----------------------------------------
+-- DELETE_PF_ROW
+-- ----------------------------------------
+--
+  procedure DELETE_PF_ROW
+   (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
+    pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR);
+
+end P_PF;
+/
+
+show errors

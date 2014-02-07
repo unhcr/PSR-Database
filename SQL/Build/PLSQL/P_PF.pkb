@@ -26,7 +26,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
     pnDIM_ID1 in P_BASE.tnDIM_ID := -1,
     pnPPG_ID in P_BASE.tnPPG_ID := -1,
     pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
-    pnSTG_ID_TABLE in P_BASE.tmnSTG_ID)
+    pnSTG_ID_PFCOUNTRY in P_BASE.tmnSTG_ID)
   is
     bNewStatistic boolean := (pnSTC_ID is null);
   begin
@@ -38,7 +38,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
         to_char(pnLOC_ID_ASYLUM_COUNTRY) || '~' ||
         to_char(pnLOC_ID_ORIGIN_COUNTRY) || '~' ||
         to_char(pnPPG_ID) || '~' ||
-        to_char(pnSTG_ID_PRIMARY) || '~' || to_char(pnSTG_ID_TABLE));
+        to_char(pnSTG_ID_PRIMARY) || '~' || to_char(pnSTG_ID_PFCOUNTRY));
   --
     P_STATISTIC.SET_STATISTIC
      (pnSTC_ID => pnSTC_ID,
@@ -55,7 +55,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
       pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY );
   --
     if bNewStatistic
-    then P_STATISTIC.INSERT_STATISTIC_IN_GROUP(pnSTC_ID, pnSTG_ID_TABLE);
+    then P_STATISTIC.INSERT_STATISTIC_IN_GROUP(pnSTC_ID, pnSTG_ID_PFCOUNTRY);
     end if;
   --
     P_UTILITY.END_MODULE;
@@ -65,12 +65,12 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
   end SET_STATISTIC;
 --
 -- ----------------------------------------
--- GET_TABLE_STATISTIC_GROUP
+-- GET_COUNTRY_STATISTIC_GROUP
 -- ----------------------------------------
 --
 -- Given the identifer of the statistic group representing a row in an PF table (the primary
 -- statistic group), get the identifier and version number of the statistic group covering all
--- the statistics in that PF table for the given row's year and country. If the required table
+-- the statistics in PF for the given row's year and country. If the required 
 -- statistic group does not exist, it is created.
 --
 -- Parameters:
@@ -79,31 +79,31 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
 --    (returned).
 --  pnSTG_ID_PRIMARY - Identifier of the primary statistic group for the PF table row (mandatory).
 --
-  procedure GET_TABLE_STATISTIC_GROUP
+  procedure GET_COUNTRY_STATISTIC_GROUP
    (pnSTG_ID out P_BASE.tnSTG_ID,
     pnVERSION_NBR out P_BASE.tnSTG_VERSION_NBR,
     pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID)
   is
     dSTART_DATE P_BASE.tdDate;
     dEND_DATE P_BASE.tdDate;
-    sSTTG_CODE P_BASE.tmsSTTG_CODE;
+    sSTTG_CODE P_BASE.tmsSTTG_CODE := 'PF';
     nLOC_ID_ASYLUM_COUNTRY P_BASE.tnLOC_ID;
   begin
     P_UTILITY.START_MODULE
-     (sVersion || '-' || sComponent || '.GET_TABLE_STATISTIC_GROUP',
+     (sVersion || '-' || sComponent || '.GET_COUNTRY_STATISTIC_GROUP',
       '~~' || to_char(pnSTG_ID_PRIMARY));
   --
-    select STG1.START_DATE, STG1.END_DATE, STG1.STTG_CODE,
+    select STG1.START_DATE, STG1.END_DATE,
 	  STG1.LOC_ID_ASYLUM_COUNTRY,
       STG2.ID, STG2.VERSION_NBR
-    into dSTART_DATE, dEND_DATE, sSTTG_CODE,
+    into dSTART_DATE, dEND_DATE,
       nLOC_ID_ASYLUM_COUNTRY,
       pnSTG_ID, pnVERSION_NBR
     from T_STATISTIC_GROUPS STG1
     left outer join T_STATISTIC_GROUPS STG2
       on STG2.START_DATE = STG1.START_DATE
       and STG2.END_DATE = STG1.END_DATE
-      and nvl(STG2.STTG_CODE, 'x') = STG1.STTG_CODE
+      and nvl(STG2.STTG_CODE, 'x') = sSTTG_CODE
       and STG2.LOC_ID_ASYLUM_COUNTRY = STG1.LOC_ID_ASYLUM_COUNTRY
       and nvl(STG2.DST_ID, 0) = 0
       and nvl(STG2.LOC_ID_ASYLUM, 0) = 0
@@ -136,7 +136,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
   exception
     when others
     then P_UTILITY.TRACE_EXCEPTION;
-  end GET_TABLE_STATISTIC_GROUP;
+  end GET_COUNTRY_STATISTIC_GROUP;
 --
 --
 -- ----------------------------------------
@@ -149,7 +149,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
   is
     nSTG_VERSION_NBR P_BASE.tnSTG_VERSION_NBR := pnSTG_VERSION_NBR;
   --
-    nSTG_ID_TABLE P_BASE.tnSTG_ID;
+    nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
     nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
   begin
     P_UTILITY.START_MODULE
@@ -159,7 +159,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
   -- Get identifier and version number of statistic group representing the whole table for
   --  this PF table, year and country.
   --
-    GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
+    GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
   --
   -- Delete the whole set of statistics in this PF table row.
   --
@@ -177,7 +177,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
   --
   -- Update the statistic group for the whole PF table to record latest update details.
   --
-    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+    P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE);
   --
     P_UTILITY.END_MODULE;
   exception
@@ -205,7 +205,7 @@ procedure INSERT_PF_PFPOC
    is
      dSTART_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR) || '-01-01', 'YYYY-MM-DD');
      dEND_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
-     nSTG_ID_TABLE P_BASE.tnSTG_ID;
+     nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
      nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
      nSTG_ID_PRIMARY P_BASE.tnSTG_ID;
      nPFPOCPY_STC_ID P_BASE.tnSTC_ID;
@@ -257,10 +257,10 @@ procedure INSERT_PF_PFPOC
   , pnPPG_ID => pnPPG_ID
     );
     --
-    -- Get identifier and version number of statistic group representing the whole PFPOC table for
+    -- Get identifier and version number of statistic group representing the whole PF data for
     --  this year and country, creating a new statistic group for this purpose if necessary.
     --
-   GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, nSTG_ID_PRIMARY);
+  GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, nSTG_ID_PRIMARY);
     --
     -- Create statistics and link them to the statistic
     --  group for the table.
@@ -275,7 +275,7 @@ procedure INSERT_PF_PFPOC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnPPG_ID => pnPPG_ID,
     pnVALUE => pnPFPOCPY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnPFPOCPY_AH_VALUE is not null
@@ -288,7 +288,7 @@ procedure INSERT_PF_PFPOC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnPPG_ID => pnPPG_ID,
     pnVALUE => pnPFPOCPY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnPFPOCCY_VALUE is not null
@@ -301,7 +301,7 @@ procedure INSERT_PF_PFPOC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnPPG_ID => pnPPG_ID,
     pnVALUE => pnPFPOCCY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnPFPOCCY_AH_VALUE is not null
@@ -314,7 +314,7 @@ procedure INSERT_PF_PFPOC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnPPG_ID => pnPPG_ID,
     pnVALUE => pnPFPOCCY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnPFPOCNY_VALUE is not null
@@ -327,7 +327,7 @@ procedure INSERT_PF_PFPOC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnPPG_ID => pnPPG_ID,
     pnVALUE => pnPFPOCNY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnPFPOCNY_AH_VALUE is not null
@@ -340,7 +340,7 @@ procedure INSERT_PF_PFPOC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnPPG_ID => pnPPG_ID,
     pnVALUE => pnPFPOCNY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     P_UTILITY.END_MODULE;
@@ -396,7 +396,7 @@ procedure UPDATE_PF_PFPOC
      nPFPOCNY_AH_STC_ID P_BASE.tnSTC_ID := pnPFPOCNY_AH_STC_ID;
      nPFPOCNY_AH_VERSION_NBR P_BASE.tnSTC_VERSION_NBR := pnPFPOCNY_AH_VERSION_NBR;
   --
-  nSTG_ID_TABLE P_BASE.tnSTG_ID;
+  nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
   nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
   begin
    P_UTILITY.START_MODULE 
@@ -437,10 +437,10 @@ procedure UPDATE_PF_PFPOC
         then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'UNHCR-assisted value may not be greater than total value');
     end if;
     --
-    -- Get identifier and version number of statistic group representing the whole returnee table for
+    -- Get identifier and version number of statistic group representing the whole  whole PF data for
     --  this year and country.
     --
-   GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
+  GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
    --
    -- Get primary statistics group details for this stateless table row.
    --
@@ -460,7 +460,7 @@ procedure UPDATE_PF_PFPOC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnPPG_ID => pnPPG_ID,
    pnVALUE => pnPFPOCPY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nPFPOCPY_AH_STC_ID, nPFPOCPY_AH_VERSION_NBR,
@@ -471,7 +471,7 @@ procedure UPDATE_PF_PFPOC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnPPG_ID => pnPPG_ID,
    pnVALUE => pnPFPOCPY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nPFPOCCY_STC_ID, nPFPOCCY_VERSION_NBR,
@@ -482,7 +482,7 @@ procedure UPDATE_PF_PFPOC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnPPG_ID => pnPPG_ID,
    pnVALUE => pnPFPOCCY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nPFPOCCY_AH_STC_ID, nPFPOCCY_AH_VERSION_NBR,
@@ -493,7 +493,7 @@ procedure UPDATE_PF_PFPOC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnPPG_ID => pnPPG_ID,
    pnVALUE => pnPFPOCCY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nPFPOCNY_STC_ID, nPFPOCNY_VERSION_NBR,
@@ -504,7 +504,7 @@ procedure UPDATE_PF_PFPOC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnPPG_ID => pnPPG_ID,
    pnVALUE => pnPFPOCNY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nPFPOCNY_AH_STC_ID, nPFPOCNY_AH_VERSION_NBR,
@@ -515,7 +515,7 @@ procedure UPDATE_PF_PFPOC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnPPG_ID => pnPPG_ID,
    pnVALUE => pnPFPOCNY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    -- Update primary statistic group and statistic group representing the whole returnee table to
    --  record latest update time and user.
@@ -527,7 +527,7 @@ procedure UPDATE_PF_PFPOC
    --
    -- Update statistic group representing the whole stateless table to record latest update details.
    --
-   P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+   P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE);
    --
     P_UTILITY.END_MODULE;
     exception
@@ -551,7 +551,7 @@ procedure INSERT_PF_RETSTOCK
    is
      dSTART_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR) || '-01-01', 'YYYY-MM-DD');
      dEND_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
-     nSTG_ID_TABLE P_BASE.tnSTG_ID;
+     nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
      nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
      nSTG_ID_PRIMARY P_BASE.tnSTG_ID;
      nRETSTOCKPY_STC_ID P_BASE.tnSTC_ID;
@@ -583,10 +583,10 @@ procedure INSERT_PF_RETSTOCK
   , pnDST_ID => pnDST_ID
     );
     --
-    -- Get identifier and version number of statistic group representing the whole RETSTOCK table for
+    -- Get identifier and version number of statistic group representing the whole PF data for
     --  this year and country, creating a new statistic group for this purpose if necessary.
     --
-   GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, nSTG_ID_PRIMARY);
+  GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, nSTG_ID_PRIMARY);
     --
     -- Create statistics and link them to the statistic
     --  group for the table.
@@ -600,7 +600,7 @@ procedure INSERT_PF_RETSTOCK
     pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnVALUE => pnRETSTOCKPY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnRETSTOCKCY_VALUE is not null
@@ -612,7 +612,7 @@ procedure INSERT_PF_RETSTOCK
     pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnVALUE => pnRETSTOCKCY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnRETSTOCKNY_VALUE is not null
@@ -624,7 +624,7 @@ procedure INSERT_PF_RETSTOCK
     pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnVALUE => pnRETSTOCKNY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     P_UTILITY.END_MODULE;
@@ -664,7 +664,7 @@ procedure UPDATE_PF_RETSTOCK
      nRETSTOCKNY_STC_ID P_BASE.tnSTC_ID := pnRETSTOCKNY_STC_ID;
      nRETSTOCKNY_VERSION_NBR P_BASE.tnSTC_VERSION_NBR := pnRETSTOCKNY_VERSION_NBR;
   --
-  nSTG_ID_TABLE P_BASE.tnSTG_ID;
+  nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
   nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
   begin
    P_UTILITY.START_MODULE 
@@ -686,10 +686,10 @@ procedure UPDATE_PF_RETSTOCK
     -- Check that UNHCR-assisted value is not greater than total value.
     --
     --
-    -- Get identifier and version number of statistic group representing the whole returnee table for
+    -- Get identifier and version number of statistic group representing the whole  whole PF data for
     --  this year and country.
     --
-   GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
+  GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
    --
    -- Get primary statistics group details for this stateless table row.
    --
@@ -708,7 +708,7 @@ procedure UPDATE_PF_RETSTOCK
    pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnVALUE => pnRETSTOCKPY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nRETSTOCKCY_STC_ID, nRETSTOCKCY_VERSION_NBR,
@@ -718,7 +718,7 @@ procedure UPDATE_PF_RETSTOCK
    pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnVALUE => pnRETSTOCKCY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nRETSTOCKNY_STC_ID, nRETSTOCKNY_VERSION_NBR,
@@ -728,7 +728,7 @@ procedure UPDATE_PF_RETSTOCK
    pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
    pnVALUE => pnRETSTOCKNY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    -- Update primary statistic group and statistic group representing the whole returnee table to
    --  record latest update time and user.
@@ -739,7 +739,7 @@ procedure UPDATE_PF_RETSTOCK
    --
    -- Update statistic group representing the whole stateless table to record latest update details.
    --
-   P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+   P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE);
    --
     P_UTILITY.END_MODULE;
     exception
@@ -767,7 +767,7 @@ procedure INSERT_PF_PFDEC
    is
      dSTART_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR) || '-01-01', 'YYYY-MM-DD');
      dEND_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
-     nSTG_ID_TABLE P_BASE.tnSTG_ID;
+     nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
      nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
      nSTG_ID_PRIMARY P_BASE.tnSTG_ID;
      nDUSLNPY_STC_ID P_BASE.tnSTC_ID;
@@ -819,10 +819,10 @@ procedure INSERT_PF_PFDEC
   , pnDIM_ID1 => pnDIM_ID_DURSLN
     );
     --
-    -- Get identifier and version number of statistic group representing the whole PFDEC table for
+    -- Get identifier and version number of statistic group representing the whole PF data for
     --  this year and country, creating a new statistic group for this purpose if necessary.
     --
-   GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, nSTG_ID_PRIMARY);
+  GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, nSTG_ID_PRIMARY);
     --
     -- Create statistics and link them to the statistic
     --  group for the table.
@@ -837,7 +837,7 @@ procedure INSERT_PF_PFDEC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
     pnVALUE => pnDUSLNPY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnDUSLNPY_AH_VALUE is not null
@@ -850,7 +850,7 @@ procedure INSERT_PF_PFDEC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
     pnVALUE => pnDUSLNPY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnDUSLNCY_VALUE is not null
@@ -863,7 +863,7 @@ procedure INSERT_PF_PFDEC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
     pnVALUE => pnDUSLNCY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnDUSLNCY_AH_VALUE is not null
@@ -876,7 +876,7 @@ procedure INSERT_PF_PFDEC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
     pnVALUE => pnDUSLNCY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnDUSLNNY_VALUE is not null
@@ -889,7 +889,7 @@ procedure INSERT_PF_PFDEC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
     pnVALUE => pnDUSLNNY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnDUSLNNY_AH_VALUE is not null
@@ -902,7 +902,7 @@ procedure INSERT_PF_PFDEC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
     pnVALUE => pnDUSLNNY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     P_UTILITY.END_MODULE;
@@ -958,7 +958,7 @@ procedure UPDATE_PF_PFDEC
      nDUSLNNY_AH_STC_ID P_BASE.tnSTC_ID := pnDUSLNNY_AH_STC_ID;
      nDUSLNNY_AH_VERSION_NBR P_BASE.tnSTC_VERSION_NBR := pnDUSLNNY_AH_VERSION_NBR;
   --
-  nSTG_ID_TABLE P_BASE.tnSTG_ID;
+  nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
   nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
   begin
    P_UTILITY.START_MODULE 
@@ -999,10 +999,10 @@ procedure UPDATE_PF_PFDEC
         then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'UNHCR-assisted value may not be greater than total value');
     end if;
     --
-    -- Get identifier and version number of statistic group representing the whole returnee table for
+    -- Get identifier and version number of statistic group representing the whole  whole PF data for
     --  this year and country.
     --
-   GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
+  GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
    --
    -- Get primary statistics group details for this stateless table row.
    --
@@ -1022,7 +1022,7 @@ procedure UPDATE_PF_PFDEC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
    pnVALUE => pnDUSLNPY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nDUSLNPY_AH_STC_ID, nDUSLNPY_AH_VERSION_NBR,
@@ -1033,7 +1033,7 @@ procedure UPDATE_PF_PFDEC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
    pnVALUE => pnDUSLNPY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nDUSLNCY_STC_ID, nDUSLNCY_VERSION_NBR,
@@ -1044,7 +1044,7 @@ procedure UPDATE_PF_PFDEC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
    pnVALUE => pnDUSLNCY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nDUSLNCY_AH_STC_ID, nDUSLNCY_AH_VERSION_NBR,
@@ -1055,7 +1055,7 @@ procedure UPDATE_PF_PFDEC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
    pnVALUE => pnDUSLNCY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nDUSLNNY_STC_ID, nDUSLNNY_VERSION_NBR,
@@ -1066,7 +1066,7 @@ procedure UPDATE_PF_PFDEC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
    pnVALUE => pnDUSLNNY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nDUSLNNY_AH_STC_ID, nDUSLNNY_AH_VERSION_NBR,
@@ -1077,7 +1077,7 @@ procedure UPDATE_PF_PFDEC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_DURSLN,
    pnVALUE => pnDUSLNNY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    -- Update primary statistic group and statistic group representing the whole returnee table to
    --  record latest update time and user.
@@ -1089,7 +1089,7 @@ procedure UPDATE_PF_PFDEC
    --
    -- Update statistic group representing the whole stateless table to record latest update details.
    --
-   P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+   P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE);
    --
     P_UTILITY.END_MODULE;
     exception
@@ -1117,7 +1117,7 @@ procedure INSERT_PF_PFINC
    is
      dSTART_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR) || '-01-01', 'YYYY-MM-DD');
      dEND_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
-     nSTG_ID_TABLE P_BASE.tnSTG_ID;
+     nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
      nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
      nSTG_ID_PRIMARY P_BASE.tnSTG_ID;
      nARVLPY_STC_ID P_BASE.tnSTC_ID;
@@ -1169,10 +1169,10 @@ procedure INSERT_PF_PFINC
   , pnDIM_ID1 => pnDIM_ID_ARVLTYPE
     );
     --
-    -- Get identifier and version number of statistic group representing the whole PFINC table for
+    -- Get identifier and version number of statistic group representing the whole PF data for
     --  this year and country, creating a new statistic group for this purpose if necessary.
     --
-   GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, nSTG_ID_PRIMARY);
+  GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, nSTG_ID_PRIMARY);
     --
     -- Create statistics and link them to the statistic
     --  group for the table.
@@ -1187,7 +1187,7 @@ procedure INSERT_PF_PFINC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
     pnVALUE => pnARVLPY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnARVLPY_AH_VALUE is not null
@@ -1200,7 +1200,7 @@ procedure INSERT_PF_PFINC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
     pnVALUE => pnARVLPY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnARVLCY_VALUE is not null
@@ -1213,7 +1213,7 @@ procedure INSERT_PF_PFINC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
     pnVALUE => pnARVLCY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnARVLCY_AH_VALUE is not null
@@ -1226,7 +1226,7 @@ procedure INSERT_PF_PFINC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
     pnVALUE => pnARVLCY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnARVLNY_VALUE is not null
@@ -1239,7 +1239,7 @@ procedure INSERT_PF_PFINC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
     pnVALUE => pnARVLNY_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     if pnARVLNY_AH_VALUE is not null
@@ -1252,7 +1252,7 @@ procedure INSERT_PF_PFINC
     pnSTG_ID_PRIMARY => nSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
     pnVALUE => pnARVLNY_AH_VALUE,
-    pnSTG_ID_TABLE => nSTG_ID_TABLE);
+    pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
     end if;
     --
     P_UTILITY.END_MODULE;
@@ -1308,7 +1308,7 @@ procedure UPDATE_PF_PFINC
      nARVLNY_AH_STC_ID P_BASE.tnSTC_ID := pnARVLNY_AH_STC_ID;
      nARVLNY_AH_VERSION_NBR P_BASE.tnSTC_VERSION_NBR := pnARVLNY_AH_VERSION_NBR;
   --
-  nSTG_ID_TABLE P_BASE.tnSTG_ID;
+  nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
   nSTG_VERSION_NBR_TABLE P_BASE.tnSTG_VERSION_NBR;
   begin
    P_UTILITY.START_MODULE 
@@ -1349,10 +1349,10 @@ procedure UPDATE_PF_PFINC
         then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'UNHCR-assisted value may not be greater than total value');
     end if;
     --
-    -- Get identifier and version number of statistic group representing the whole returnee table for
+    -- Get identifier and version number of statistic group representing the whole  whole PF data for
     --  this year and country.
     --
-   GET_TABLE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
+  GET_COUNTRY_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE, pnSTG_ID_PRIMARY);
    --
    -- Get primary statistics group details for this stateless table row.
    --
@@ -1372,7 +1372,7 @@ procedure UPDATE_PF_PFINC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
    pnVALUE => pnARVLPY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nARVLPY_AH_STC_ID, nARVLPY_AH_VERSION_NBR,
@@ -1383,7 +1383,7 @@ procedure UPDATE_PF_PFINC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
    pnVALUE => pnARVLPY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nARVLCY_STC_ID, nARVLCY_VERSION_NBR,
@@ -1394,7 +1394,7 @@ procedure UPDATE_PF_PFINC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
    pnVALUE => pnARVLCY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nARVLCY_AH_STC_ID, nARVLCY_AH_VERSION_NBR,
@@ -1405,7 +1405,7 @@ procedure UPDATE_PF_PFINC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
    pnVALUE => pnARVLCY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nARVLNY_STC_ID, nARVLNY_VERSION_NBR,
@@ -1416,7 +1416,7 @@ procedure UPDATE_PF_PFINC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
    pnVALUE => pnARVLNY_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    SET_STATISTIC
    (nARVLNY_AH_STC_ID, nARVLNY_AH_VERSION_NBR,
@@ -1427,7 +1427,7 @@ procedure UPDATE_PF_PFINC
    pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY,
     pnDIM_ID1 => pnDIM_ID_ARVLTYPE,
    pnVALUE => pnARVLNY_AH_VALUE,
-   pnSTG_ID_TABLE => nSTG_ID_TABLE);
+   pnSTG_ID_PFCOUNTRY => nSTG_ID_PFCOUNTRY);
    --
    -- Update primary statistic group and statistic group representing the whole returnee table to
    --  record latest update time and user.
@@ -1439,7 +1439,7 @@ procedure UPDATE_PF_PFINC
    --
    -- Update statistic group representing the whole stateless table to record latest update details.
    --
-   P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_TABLE, nSTG_VERSION_NBR_TABLE);
+   P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE);
    --
     P_UTILITY.END_MODULE;
     exception

@@ -1070,7 +1070,7 @@ ALTER TABLE T_STATISTICS
 
 
 ALTER TABLE T_STATISTICS 
-    ADD CONSTRAINT UK_STC UNIQUE ( START_DATE , END_DATE , STCT_CODE , DST_ID , LOC_ID_ASYLUM_COUNTRY , LOC_ID_ASYLUM , LOC_ID_ORIGIN_COUNTRY , LOC_ID_ORIGIN , DIM_ID1 , DIM_ID2 , DIM_ID3 , DIM_ID4 , DIM_ID5 , SEX_CODE , AGR_ID , STG_SEQ_NBR ) ;
+    ADD CONSTRAINT UK_STC UNIQUE ( START_DATE , END_DATE , STCT_CODE , DST_ID , LOC_ID_ASYLUM_COUNTRY , LOC_ID_ASYLUM , LOC_ID_ORIGIN_COUNTRY , LOC_ID_ORIGIN , DIM_ID1 , DIM_ID2 , DIM_ID3 , DIM_ID4 , DIM_ID5 , SEX_CODE , AGR_ID , PPG_ID, STG_SEQ_NBR ) ;
 
 
 ALTER TABLE T_STATISTICS 
@@ -1134,7 +1134,7 @@ ALTER TABLE T_STATISTIC_GROUPS
 
 CREATE UNIQUE INDEX IX_STG ON T_STATISTIC_GROUPS 
     ( 
-     START_DATE, END_DATE, nvl(STTG_CODE, 'x'), nvl(DST_ID, 0), nvl(LOC_ID_ASYLUM_COUNTRY, 0), nvl(LOC_ID_ORIGIN_COUNTRY, 0), nvl(LOC_ID_ASYLUM, 0), nvl(LOC_ID_ORIGIN, 0), nvl(DIM_ID1, 0), nvl(DIM_ID2, 0), nvl(DIM_ID3, 0), nvl(DIM_ID4, 0), nvl(DIM_ID5, 0), nvl(SEX_CODE, 'x'), nvl(AGR_ID, 0), SEQ_NBR
+     START_DATE, END_DATE, nvl(STTG_CODE, 'x'), nvl(DST_ID, 0), nvl(LOC_ID_ASYLUM_COUNTRY, 0), nvl(LOC_ID_ORIGIN_COUNTRY, 0), nvl(LOC_ID_ASYLUM, 0), nvl(LOC_ID_ORIGIN, 0), nvl(DIM_ID1, 0), nvl(DIM_ID2, 0), nvl(DIM_ID3, 0), nvl(DIM_ID4, 0), nvl(DIM_ID5, 0), nvl(SEX_CODE, 'x'), nvl(AGR_ID, 0), nvl(PPG_ID,0), SEQ_NBR
     ) 
 ;
 
@@ -6932,10 +6932,35 @@ select cast(T.PF_YEAR as varchar2(4)) as PF_YEAR,
 
 create or replace view PF_PPG_COUNTRY
 as
-select  ppg.*, c.ID COUNTRY_ID, EXTRACT(year FROM ppg.start_date) planyear_start,  EXTRACT(year FROM ppg.end_date -1) planyear_end  
-From POPULATION_PLANNING_GROUPS ppg
-join LOCATION_RELATIONSHIPS lr on lr.LOC_ID_FROM = ppg.loc_id
-join LOCATIONS c  on c.ID = lr.LOC_ID_TO;
+with COP_LOC as
+(select cop.id cop_id, c.id  ctry_id 
+From LOCATIONS c
+join LOCATIONS cop on (c.name = cop.name and c.LOCT_CODE = 'COUNTRY' AND cop.LOCT_CODE = 'HCR-COP')
+),
+ROF_LOC as
+(
+select rof.id rof_id, c.id ctry_id 
+from T_LOCATIONS c
+join T_LOCATION_RELATIONSHIPS lr ON (c.ID = lr.LOC_ID_TO  and c.LOCT_CODE = 'COUNTRY' and lr.locrt_code = 'HCRRESP')
+join T_LOCATIONS rof ON (lr.LOC_ID_FROM = rof.id and rof.LOCT_CODE = 'HCR-ROF')
+)
+SELECT
+    ppg."ID",
+    ppg."DESCRIPTION",
+    ppg."LANG_CODE",
+    ppg."LOC_ID",
+    ppg."PPG_CODE",
+    ppg."START_DATE",
+    ppg."END_DATE",
+    ppg."ITM_ID",
+    ppg."VERSION_NBR",
+    coalesce(cop.ctry_id, rof.ctry_id)  COUNTRY_ID,
+    EXTRACT(YEAR FROM ppg.start_date) planyear_start,
+    EXTRACT(YEAR FROM ppg.end_date -1) planyear_end
+FROM POPULATION_PLANNING_GROUPS ppg
+left outer join cop_loc cop on cop.cop_id = ppg.loc_id
+left outer join rof_loc rof on rof.rof_id = ppg.loc_id;
+
 
 
 

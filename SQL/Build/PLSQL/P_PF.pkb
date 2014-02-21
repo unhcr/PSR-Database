@@ -77,46 +77,70 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
 --  pnSTG_ID - Identifier of statistic group covering the whole table (returned).
 --  pnVERSION_NBR - Update version number of statistic group record covering the whole table
 --    (returned).
---  pnSTG_ID_PRIMARY - Identifier of the primary statistic group for the PF table row (mandatory).
+--  pnSTG_ID_PRIMARY - Identifier of the primary statistic group for the PF table row.
+
 --
   procedure GET_COUNTRY_STATISTIC_GROUP
    (pnSTG_ID out P_BASE.tnSTG_ID,
     pnVERSION_NBR out P_BASE.tnSTG_VERSION_NBR,
-    pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID)
+    pnSTG_ID_PRIMARY in P_BASE.tnSTG_ID := null,
+    pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tnLOC_ID := null,
+    pdSTART_DATE in P_BASE.tdDate := null,
+    pdEND_DATE in P_BASE.tdDate := null
+)
   is
-    dSTART_DATE P_BASE.tdDate;
-    dEND_DATE P_BASE.tdDate;
+    dSTART_DATE P_BASE.tdDate := pdSTART_DATE;
+    dEND_DATE P_BASE.tdDate   := pdEND_DATE;
     sSTTG_CODE P_BASE.tmsSTTG_CODE := 'PF';
-    nLOC_ID_ASYLUM_COUNTRY P_BASE.tnLOC_ID;
+    nLOC_ID_ASYLUM_COUNTRY P_BASE.tnLOC_ID := pnLOC_ID_ASYLUM_COUNTRY;
+    nCountGroup number;
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.GET_COUNTRY_STATISTIC_GROUP',
-      '~~' || to_char(pnSTG_ID_PRIMARY));
+      '~~' || to_char(pnSTG_ID_PRIMARY) ||
+      '~~' || to_char(pnLOC_ID_ASYLUM_COUNTRY) ||
+      '~~' || to_char(pdSTART_DATE) ||
+      '~~' || to_char(pdEND_DATE) 
+       );
   --
-    select STG1.START_DATE, STG1.END_DATE,
-	  STG1.LOC_ID_ASYLUM_COUNTRY,
-      STG2.ID, STG2.VERSION_NBR
-    into dSTART_DATE, dEND_DATE,
-      nLOC_ID_ASYLUM_COUNTRY,
-      pnSTG_ID, pnVERSION_NBR
-    from T_STATISTIC_GROUPS STG1
-    left outer join T_STATISTIC_GROUPS STG2
-      on STG2.START_DATE = STG1.START_DATE
-      and STG2.END_DATE = STG1.END_DATE
-      and nvl(STG2.STTG_CODE, 'x') = sSTTG_CODE
-      and STG2.LOC_ID_ASYLUM_COUNTRY = STG1.LOC_ID_ASYLUM_COUNTRY
-      and nvl(STG2.DST_ID, 0) = 0
-      and nvl(STG2.LOC_ID_ASYLUM, 0) = 0
-      and nvl(STG2.LOC_ID_ORIGIN, 0) = 0
-      and nvl(STG2.DIM_ID1, 0) = 0
-      and nvl(STG2.DIM_ID2, 0) = 0
-      and nvl(STG2.DIM_ID3, 0) = 0
-      and nvl(STG2.DIM_ID4, 0) = 0
-      and nvl(STG2.DIM_ID5, 0) = 0
-      and nvl(STG2.SEX_CODE, 'x') = 'x'
-      and nvl(STG2.AGR_ID, 0) = 0
-      and STG2.SEQ_NBR is null
-    where STG1.ID = pnSTG_ID_PRIMARY;
+    if (pnSTG_ID_PRIMARY is null 
+        and (pnLOC_ID_ASYLUM_COUNTRY is null or pdSTART_DATE is null  or pdEND_DATE is null)
+        ) 
+    then P_MESSAGE.DISPLAY_MESSAGE(sComponent, 1, 'Incorrect parameters');
+    end if;
+ 
+  --
+    if pnSTG_ID_PRIMARY is not null
+    then 
+        select STG1.START_DATE, STG1.END_DATE, STG1.LOC_ID_ASYLUM_COUNTRY
+          into dSTART_DATE, dEND_DATE, nLOC_ID_ASYLUM_COUNTRY
+          from T_STATISTIC_GROUPS STG1
+         where STG1.ID = pnSTG_ID_PRIMARY; 
+    end if;
+
+    select max(STG2.ID), max(STG2.VERSION_NBR), count(*)  -- use max to avoid no_data_found
+      into pnSTG_ID, pnVERSION_NBR, nCountGroup
+      from T_STATISTIC_GROUPS STG2
+     where STG2.START_DATE = dSTART_DATE
+       and STG2.END_DATE   = dEND_DATE
+       and nvl(STG2.STTG_CODE, 'x') = sSTTG_CODE
+       and STG2.LOC_ID_ASYLUM_COUNTRY = nLOC_ID_ASYLUM_COUNTRY
+       and nvl(STG2.DST_ID, 0) = 0
+       and nvl(STG2.LOC_ID_ASYLUM, 0) = 0
+       and nvl(STG2.LOC_ID_ORIGIN, 0) = 0
+       and nvl(STG2.DIM_ID1, 0) = 0
+       and nvl(STG2.DIM_ID2, 0) = 0
+       and nvl(STG2.DIM_ID3, 0) = 0
+       and nvl(STG2.DIM_ID4, 0) = 0
+       and nvl(STG2.DIM_ID5, 0) = 0
+       and nvl(STG2.SEX_CODE, 'x') = 'x'
+       and nvl(STG2.AGR_ID, 0) = 0
+       and STG2.SEQ_NBR is null;
+  -- 
+    if nCountGroup > 1 
+    then
+        raise_application_error(-20101, 'Multiple PF statistic groups found for that country and year');
+    end if;
   --
   -- Create new statistic group covering the whole table when it doesn't already exist.
   --
@@ -174,8 +198,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
   -- Delete the primary statistic group.
   --
     P_STATISTIC_GROUP.DELETE_STATISTIC_GROUP(pnSTG_ID_PRIMARY, nSTG_VERSION_NBR);
-  --
-  -- Update the statistic group for the whole PF table to record latest update details.
+  --  -- Update the statistic group for the whole PF table to record latest update details.
   --
     P_STATISTIC_GROUP.UPDATE_STATISTIC_GROUP(nSTG_ID_PFCOUNTRY, nSTG_VERSION_NBR_TABLE);
   --
@@ -184,6 +207,55 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
     when others
     then P_UTILITY.TRACE_EXCEPTION;
   end DELETE_PF_ROW;
+--
+-- ----------------------------------------
+-- SET_FOCAL_POINT
+-- ----------------------------------------
+-- 
+procedure SET_FOCAL_POINT
+  (pnPF_YEAR in P_BASE.tmnYear
+ , pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID
+ , psFOCAL_POINT_NAME in  P_BASE.tsSTGA_CHAR_VALUE
+ , pnNAME_VERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR
+ , psFOCAL_POINT_EMAIL in  P_BASE.tsSTGA_CHAR_VALUE
+ , pnEMAIL_VERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR
+ )
+is
+     dSTART_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR) || '-01-01', 'YYYY-MM-DD');
+     dEND_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
+     nSTG_ID_PFCOUNTRY P_BASE.tnSTG_ID;
+     nSTG_VERSION P_BASE.tnSTG_VERSION_NBR;
+begin
+    P_UTILITY.START_MODULE
+     (sVersion || '-' || sComponent || '.SET_FOCAL_POINT',
+      to_char(pnPF_YEAR)  || '~' || to_char(pnLOC_ID_ASYLUM_COUNTRY));
+--
+    GET_COUNTRY_STATISTIC_GROUP(
+        pnSTG_ID => nSTG_ID_PFCOUNTRY
+      , pnVERSION_NBR => nSTG_VERSION
+      , pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY
+      , pdSTART_DATE => dSTART_DATE
+      , pdEND_DATE => dEND_DATE);
+--
+--  Focal Point Name 
+    P_STATISTIC_GROUP.SET_STG_ATTRIBUTE (
+        pnSTG_ID => nSTG_ID_PFCOUNTRY,
+        psSTGAT_CODE => 'FPTNAME',
+        pnVERSION_NBR => pnNAME_VERSION_NBR,
+        psCHAR_VALUE => psFOCAL_POINT_NAME
+    );
+--  Focal Point Email 
+    P_STATISTIC_GROUP.SET_STG_ATTRIBUTE (
+        pnSTG_ID => nSTG_ID_PFCOUNTRY,
+        psSTGAT_CODE => 'FPTMAIL',
+        pnVERSION_NBR => pnEMAIL_VERSION_NBR,
+        psCHAR_VALUE => psFOCAL_POINT_EMAIL
+    );
+    P_UTILITY.END_MODULE;
+  exception
+    when others
+    then P_UTILITY.TRACE_EXCEPTION;
+  end SET_FOCAL_POINT;
 --
 -- ----------------------------------------
 -- INSERT_PF_PFPOC

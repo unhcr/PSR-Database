@@ -11,6 +11,8 @@ purge recyclebin;
 
 @@LoadData
 
+@@LoadPFData
+
 @@FinaliseInfrastructure
 
 commit;

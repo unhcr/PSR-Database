@@ -211,7 +211,18 @@ procedure UPDATE_PF_PFINC
   procedure DELETE_PF_ROW
    (pnSTG_ID_PRIMARY in P_BASE.tmnSTG_ID,
     pnSTG_VERSION_NBR in P_BASE.tmnSTG_VERSION_NBR);
-
+-- ----------------------------------------
+-- SET_FOCAL_POINT
+-- ----------------------------------------
+-- 
+procedure SET_FOCAL_POINT
+  (pnPF_YEAR in P_BASE.tmnYear
+ , pnLOC_ID_ASYLUM_COUNTRY in P_BASE.tmnLOC_ID
+ , psFOCAL_POINT_NAME in  P_BASE.tsSTGA_CHAR_VALUE
+ , pnNAME_VERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR
+ , psFOCAL_POINT_EMAIL in  P_BASE.tsSTGA_CHAR_VALUE
+ , pnEMAIL_VERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR
+ );
 end P_PF;
 /
 

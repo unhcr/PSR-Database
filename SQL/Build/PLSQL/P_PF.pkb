@@ -40,22 +40,25 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
         to_char(pnPPG_ID) || '~' ||
         to_char(pnSTG_ID_PRIMARY) || '~' || to_char(pnSTG_ID_PFCOUNTRY));
   --
-    P_STATISTIC.SET_STATISTIC
-     (pnSTC_ID => pnSTC_ID,
-      pnVERSION_NBR =>  pnVERSION_NBR,
-      pnVALUE => pnVALUE,
-      pdSTART_DATE => pdSTART_DATE,
-      pdEND_DATE =>  pdEND_DATE,
-      psSTCT_CODE => psSTCT_CODE,
-      pnDST_ID => pnDST_ID,
-      pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY ,
-      pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
-      pnDIM_ID1 => pnDIM_ID1,
-      pnPPG_ID => pnPPG_ID,
-      pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY );
-  --
-    if bNewStatistic
-    then P_STATISTIC.INSERT_STATISTIC_IN_GROUP(pnSTC_ID, pnSTG_ID_PFCOUNTRY);
+    if coalesce(pnSTC_ID,pnVALUE) is not null
+    then 
+        P_STATISTIC.SET_STATISTIC
+         (pnSTC_ID => pnSTC_ID,
+          pnVERSION_NBR =>  pnVERSION_NBR,
+          pnVALUE => pnVALUE,
+          pdSTART_DATE => pdSTART_DATE,
+          pdEND_DATE =>  pdEND_DATE,
+          psSTCT_CODE => psSTCT_CODE,
+          pnDST_ID => pnDST_ID,
+          pnLOC_ID_ASYLUM_COUNTRY => pnLOC_ID_ASYLUM_COUNTRY ,
+          pnLOC_ID_ORIGIN_COUNTRY => pnLOC_ID_ORIGIN_COUNTRY,
+          pnDIM_ID1 => pnDIM_ID1,
+          pnPPG_ID => pnPPG_ID,
+          pnSTG_ID_PRIMARY => pnSTG_ID_PRIMARY );
+      --
+        if bNewStatistic
+        then P_STATISTIC.INSERT_STATISTIC_IN_GROUP(pnSTC_ID, pnSTG_ID_PFCOUNTRY);
+        end if;
     end if;
   --
     P_UTILITY.END_MODULE;

@@ -7022,7 +7022,8 @@ left outer join rof_loc rof on rof.rof_id = ppg.loc_id;
 CREATE OR REPLACE VIEW PF_FOCAL_POINT AS
 select * from 
 (
-select EXTRACT(YEAR FROM sg.start_date) PF_YEAR
+select sg.id stg_id
+     , EXTRACT(YEAR FROM sg.start_date) PF_YEAR
      , sg.loc_id_asylum_country
      , sga.STGAT_CODE
      , sga.CHAR_VALUE
@@ -7037,8 +7038,33 @@ where sg.sttg_code = 'PF'
     in ('FPTNAME' as FPTNAME, 'FPTMAIL' as FPTMAIL)
 )
 ;
-
-
+--
+-- pf_summary_statistics
+--
+create or replace view pf_summary_statistics
+as
+with Q_pf_ctry 
+as (
+select cou_id, cou_name from ROLE_COUNTRIES where rol_id = 7
+) 
+, Q_PF_SUM
+as (
+select * from 
+(select sg.id stg_id, sg.loc_id_asylum_country,  EXTRACT(YEAR FROM sg.start_date) PF_YEAR, sg.UPDATE_USERID, sg.UPDATE_TIMESTAMP, stig.STTG_CODE, fp.FPTNAME, fp.FPTMAIL 
+  from T_STATISTIC_GROUPS  sg
+  left outer join PF_FOCAL_POINT fp on sg.id = fp.STG_ID 
+  join T_STATISTICS_IN_GROUPS sig on sg.id =  sig.STG_ID
+  join T_STATISTICS s on sig.STC_ID = s.id 
+  join T_STATISTIC_TYPES_IN_GROUPS stig on stig.STCT_CODE = s.STCT_CODE
+ where sg.STTG_CODE = 'PF'
+)
+pivot 
+ ( count(*) as nb_stats for STTG_CODE in ('PFDEC' as PFDEC, 'PFINC' as PFINC, 'PFPOC' as PFPOC, 'RETSTOCK' as RETSTOCK))
+) 
+select * from  Q_pf_ctry c 
+left outer join Q_PF_SUM s on c.cou_id = s.loc_id_asylum_country
+;
+--
 
 CREATE SEQUENCE AGR_SEQ 
 START WITH 1 ;

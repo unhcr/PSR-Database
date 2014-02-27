@@ -15,6 +15,14 @@ P_SYSTEM_USER.INSERT_SYSTEM_USER  ('abouchab','en','Tarek Abou Chabake');
 P_SYSTEM_USER.INSERT_SYSTEM_USER  ('tenkoran','en','Joseph Tenkorang');
 P_SYSTEM_USER.INSERT_SYSTEM_USER  ('gross','en','Stefanie Gross');
 P_SYSTEM_USER.INSERT_SYSTEM_USER  ('karp','en','David Karp');
+P_SYSTEM_USER.INSERT_SYSTEM_USER  ('casasola','en','Michael Casasola');
+P_SYSTEM_USER.INSERT_SYSTEM_USER  ('dioh','en','Ngor Dioh');
+P_SYSTEM_USER.INSERT_SYSTEM_USER  ('lebillan','en','Samuel Le Billan');
+P_SYSTEM_USER.INSERT_SYSTEM_USER  ('morlang','en','Claas Morlang');
+P_SYSTEM_USER.INSERT_SYSTEM_USER  ('omer','en','Sanaa Omer');
+P_SYSTEM_USER.INSERT_SYSTEM_USER  ('selivano','en','Tatiana Selivanova');
+P_SYSTEM_USER.INSERT_SYSTEM_USER  ('teohf','en','Francis Teoh');
+
 end;
 /
 
@@ -57,7 +65,18 @@ CURSOR cUserCtry IS
     union select 'lumb','South Africa' from dual
     union select 'khanna','Yemen' from dual
     union select 'chikwan','Zambia' from dual
-    union select 'kasoma','Zambia' from dual;
+    union select 'kasoma','Zambia' from dual
+	union select 'morlang','Afghanistan' from dual
+	union select 'omer','Afghanistan' from dual
+	union select 'tenkoran','Afghanistan' from dual
+	union select 'casasola','Canada' from dual
+	union select 'selivano','China' from dual
+	union select 'teohf','China' from dual
+	union select 'tenkoran','Kenya' from dual
+	union select 'dioh','Senegal' from dual
+	union select 'lebillan','Senegal' from dual
+	union select 'tenkoran','South Sudan' from dual
+;
 begin
    for r in cUserCtry loop
         select rol_id, cou_id 

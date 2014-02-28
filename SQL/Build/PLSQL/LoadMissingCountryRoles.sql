@@ -88,6 +88,7 @@ begin
         ,'URU'
         ,'VAN'
         ,'VCT'
+		,'RSA'
         )
      ) on 1=1
     )

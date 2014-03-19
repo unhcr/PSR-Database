@@ -7056,7 +7056,7 @@ select * from
   join T_STATISTICS_IN_GROUPS sig on sg.id =  sig.STG_ID
   join T_STATISTICS s on sig.STC_ID = s.id 
   join T_STATISTIC_TYPES_IN_GROUPS stig on stig.STCT_CODE = s.STCT_CODE
- where sg.STTG_CODE = 'PF'
+ where sg.STTG_CODE = 'PF' and s.value > 0
 )
 pivot 
  ( count(*) as nb_stats for STTG_CODE in ('PFDEC' as PFDEC, 'PFINC' as PFINC, 'PFPOC' as PFPOC, 'RETSTOCK' as RETSTOCK))

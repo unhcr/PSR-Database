@@ -1,0 +1,124 @@
+create or replace view V_BI_ASR_DEMOGRAPHICS
+as
+select extract(YEAR FROM STC.START_DATE) ASR_YEAR,
+STC.STCT_CODE, STC.STCT_DESCRIPTION, STC.DST_ID, STC.DST_DESCRIPTION, STC.DST_CODE, STC.LOC_ID_ASYLUM_COUNTRY, STC.LOC_NAME_ASYLUM_COUNTRY
+, STC.ISO_COUNTRY_CODE, STC.UNHCR_COUNTRY_CODE, STC.LOC_ID_ASYLUM, STC.LOC_NAME_ASYLUM, STC.LOCT_CODE_ASYLUM, STC.LOCT_DESCRIPTION_ASYLUM
+, STC.LOC_ID_ORIGIN_COUNTRY, STC.LOC_NAME_ORIGIN_COUNTRY, STC.ISO_ORIGIN_CODE, STC.UNHCR_ORIGIN_CODE
+, STC.LOC_ID_ORIGIN, STC.LOC_NAME_ORIGIN
+, STC.DIM_ID1 UR_ID, DIM_CODE1 UR_CODE, DIM_DESCRIPTION1 UR_DESC
+, DIM_ID2 ACMT_ID, DIM_CODE2 ACMT_CODE, DIM_DESCRIPTION2 ACMT_DESC
+, DIM_ID3 REG_ID, DIM_CODE3 REG_CODE, DIM_DESCRIPTION3 REG_DESC
+, STC.SEX_CODE, STC.SEX_DESCRIPTION, STC.AGR_ID, STC.AGE_FROM, STC.AGE_TO, STC.AGR_DESCRIPTION, STC.AGP_DESCRIPTION
+, STC.SUBGROUP_NAME, STC.PPG_ID, STC.PPG_CODE, STC.PPG_DESCRIPTION, STC.VALUE
+      From  T_STATISTIC_TYPES_IN_GROUPS STTIG
+INNER JOIN  STATISTICS STC  ON (STC.STCT_CODE = STTIG.STCT_CODE)
+  WHERE STTIG.STTG_CODE = 'DEMOGR';
+--and extract(YEAR FROM STC.START_DATE)>=2010
+--and loc_name_asylum_country in ('Algeria' ,'Afghanistan', 'Ecuador', 'Sudan', 'Côte d''Ivoire')
+
+
+create or replace view V_BI_PLANNINGFIGURES
+as
+with Q_PFSTATS as
+(
+select extract(YEAR FROM STC.START_DATE) AS PF_YEAR ,
+       STC.LOC_ID_ASYLUM_COUNTRY ,
+       STC.LOC_ID_ORIGIN_COUNTRY ,
+       STC.DST_ID ,
+       STC.STG_ID_PRIMARY ,
+       STC.STCT_CODE ,
+       STC.VALUE ,
+       STC.PPG_ID
+  from STATISTICS STC 
+INNER JOIN T_STATISTIC_TYPES_IN_GROUPS  STTIG ON (STC.STCT_CODE = STTIG.STCT_CODE)
+  WHERE STTIG.STTG_CODE = 'PFPOC'
+),
+Q_PF as
+(
+select prev.PF_YEAR - 1 planning_year, prev.* from ( select * from Q_PFSTATS pivot  ( sum(value) as value for STCT_CODE IN ( 'PFPOCPY' AS total , 'PFPOCPY-AH' AS assisted) )) prev
+union all
+select curr.PF_YEAR, curr.* from ( select * from Q_PFSTATS pivot  ( sum(value) as value for STCT_CODE IN ( 'PFPOCCY' AS total , 'PFPOCCY-AH' AS assisted) )) curr
+union all
+select nexty.PF_YEAR +1, nexty.* from ( select * from Q_PFSTATS pivot  ( sum(value) as value for STCT_CODE IN ( 'PFPOCNY' AS total , 'PFPOCNY-AH' AS assisted) )) nexty
+)
+select pf.PLANNING_YEAR
+     , pf.PF_YEAR
+     , pf.DST_ID
+     , dst.DESCRIPTION DST_DESCRIPTION
+     , dst.CODE DST_CODE
+     , pf.LOC_ID_ASYLUM_COUNTRY
+     , asyl.NAME LOC_NAME_ASYLUM_COUNTRY
+     , asyl.ISO3166_ALPHA3_CODE  ISO_COUNTRY_CODE
+     , asyl.UNHCR_COUNTRY_CODE
+     , pf.LOC_ID_ORIGIN_COUNTRY
+     , orig.NAME LOC_NAME_ORIGIN_COUNTRY
+     , orig.ISO3166_ALPHA3_CODE ISO_ORIGIN_CODE
+     , orig.UNHCR_COUNTRY_CODE UNHCR_ORIGIN_CODE
+     , pf.STG_ID_PRIMARY
+     , pf.PPG_ID
+     , ppg.PPG_CODE
+     , ppg.description PPG_DESCRIPTION
+     , nvl(pf.TOTAL_VALUE,pf.ASSISTED_VALUE) TOTAL_VALUE -- handle returnees as total is not reported in PF
+     , pf.ASSISTED_VALUE
+from Q_PF pf
+join DISPLACEMENT_STATUSES dst on pf.dst_id = dst.ID
+left outer join COUNTRIES asyl on pf.LOC_ID_ASYLUM_COUNTRY = asyl.ID
+left outer join COUNTRIES orig on pf.LOC_ID_ORIGIN_COUNTRY = orig.ID
+left outer join POPULATION_PLANNING_GROUPS ppg on pf.ppg_id = ppg.id
+;
+
+
+
+create or replace view V_BI_PPG_POPDETAILS
+as
+select PLANNING_YEAR YEAR
+     , 'PF' source
+     , PPG_ID
+     , PPG_CODE
+     , PPG_DESCRIPTION
+     , DST_ID
+     , DST_DESCRIPTION
+     , DST_CODE
+     , LOC_ID_ASYLUM_COUNTRY
+     , LOC_NAME_ASYLUM_COUNTRY
+     , ISO_COUNTRY_CODE
+     , UNHCR_COUNTRY_CODE
+     , LOC_ID_ORIGIN_COUNTRY
+     , LOC_NAME_ORIGIN_COUNTRY
+     , ISO_ORIGIN_CODE
+     , UNHCR_ORIGIN_CODE
+     , TOTAL_VALUE VALUE
+From V_BI_PLANNINGFIGURES
+where pf_year = (select max(pf_year) from PF_PFPOC) -- only most recent PF
+  and PLANNING_YEAR > (select max(asr_year) from V_BI_ASR_DEMOGRAPHICS) -- if ASR data is not available
+union all
+select ASR_YEAR YEAR
+     , 'ASR' source
+     , PPG_ID
+     , PPG_CODE
+     , PPG_DESCRIPTION
+     , DST_ID
+     , DST_DESCRIPTION
+     , DST_CODE
+     , LOC_ID_ASYLUM_COUNTRY
+     , LOC_NAME_ASYLUM_COUNTRY
+     , ISO_COUNTRY_CODE
+     , UNHCR_COUNTRY_CODE
+     , LOC_ID_ORIGIN_COUNTRY
+     , LOC_NAME_ORIGIN_COUNTRY
+     , ISO_ORIGIN_CODE
+     , UNHCR_ORIGIN_CODE
+     , VALUE
+From V_BI_ASR_DEMOGRAPHICS
+;
+
+create materialized view BI_ASR_DEMOGRAPHICS as select * from V_BI_ASR_DEMOGRAPHICS;
+create materialized view BI_PLANNINGFIGURES  as select * from V_BI_PLANNINGFIGURES;
+create materialized view BI_PPG_POPDETAILS   as select * from V_BI_PPG_POPDETAILS;
+
+
+grant select on BI_ASR_DEMOGRAPHICS to PSR_INTERNAL_API;
+grant select on BI_PLANNINGFIGURES  to PSR_INTERNAL_API;
+grant select on BI_PPG_POPDETAILS   to PSR_INTERNAL_API;
+
+

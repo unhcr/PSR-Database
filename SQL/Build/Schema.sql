@@ -7046,23 +7046,35 @@ as
 with Q_pf_ctry 
 as (
 select cou_id, cou_name from ROLE_COUNTRIES where rol_id = 7
-) 
+)
+, Q_PF_STG_COUNTRY
+as (
+    select sg.id stg_id, sg.loc_id_asylum_country
+         , EXTRACT(YEAR FROM sg.start_date) PF_YEAR
+         , sg.UPDATE_USERID, sg.UPDATE_TIMESTAMP
+         , fp.FPTNAME, fp.FPTMAIL
+     from T_STATISTIC_GROUPS  sg
+    left outer join PF_FOCAL_POINT fp on sg.id = fp.STG_ID 
+    where sg.STTG_CODE = 'PF'
+)
 , Q_PF_SUM
 as (
 select * from 
-(select sg.id stg_id, sg.loc_id_asylum_country,  EXTRACT(YEAR FROM sg.start_date) PF_YEAR, sg.UPDATE_USERID, sg.UPDATE_TIMESTAMP, stig.STTG_CODE, fp.FPTNAME, fp.FPTMAIL 
-  from T_STATISTIC_GROUPS  sg
-  left outer join PF_FOCAL_POINT fp on sg.id = fp.STG_ID 
-  join T_STATISTICS_IN_GROUPS sig on sg.id =  sig.STG_ID
-  join T_STATISTICS s on sig.STC_ID = s.id 
+(select stgc.stg_id, stgc.loc_id_asylum_country, stig.STTG_CODE
+  from Q_PF_STG_COUNTRY stgc 
+  join T_STATISTICS_IN_GROUPS sig on stgc.stg_id =  sig.STG_ID
+  join T_STATISTICS s on sig.STC_ID = s.id
   join T_STATISTIC_TYPES_IN_GROUPS stig on stig.STCT_CODE = s.STCT_CODE
- where sg.STTG_CODE = 'PF' and s.value > 0
+ where s.value > 0
 )
 pivot 
  ( count(*) as nb_stats for STTG_CODE in ('PFDEC' as PFDEC, 'PFINC' as PFINC, 'PFPOC' as PFPOC, 'RETSTOCK' as RETSTOCK))
-) 
-select * from  Q_pf_ctry c 
-left outer join Q_PF_SUM s on c.cou_id = s.loc_id_asylum_country
+)
+
+select c.*, stgc.*, s.PFDEC_NB_STATS, s.PFINC_NB_STATS, s.PFPOC_NB_STATS, s.RETSTOCK_NB_STATS
+           from Q_pf_ctry c 
+left outer join Q_PF_STG_COUNTRY stgc on c.cou_id = stgc.loc_id_asylum_country
+left outer join Q_PF_SUM s on stgc.loc_id_asylum_country = s.loc_id_asylum_country
 ;
 --
 

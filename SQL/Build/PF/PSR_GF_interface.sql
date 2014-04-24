@@ -58,7 +58,7 @@ select pf.PLANNING_YEAR
      , pf.PPG_ID
      , ppg.PPG_CODE
      , ppg.description PPG_DESCRIPTION
-     , nvl(pf.TOTAL_VALUE,pf.ASSISTED_VALUE) TOTAL_VALUE -- handle returnees as total is not reported in PF
+     , pf.TOTAL_VALUE
      , pf.ASSISTED_VALUE
 from Q_PF pf
 join DISPLACEMENT_STATUSES dst on pf.dst_id = dst.ID

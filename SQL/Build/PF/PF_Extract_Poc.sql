@@ -8,11 +8,11 @@ SELECT
           orig.NAME Origin,
           DST_DESCRIPTION,
           DST_CODE,
-          nvl(PFPOCPY_VALUE, PFPOCPY_AH_VALUE) "2013 Total",
+          PFPOCPY_VALUE "2013 Total",
           PFPOCPY_AH_VALUE "2013 Assisted",
-          nvl(PFPOCCY_VALUE,PFPOCCY_AH_VALUE) "2014 Total",
+          PFPOCCY_VALUE "2014 Total",
           PFPOCCY_AH_VALUE "2014 Assisted",
-          nvl(PFPOCNY_VALUE,PFPOCNY_AH_VALUE) "2015 Total",
+          PFPOCNY_VALUE "2015 Total",
           PFPOCNY_AH_VALUE "2015 Assisted"
           FROM PF_PFPOC poc
           join locations c on poc.LOC_ID_ASYLUM_COUNTRY = c.id

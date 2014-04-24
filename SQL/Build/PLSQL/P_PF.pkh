@@ -223,6 +223,22 @@ procedure SET_FOCAL_POINT
  , psFOCAL_POINT_EMAIL in  P_BASE.tsSTGA_CHAR_VALUE
  , pnEMAIL_VERSION_NBR in out P_BASE.tnSTGA_VERSION_NBR
  );
+--
+-- ----------------------------------------
+-- SET_PF_STATUS
+-- ----------------------------------------
+-- Change the status of the planning figures for a given year and one or all countries
+--
+-- Parameters:
+--  pnPF_YEAR - Year of Planning Figures.
+--  pnLOC_ID_ORIGIN_COUNTRY - Location identifier of country of origin, if null the change will apply to all countries
+--  psSTATUS - new status (ENTRY: open for user entry, REVIEW: under review by bureau, FINAL: figures have been reviewed and cannot be changed 
+procedure SET_PF_STATUS
+  (pnPF_YEAR in P_BASE.tmnYear
+ , pnLOC_ID_COUNTRY in P_BASE.tnLOC_ID := null
+ , psSTATUS in P_BASE.tsSTGA_CHAR_VALUE
+ );
+--
 end P_PF;
 /
 

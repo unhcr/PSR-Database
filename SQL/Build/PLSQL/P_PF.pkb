@@ -97,6 +97,7 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
     sSTTG_CODE P_BASE.tmsSTTG_CODE := 'PF';
     nLOC_ID_ASYLUM_COUNTRY P_BASE.tnLOC_ID := pnLOC_ID_ASYLUM_COUNTRY;
     nCountGroup number;
+    nSTGA_VERSION_NBR P_BASE.tnSTGA_VERSION_NBR := null;
   begin
     P_UTILITY.START_MODULE
      (sVersion || '-' || sComponent || '.GET_COUNTRY_STATISTIC_GROUP',
@@ -152,6 +153,14 @@ CREATE OR REPLACE PACKAGE BODY "P_PF" is
       P_STATISTIC_GROUP.INSERT_STATISTIC_GROUP
        (pnSTG_ID, dSTART_DATE, dEND_DATE, sSTTG_CODE,
         pnLOC_ID_ASYLUM_COUNTRY => nLOC_ID_ASYLUM_COUNTRY);
+    --
+    --  PF status, initial value: user entry
+        P_STATISTIC_GROUP.SET_STG_ATTRIBUTE (
+            pnSTG_ID => pnSTG_ID,
+            psSTGAT_CODE => 'PFSTATUS',
+            pnVERSION_NBR =>  nSTGA_VERSION_NBR,
+            psCHAR_VALUE => 'ENTRY'
+        );
     --
       pnVERSION_NBR := 1;
     end if;
@@ -1521,6 +1530,45 @@ procedure UPDATE_PF_PFINC
     when others
     then P_UTILITY.TRACE_EXCEPTION;
   end UPDATE_PF_PFINC;
+--
+-- ----------------------------------------
+-- SET_PF_STATUS
+-- ----------------------------------------
+procedure SET_PF_STATUS
+  (pnPF_YEAR in P_BASE.tmnYear
+ , pnLOC_ID_COUNTRY in P_BASE.tnLOC_ID := null
+ , psSTATUS in P_BASE.tsSTGA_CHAR_VALUE
+ )
+is
+     dSTART_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR) || '-01-01', 'YYYY-MM-DD');
+     dEND_DATE P_BASE.tdDate := to_date(to_char(pnPF_YEAR + 1) || '-01-01', 'YYYY-MM-DD');
+begin
+    P_UTILITY.START_MODULE
+     (sVersion || '-' || sComponent || '.SET_STATUS',
+      to_char(pnPF_YEAR)  || '~' || to_char(pnLOC_ID_COUNTRY) 
+      || '~' || psSTATUS);
+--
+   for rSTG in
+     ( 
+         select sg.ID, sg.LOC_ID_ASYLUM_COUNTRY, sga.VERSION_NBR
+           from T_STATISTIC_GROUPS sg
+           left outer join 
+                T_STC_GROUP_ATTRIBUTES sga on (sg.id = sga.STG_ID and sga.STGAT_CODE = 'PFSTATUS' )
+          where sg.sttg_code = 'PF'
+            and sg.LOC_ID_ASYLUM_COUNTRY = nvl(pnLOC_ID_COUNTRY, sg.LOC_ID_ASYLUM_COUNTRY)  
+            and EXTRACT(YEAR FROM sg.start_date) = pnPF_YEAR
+     )
+    loop
+        --
+        P_STATISTIC_GROUP.SET_STG_ATTRIBUTE (
+            pnSTG_ID => rSTG.ID,
+            psSTGAT_CODE => 'PFSTATUS',
+            pnVERSION_NBR => rSTG.VERSION_NBR,
+            psCHAR_VALUE => psSTATUS
+        );
+    end loop;
+--
+END;
 --
 end P_PF;
 /

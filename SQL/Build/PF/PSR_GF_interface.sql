@@ -87,7 +87,7 @@ select PLANNING_YEAR YEAR
      , LOC_NAME_ORIGIN_COUNTRY
      , ISO_ORIGIN_CODE
      , UNHCR_ORIGIN_CODE
-     , TOTAL_VALUE VALUE
+     , ASSISTED_VALUE VALUE
 From V_BI_PLANNINGFIGURES
 where pf_year = (select max(pf_year) from PF_PFPOC) -- only most recent PF
   and PLANNING_YEAR > (select max(asr_year) from V_BI_ASR_DEMOGRAPHICS) -- if ASR data is not available

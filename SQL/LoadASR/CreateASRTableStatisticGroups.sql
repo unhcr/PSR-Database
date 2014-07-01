@@ -27,7 +27,8 @@ begin
       from T_STATISTIC_TYPES_IN_GROUPS STTIG
       inner join T_STATISTICS STC
         on STC.STCT_CODE = STTIG.STCT_CODE
-      where STTIG.STTG_CODE in
+      where extract(YEAR FROM START_DATE) = &year
+	    and STTIG.STTG_CODE in
         ('REFUGEE', 'DEMOGR', 'RSD', 'IDP', 'IDPCNFLCT', 'IDPNTRLDIS', 'RETURNEE', 'STATELESS', 'OOC'))
     order by STTG_CODE, START_DATE, LOC_ID_ASYLUM_COUNTRY, LOC_ID_ORIGIN_COUNTRY, SEQ_NBR)
   loop

@@ -45,7 +45,7 @@ begin
           else replace(DATA_POINT, '_', '-')
         end as STCT_CODE,
         VALUE
-      from S_ASR_REFUGEES) STC
+      from S_ASR_REFUGEES where STATSYEAR = &year) STC
     left outer join T_DISPLACEMENT_STATUSES DST
       on DST.CODE = STC.DST_CODE
       and DST.START_DATE < STC.END_DATE_YEAR

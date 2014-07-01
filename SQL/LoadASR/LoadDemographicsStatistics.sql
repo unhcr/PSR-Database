@@ -58,7 +58,7 @@ begin
         substr(DATA_POINT, 1, 1) as SEX_CODE,
         to_number(substr(DATA_POINT, 2)) as AGE_FROM,
         VALUE
-      from S_ASR_DEMOGRAPHICS) STC
+      from S_ASR_DEMOGRAPHICS  where STATSYEAR = &year) STC
     -- Displacement status
     left outer join T_DISPLACEMENT_STATUSES DST
       on DST.CODE = STC.DST_CODE

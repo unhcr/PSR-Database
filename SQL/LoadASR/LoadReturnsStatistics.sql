@@ -31,7 +31,7 @@ begin
         DST_CODE, COU_CODE_ASYLUM, COU_CODE_ORIGIN, SOURCE, BASIS,
         DATA_POINT as STCT_CODE,
         VALUE
-      from S_ASR_RETURNS) STC
+      from S_ASR_RETURNS where STATSYEAR = &year) STC
     left outer join T_DISPLACEMENT_STATUSES DST
       on DST.CODE = STC.DST_CODE
       and DST.START_DATE < STC.END_DATE

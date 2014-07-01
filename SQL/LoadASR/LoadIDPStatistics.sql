@@ -68,7 +68,7 @@ begin
               when 'POP_AH_END' then 'POP-AH'
             end as STCT_CODE,
           VALUE
-        from S_ASR_IDPS) STC
+        from S_ASR_IDPS where STATSYEAR = &year) STC
       left outer join T_DISPLACEMENT_STATUSES DST
         on DST.CODE = STC.DST_CODE
         and DST.START_DATE < STC.END_DATE_YEAR
